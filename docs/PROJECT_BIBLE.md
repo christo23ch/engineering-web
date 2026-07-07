@@ -1,620 +1,1455 @@
-# PROJECT BIBLE — Documento Maestro
+# PROJECT BIBLE — Documento Definitivo
 
-> **Fuente única de verdad (Single Source of Truth).** Este documento gobierna todas las fases posteriores del proyecto: diseño, desarrollo, SEO, automatización y marketing. Cualquier decisión que contradiga este documento debe, o bien alinearse con él, o bien actualizarlo mediante el proceso de cambios descrito en la sección [16](#16-gobernanza-del-documento).
+> **Fuente única de verdad (Single Source of Truth, SSOT).**
+> Este documento gobierna todas las fases del proyecto: producto, diseño, desarrollo, datos, IA, seguridad, SEO, automatización, marketing y operación. **Toda decisión posterior debe ser coherente con este documento.** Si una decisión lo contradice, o bien se alinea con él, o bien se actualiza este documento mediante el proceso de gobernanza descrito en la [§29](#29-convenciones-del-proyecto) y registrado como ADR en la [§43](#43-decisiones-de-arquitectura-adr).
 
 | Metadato | Valor |
 |---|---|
-| **Nombre del documento** | PROJECT_BIBLE.md |
-| **Versión** | 0.1.0 (borrador inicial) |
-| **Estado** | 🟡 En revisión — pendiente de validar supuestos |
-| **Última actualización** | 2026-07-07 |
-| **Responsable (owner)** | Dirección / Cliente *(por confirmar)* |
-| **Ámbito** | Sitio web corporativo + base para automatización y marketing |
+| **Documento** | `docs/PROJECT_BIBLE.md` |
+| **Versión** | 1.0.0 |
+| **Estado** | 🟡 En revisión — pendiente de validar hipótesis (ver [§44](#44-hipótesis)) |
+| **Fecha** | 2026-07-07 |
+| **Propietario (owner)** | Dirección / Cliente *(por confirmar)* |
+| **Redactado por** | Equipo multidisciplinar: Software Architect · Product Owner · CTO · Lead Backend · Lead Frontend · Database Architect · UX/UI Lead · AI Engineer · QA Lead · DevOps · Security Engineer · Technical Writer |
+| **Ámbito** | Plataforma web corporativa y de captación de leads B2B |
+| **Reemplaza a** | Borrador 0.1.0 (23 secciones) — ver [§50](#50-resultado-de-la-autoauditoría) |
+
+---
+
+## Cómo leer este documento
+
+- **Terminología:** los términos con significado fijo se definen en la [tabla de terminología canónica](#terminología-canónica) y en el [Glosario (§47)](#47-glosario). Se usan siempre igual en todo el documento.
+- **Microestructura de calidad:** las secciones sustantivas (1–46) siguen el mismo esqueleto — **Objetivo · Descripción · Justificación · Impacto · Riesgos · Dependencias · Decisiones tomadas · Alternativas descartadas** — para que cada bloque sea autocontenido y accionable. Las secciones de referencia (47–49) usan un formato propio, justificado en la [autoauditoría (§50)](#50-resultado-de-la-autoauditoría).
+- **Incertidumbre:** cuando una decisión no puede cerrarse con la información disponible, **no se inventa**: se marca con **`⚠️ INCERTIDUMBRE`**, se propone la mejor alternativa y se traslada al [Anexo de decisiones abiertas (§49)](#49-anexo-de-decisiones-abiertas).
+- **Hipótesis:** los datos de empresa no facilitados (nombre, subsector, sedes…) se tratan como **`[HIPÓTESIS]`** verificables y se consolidan en la [§44](#44-hipótesis). El nombre comercial se referencia siempre con el token **`«[NOMBRE_EMPRESA]»`**.
+
+### Terminología canónica
+
+| Término | Significado fijo en este documento |
+|---|---|
+| **Plataforma** | El conjunto: sitio público + capa de servicios (formularios, IA, integraciones) + panel de contenidos. |
+| **Sitio** | La web pública indexable (frontend orientado a visitantes). |
+| **CMS** | Gestor de contenidos *headless* (fuente de verdad del contenido editorial). |
+| **Lead** | Contacto comercial capturado por la Plataforma (formulario o descarga). |
+| **Caso de éxito** / **Proyecto** | Ficha de portfolio de un trabajo realizado. Se usa «Proyecto (de portfolio)» cuando hay ambigüedad con el proyecto de software. |
+| **Área privada** | Portal autenticado de cliente (alcance **futuro**, ver [§7](#7-funcionalidades-futuras)). |
+| **BFF** | *Backend for Frontend*: capa serverless fina que orquesta formularios, IA e integraciones. |
+| **RAG** | *Retrieval-Augmented Generation*: generación asistida por recuperación de contenido propio. |
+| **SSOT** | *Single Source of Truth*: este documento. |
+| **Core Web Vitals (CWV)** | Métricas de experiencia de Google: LCP, INP, CLS. |
 
 ---
 
 ## Tabla de contenidos
 
-1. [Resumen ejecutivo](#1-resumen-ejecutivo)
-2. [Visión, misión y valores](#2-visión-misión-y-valores)
-3. [Propuesta de valor](#3-propuesta-de-valor)
-4. [Identidad de marca](#4-identidad-de-marca)
-5. [Servicios](#5-servicios)
-6. [Clientes objetivo (Buyer Personas)](#6-clientes-objetivo-buyer-personas)
-7. [Análisis de competencia](#7-análisis-de-competencia)
-8. [Posicionamiento](#8-posicionamiento)
-9. [Tono y estilo de comunicación](#9-tono-y-estilo-de-comunicación)
-10. [Requisitos funcionales](#10-requisitos-funcionales)
-11. [Requisitos no funcionales](#11-requisitos-no-funcionales)
-12. [Arquitectura de la información](#12-arquitectura-de-la-información)
-13. [Estrategia SEO](#13-estrategia-seo)
-14. [Stack tecnológico recomendado](#14-stack-tecnológico-recomendado)
-15. [Convenciones de desarrollo](#15-convenciones-de-desarrollo)
-16. [Reglas UX/UI](#16-reglas-uxui)
-17. [Estrategia de automatización y marketing](#17-estrategia-de-automatización-y-marketing)
-18. [Roadmap](#18-roadmap)
-19. [Riesgos](#19-riesgos)
-20. [Supuestos](#20-supuestos)
-21. [Criterios de éxito (KPIs)](#21-criterios-de-éxito-kpis)
-22. [Gobernanza del documento](#22-gobernanza-del-documento)
-23. [Glosario](#23-glosario)
+1. [Visión del producto](#1-visión-del-producto)
+2. [Objetivos del negocio](#2-objetivos-del-negocio)
+3. [Problemas que resuelve](#3-problemas-que-resuelve)
+4. [Público objetivo](#4-público-objetivo)
+5. [Casos de uso](#5-casos-de-uso)
+6. [Funcionalidades principales](#6-funcionalidades-principales)
+7. [Funcionalidades futuras](#7-funcionalidades-futuras)
+8. [Requisitos funcionales](#8-requisitos-funcionales)
+9. [Requisitos no funcionales](#9-requisitos-no-funcionales)
+10. [Restricciones](#10-restricciones)
+11. [Arquitectura general](#11-arquitectura-general)
+12. [Arquitectura del frontend](#12-arquitectura-del-frontend)
+13. [Arquitectura del backend](#13-arquitectura-del-backend)
+14. [Arquitectura de datos](#14-arquitectura-de-datos)
+15. [Integraciones externas](#15-integraciones-externas)
+16. [Inteligencia Artificial](#16-inteligencia-artificial)
+17. [Seguridad](#17-seguridad)
+18. [Rendimiento](#18-rendimiento)
+19. [Escalabilidad](#19-escalabilidad)
+20. [Accesibilidad](#20-accesibilidad)
+21. [UX](#21-ux)
+22. [UI](#22-ui)
+23. [Diseño responsive](#23-diseño-responsive)
+24. [Navegación](#24-navegación)
+25. [Gestión de usuarios](#25-gestión-de-usuarios)
+26. [Roles](#26-roles)
+27. [Permisos](#27-permisos)
+28. [Modelo de datos de alto nivel](#28-modelo-de-datos-de-alto-nivel)
+29. [Convenciones del proyecto](#29-convenciones-del-proyecto)
+30. [Estándares de desarrollo](#30-estándares-de-desarrollo)
+31. [Organización del repositorio](#31-organización-del-repositorio)
+32. [Estrategia de testing](#32-estrategia-de-testing)
+33. [Estrategia de despliegue](#33-estrategia-de-despliegue)
+34. [Monitorización](#34-monitorización)
+35. [Gestión de errores](#35-gestión-de-errores)
+36. [Gestión de logs](#36-gestión-de-logs)
+37. [Gestión de configuración](#37-gestión-de-configuración)
+38. [Variables de entorno](#38-variables-de-entorno)
+39. [Riesgos del proyecto](#39-riesgos-del-proyecto)
+40. [Riesgos técnicos](#40-riesgos-técnicos)
+41. [Riesgos de negocio](#41-riesgos-de-negocio)
+42. [Riesgos legales](#42-riesgos-legales)
+43. [Decisiones de arquitectura (ADR)](#43-decisiones-de-arquitectura-adr)
+44. [Hipótesis](#44-hipótesis)
+45. [Limitaciones conocidas](#45-limitaciones-conocidas)
+46. [Roadmap de alto nivel](#46-roadmap-de-alto-nivel)
+47. [Glosario](#47-glosario)
+48. [Referencias](#48-referencias)
+49. [Anexo de decisiones abiertas](#49-anexo-de-decisiones-abiertas)
+50. [Resultado de la autoauditoría](#50-resultado-de-la-autoauditoría)
 
 ---
 
-> ### ⚠️ Nota sobre supuestos
-> No se proporcionaron datos concretos de la empresa (nombre comercial, subsector de ingeniería, ciudad, tamaño, catálogo de servicios real). Para que este documento sea accionable, se han adoptado supuestos razonables y **coherentes entre sí**, marcados en el texto con la etiqueta **`[SUPUESTO]`** y consolidados en la [sección 20](#20-supuestos). Sustituya cada supuesto por el dato real antes de aprobar el documento (`Estado → 🟢 Aprobado`).
+## 1. Visión del producto
+
+**Objetivo.** Definir qué es la Plataforma y qué aspira a lograr a largo plazo.
+
+**Descripción.** **`[HIPÓTESIS]`** La Plataforma es el sitio web corporativo y motor de captación de **«[NOMBRE_EMPRESA]»**, una ingeniería española moderna (30–80 personas) especializada en ingeniería industrial, energética, instalaciones (MEP) y renovables, con foco diferencial en **eficiencia energética y sostenibilidad rentable**. No es un folleto: es la infraestructura digital central de credibilidad, captación y conversión. A medio plazo incorpora **asistencia por IA** (búsqueda semántica y asistente sobre contenido propio) y un **área privada** de seguimiento para clientes.
+
+**Justificación.** El sector de la ingeniería española tiene, en general, presencia digital técnicamente correcta pero débil en narrativa de resultados, SEO y captación (ver [§3](#3-problemas-que-resuelve) y análisis de competencia heredado del borrador). Una plataforma orientada a datos, casos y conversión genera ventaja competitiva a coste relativo bajo.
+
+**Impacto.** Alto y transversal: condiciona diseño, contenido, arquitectura técnica, SEO y procesos comerciales. Es el activo digital nuclear de la empresa.
+
+**Riesgos.** Que se perciba como «otra web más»; mitigado por la orientación a resultados medibles y la prueba social (ver [§2](#2-objetivos-del-negocio), [§6](#6-funcionalidades-principales)).
+
+**Dependencias.** Manual de marca, inventario de casos reales con métricas, validación de hipótesis de negocio ([§44](#44-hipótesis)).
+
+**Decisiones tomadas.** La visión prioriza **captación de leads cualificados B2B** sobre notoriedad genérica. El sitio se construye *content-first* y *conversion-first*.
+
+**Alternativas descartadas.** (a) *Portal transaccional/e-commerce* — descartado: el ciclo de venta es consultivo B2B, no de compra directa. (b) *Micrositio de campaña* — descartado: insuficiente para autoridad de marca sostenida.
 
 ---
 
-## 1. Resumen ejecutivo
+## 2. Objetivos del negocio
 
-**`[SUPUESTO]`** El proyecto consiste en el diseño y desarrollo del sitio web corporativo de **«Ingeniería [NOMBRE]»**, una consultora de ingeniería española de tamaño medio (30–80 personas) con sede principal en España y vocación internacional, especializada en **ingeniería industrial, energética y de instalaciones** con foco en eficiencia energética, transición sostenible y digitalización de proyectos.
+**Objetivo.** Traducir la visión en metas de negocio medibles.
 
-El sitio web no es un folleto estático: es la **infraestructura central de captación, credibilidad y conversión** de la empresa. Debe (1) transmitir autoridad técnica, (2) generar leads cualificados B2B, (3) servir de repositorio de casos de éxito y (4) actuar como base de datos estructurada para las fases posteriores de SEO, automatización de marketing y ventas.
+**Descripción.** Objetivos priorizados:
 
-**Objetivo de negocio primario:** aumentar la generación de oportunidades comerciales cualificadas (RFP/RFQ, solicitudes de propuesta) desde canal digital.
+| # | Objetivo de negocio | Métrica asociada (ver [§46](#46-roadmap-de-alto-nivel) y KPIs) |
+|---|---|---|
+| B1 | Generar oportunidades comerciales cualificadas por canal digital. | Leads cualificados/mes; oportunidades (RFP/RFQ) originadas en web. |
+| B2 | Reforzar autoridad y credibilidad técnica. | Casos publicados; tráfico orgánico; menciones/backlinks. |
+| B3 | Reducir el coste de adquisición comercial. | Coste por lead (CPL); tasa visita→lead. |
+| B4 | Atraer y retener talento. | Candidaturas cualificadas vía «Empleo». |
+| B5 | Habilitar automatización de marketing y ventas. | % de leads con seguimiento automatizado en CRM. |
 
-**Horizonte:** MVP en **8–10 semanas**; plataforma completa y optimizada en **6 meses**.
+**Justificación.** La empresa vende servicios de alto valor y ciclo largo; el retorno del canal digital se maximiza optimizando la calidad del lead, no solo el volumen.
 
----
+**Impacto.** Define la priorización funcional ([§6](#6-funcionalidades-principales), [§8](#8-requisitos-funcionales)) y los criterios de éxito.
 
-## 2. Visión, misión y valores
+**Riesgos.** Expectativas de retorno inmediato del SEO (medio-largo plazo); mitigado con canales complementarios (LinkedIn/Ads) y comunicación de expectativas.
 
-### 2.1 Visión
-> Ser la referencia en ingeniería española que combina **excelencia técnica y compromiso con la sostenibilidad**, reconocida por proyectos que son a la vez eficientes, rentables y responsables con el planeta.
+**Dependencias.** CRM operativo ([§15](#15-integraciones-externas)); definición de «lead cualificado» acordada con el equipo comercial.
 
-### 2.2 Misión
-> Diseñar, calcular y ejecutar soluciones de ingeniería que resuelvan problemas complejos de nuestros clientes con rigor, transparencia y visión a largo plazo, apoyándonos en la mejor ingeniería y en la tecnología disponible.
+**Decisiones tomadas.** B1 es el objetivo primario; el resto lo soportan.
 
-### 2.3 Valores
-
-| Valor | Qué significa en la práctica |
-|---|---|
-| **Rigor técnico** | Cálculos verificables, normativa vigente, cero improvisación. |
-| **Transparencia** | Presupuestos claros, plazos realistas, comunicación honesta del riesgo. |
-| **Sostenibilidad** | Cada proyecto evalúa su impacto energético y ambiental. |
-| **Compromiso** | Acompañamos al cliente del anteproyecto a la puesta en marcha. |
-| **Innovación aplicada** | Adoptamos tecnología (BIM, gemelos digitales, IA) cuando aporta valor real, no por moda. |
-
-*Todos los enunciados anteriores están marcados implícitamente como **`[SUPUESTO]`** hasta validación de dirección.*
+**Alternativas descartadas.** Priorizar *branding* puro sin captación — descartado por no ser medible ni sostenible para justificar la inversión.
 
 ---
 
-## 3. Propuesta de valor
+## 3. Problemas que resuelve
 
-### 3.1 Propuesta de valor central (Value Proposition Statement)
+**Objetivo.** Explicar los problemas concretos que la Plataforma resuelve para la empresa y para sus clientes.
 
-> **Para** responsables de operaciones, plantas industriales y promotores **que necesitan** ejecutar proyectos de ingeniería complejos con garantías, **«Ingeniería [NOMBRE]»** es una consultora que **entrega proyectos técnicamente impecables, en plazo y optimizados energéticamente**, **a diferencia de** las grandes ingenierías impersonales o los estudios pequeños sin capacidad, **porque** combinamos la cercanía de un equipo dedicado con la solvencia de una firma consolidada y métricas verificables de ahorro.
+**Descripción.**
+- **Para la empresa:** baja generación de leads digitales; dificultad para demostrar resultados; dependencia del boca a boca; procesos comerciales no trazables; contenido desactualizado por depender de desarrolladores.
+- **Para el cliente (comprador B2B):** dificultad para evaluar la solvencia técnica de una ingeniería; propuestas opacas; falta de casos con datos comparables; poca claridad sobre servicios y normativa aplicable.
 
-### 3.2 Pilares de valor (los 4 mensajes que el sitio debe demostrar)
+**Justificación.** Estos problemas se derivan del análisis de competencia y de las buyer personas ([§4](#4-público-objetivo)); son la raíz de la propuesta de valor.
 
-1. **Rigor demostrable** — casos de éxito con datos reales (kWh ahorrados, €, plazos cumplidos).
-2. **Especialización sectorial** — no hacemos «de todo»; dominamos nuestros nichos.
-3. **Sostenibilidad rentable** — la eficiencia energética como retorno de inversión, no como coste.
-4. **Acompañamiento integral** — un único interlocutor de principio a fin del proyecto.
+**Impacto.** Justifica funcionalidades clave: casos de éxito con métricas, páginas de servicio con normativa, formularios de propuesta trazables, CMS autónomo.
 
-### 3.3 Prueba (cómo se sustancia en el sitio)
-Certificaciones (ISO 9001/14001/45001 *`[SUPUESTO]`*), colegiación profesional, portfolio con métricas, testimonios nominales, logos de clientes, premios y participación en asociaciones sectoriales.
+**Riesgos.** Resolver el problema equivocado si las hipótesis de negocio son falsas; mitigado por validación temprana ([§44](#44-hipótesis)).
 
----
+**Dependencias.** Datos reales de casos y testimonios.
 
-## 4. Identidad de marca
+**Decisiones tomadas.** El sitio se organiza alrededor de **prueba de resultados** (casos con datos) y **claridad de servicio**.
 
-### 4.1 Personalidad de marca
-Profesional, fiable, técnica pero accesible. Arquetipos dominantes: **El Sabio** (conocimiento, autoridad) + **El Creador** (soluciones a medida). Evita el arquetipo «Héroe agresivo» propio del marketing de consumo.
-
-### 4.2 Identidad verbal
-- **Nombre:** *`[SUPUESTO — pendiente]`*
-- **Tagline propuesto (borrador):** «Ingeniería que rinde. Hoy y mañana.» *`[SUPUESTO]`*
-- **Idiomas:** Español (principal), Inglés (internacional). Considerar catalán/portugués en fase 2 según mercados. *`[SUPUESTO]`*
-
-### 4.3 Identidad visual (directrices; el manual de marca completo es entregable aparte)
-
-> **`[SUPUESTO]`** — A falta de manual de marca, se proponen las siguientes directrices como punto de partida. **No usar en producción sin validación de diseño.**
-
-| Elemento | Directriz |
-|---|---|
-| **Paleta primaria** | Azul técnico/corporativo (confianza, ingeniería) como color de marca. |
-| **Paleta secundaria** | Verde (sostenibilidad) como acento. Neutros (grises) para estructura. |
-| **Tipografía** | Sans-serif geométrica y legible para UI (p. ej. Inter, Manrope o similar de licencia abierta). Jerarquía clara. |
-| **Iconografía** | Lineal, consistente, técnica. Sin ilustraciones «cartoon». |
-| **Fotografía** | Proyectos reales > banco de imágenes. Personas reales del equipo. |
-| **Contraste** | Cumplir WCAG 2.2 AA como mínimo (ver [§16](#16-reglas-uxui)). |
-
-### 4.4 Uso incorrecto
-No deformar el logo, no usar sobre fondos de bajo contraste, no combinar con tipografías ajenas al sistema, no usar imágenes de stock genéricas de «gente de negocios sonriendo».
+**Alternativas descartadas.** Enfoque puramente estético sin datos — descartado: no resuelve el problema de evaluación de solvencia.
 
 ---
 
-## 5. Servicios
+## 4. Público objetivo
 
-> **`[SUPUESTO]`** — Catálogo propuesto según el posicionamiento asumido. Ajustar a la cartera real.
+**Objetivo.** Definir a quién sirve la Plataforma.
 
-### 5.1 Líneas de servicio
+**Descripción.** Modelo B2B con comité de compra (3–5 decisores). Buyer personas **`[HIPÓTESIS]`**:
 
-| # | Servicio | Descripción breve | Entregables típicos |
+| Persona | Rol | Qué busca en la Plataforma |
+|---|---|---|
+| **A. Director de Planta / Operaciones** | Comprador técnico | Casos con datos, capacidad técnica, referencias del sector. |
+| **B. Responsable de Compras** | Comprador económico/cumplimiento | Certificaciones, solvencia, tamaño, capacidad de respuesta. |
+| **C. Promotor / Property Manager** | Terciario/inmobiliario | Portfolio visual, plazos, gestión integral de licencias. |
+| **D. Administración pública** | Licitaciones | Experiencia en obra pública, clasificación, referencias verificables. |
+| **E. Candidato/a** | Talento | Cultura, proyectos, oportunidades (soporta B4). |
+
+**Justificación.** El contenido y la navegación deben servir a cada rol; un único mensaje no cubre al comité de compra.
+
+**Impacto.** Determina la arquitectura de la información ([§11](#11-arquitectura-general)/[§24](#24-navegación)) y los CTAs.
+
+**Riesgos.** Personas mal calibradas; mitigado validando con el equipo comercial.
+
+**Dependencias.** Entrevistas comerciales; datos de CRM históricos si existen.
+
+**Decisiones tomadas.** Persona A (comprador técnico) es la primaria; el sitio se optimiza para ella sin excluir a las demás.
+
+**Alternativas descartadas.** Público B2C — descartado: no es el mercado de la empresa.
+
+---
+
+## 5. Casos de uso
+
+**Objetivo.** Enumerar las interacciones clave usuario–Plataforma.
+
+**Descripción.** Casos de uso primarios (CU):
+
+| ID | Actor | Caso de uso | Resultado esperado |
 |---|---|---|---|
-| S1 | **Ingeniería industrial** | Diseño y optimización de plantas, procesos y líneas productivas. | Proyectos, layouts, cálculos, dirección de obra. |
-| S2 | **Eficiencia energética** | Auditorías, certificación y proyectos de ahorro. | Auditoría energética, plan de medidas, certificados. |
-| S3 | **Energías renovables** | Fotovoltaica, autoconsumo, almacenamiento. | Proyecto, legalización, dirección facultativa. |
-| S4 | **Instalaciones (MEP)** | Climatización, electricidad, PCI, fontanería. | Proyectos de instalaciones, cálculos, BIM. |
-| S5 | **Consultoría y due diligence técnica** | Asesoría, viabilidad, informes periciales. | Informes técnicos, dictámenes. |
-| S6 | **Digitalización / BIM** | Modelado, gemelos digitales, gestión de activos. | Modelos BIM, coordinación, gestión de datos. |
+| CU-01 | Visitante | Explorar servicios y entender el enfoque. | Comprensión clara; avance a caso o contacto. |
+| CU-02 | Visitante | Filtrar y revisar casos de éxito por sector/servicio. | Evidencia de solvencia. |
+| CU-03 | Lead | Solicitar propuesta (formulario). | Lead registrado en CRM + acuse por email. |
+| CU-04 | Lead | Descargar recurso (whitepaper) dejando email. | Lead + secuencia de *nurturing*. |
+| CU-05 | Visitante | Usar el asistente IA / búsqueda semántica. | Respuesta con fuentes del sitio; posible conversión. |
+| CU-06 | Candidato/a | Enviar candidatura a una oferta. | Candidatura registrada. |
+| CU-07 | Editor | Publicar/editar servicio, caso o artículo en el CMS. | Contenido publicado sin intervención de desarrollo. |
+| CU-08 | Administrador | Gestionar usuarios del CMS y consentimientos. | Gobierno de acceso y cumplimiento. |
+| CU-09 | Sistema | Enviar lead a CRM y disparar automatización. | Trazabilidad comercial. |
+| CU-10 *(futuro)* | Cliente | Consultar estado de su proyecto en área privada. | Autoservicio de seguimiento. |
 
-### 5.2 Estructura de cada página de servicio (plantilla)
-Problema del cliente → Enfoque de la empresa → Metodología (fases) → Entregables → Normativa aplicable → Casos relacionados → Preguntas frecuentes → CTA (solicitar propuesta).
+**Justificación.** Cada CU se traza a requisitos funcionales ([§8](#8-requisitos-funcionales)) y evita construir funcionalidades sin propósito.
 
----
+**Impacto.** Base de la matriz de trazabilidad y del plan de pruebas ([§32](#32-estrategia-de-testing)).
 
-## 6. Clientes objetivo (Buyer Personas)
+**Riesgos.** CU futuros (CU-10) que condicionen prematuramente la arquitectura; mitigado marcándolos como futuros pero previendo extensibilidad.
 
-> **`[SUPUESTO]`** — Personas B2B representativas. Validar con el equipo comercial.
+**Dependencias.** Roles y permisos ([§26](#26-roles)/[§27](#27-permisos)).
 
-### Persona A — «Director de Planta / Operaciones» (comprador técnico)
-- **Contexto:** industria manufacturera, energía o logística. Presiona por reducir costes energéticos y evitar paradas.
-- **Objetivos:** fiabilidad, ROI, cumplimiento normativo.
-- **Dolores:** proveedores que incumplen plazos, propuestas opacas.
-- **Qué busca en el sitio:** casos con datos, capacidad técnica, referencias del sector.
+**Decisiones tomadas.** CU-01 a CU-09 entran en el alcance inicial (CU-05 en su versión mínima); CU-10 es futuro.
 
-### Persona B — «Responsable de Compras / Contratación»
-- **Objetivos:** solvencia, certificaciones, cumplimiento, precio competitivo.
-- **Qué busca:** acreditaciones, tamaño de la empresa, capacidad de respuesta.
-
-### Persona C — «Promotor / Property Manager»
-- **Contexto:** promoción inmobiliaria, terciario, retail.
-- **Qué busca:** portfolio visual, plazos, gestión integral de licencias.
-
-### Persona D — «Administración pública / licitaciones»
-- **Qué busca:** experiencia en obra pública, clasificación de contratista, referencias verificables.
-
-**Mapa de decisión:** en B2B intervienen 3–5 personas (comité de compra). El sitio debe servir a **cada rol** con contenido específico (técnico, financiero, de cumplimiento).
+**Alternativas descartadas.** Casos de uso transaccionales (pago online) — descartados por modelo de negocio.
 
 ---
 
-## 7. Análisis de competencia
+## 6. Funcionalidades principales
 
-> **`[SUPUESTO]`** — Marco de análisis y arquetipos competitivos. Sustituir por nombres reales tras un benchmarking de 8–12 competidores directos.
+**Objetivo.** Definir el alcance funcional nuclear (MVP y plataforma inicial).
 
-### 7.1 Tipología de competidores
+**Descripción.**
+1. **Home** con propuesta de valor, servicios destacados y CTA principal.
+2. **Páginas de servicio** (una por línea) con plantilla común (problema → enfoque → metodología → entregables → normativa → casos → FAQ → CTA).
+3. **Portfolio de casos de éxito** filtrable (sector, servicio, año) + **ficha de caso** con métricas, imágenes y testimonio.
+4. **Sobre nosotros** (equipo, historia, certificaciones).
+5. **Recursos/Blog** (artículos técnicos, guías, lead magnets).
+6. **Empleo** con formulario de candidatura.
+7. **Contacto / Solicitud de propuesta** con validación y trazabilidad a CRM.
+8. **Asistente IA + búsqueda semántica** (versión mínima) sobre contenido publicado.
+9. **CMS headless** para gestión autónoma de contenido.
+10. **Cumplimiento legal** (consentimiento de cookies, textos legales) y **analítica**.
 
-| Tipo | Fortalezas | Debilidades explotables |
+**Justificación.** Es el conjunto mínimo que cubre los objetivos B1–B5 y los CU-01…CU-09.
+
+**Impacto.** Delimita el esfuerzo del MVP ([§46](#46-roadmap-de-alto-nivel)).
+
+**Riesgos.** *Scope creep*; mitigado con priorización MoSCoW ([§8](#8-requisitos-funcionales)) y gobernanza.
+
+**Dependencias.** Contenido real; CMS; CRM; proveedor de IA.
+
+**Decisiones tomadas.** El asistente IA entra en versión mínima (búsqueda semántica + FAQ con fuentes), no como agente complejo.
+
+**Alternativas descartadas.** Lanzar sin IA — descartado porque la IA está en la estructura obligatoria del producto y aporta diferenciación; se acota su alcance en lugar de eliminarla.
+
+---
+
+## 7. Funcionalidades futuras
+
+**Objetivo.** Registrar el alcance diferido sin comprometer el MVP.
+
+**Descripción.**
+- **Multi-idioma** ES/EN (arquitectura preparada desde el inicio; activación posterior).
+- **Área privada de cliente** (seguimiento de proyectos, documentos).
+- **Calculadoras interactivas** (p. ej., estimación de ahorro energético).
+- **Automatización avanzada** de marketing (lead scoring, secuencias segmentadas).
+- **Portal de licitaciones** / repositorio de documentación para concursos.
+- **Asistente IA avanzado** con acciones (agendar reunión, generar propuesta preliminar).
+
+**Justificación.** Concentran valor pero incrementan complejidad, superficie de seguridad y coste; se difieren para no poner en riesgo el MVP.
+
+**Impacto.** Condicionan decisiones de extensibilidad (i18n, autenticación) que sí se prevén en la arquitectura inicial.
+
+**Riesgos.** Que se adelanten sin control; mitigado por gobernanza y roadmap.
+
+**Dependencias.** Autenticación robusta ([§25](#25-gestión-de-usuarios)); madurez del CRM; validación de demanda.
+
+**Decisiones tomadas.** i18n se **diseña** desde el inicio pero se **activa** después; área privada requiere PostgreSQL + autenticación gestionada (previstos, no desplegados en MVP).
+
+**Alternativas descartadas.** Incluir área privada en el MVP — descartado por coste/seguridad frente a valor inmediato.
+
+---
+
+## 8. Requisitos funcionales
+
+**Objetivo.** Especificar qué debe hacer la Plataforma, con prioridad.
+
+**Descripción.** Notación **MoSCoW**: `[MUST]` MVP · `[SHOULD]` deseable · `[COULD]` futuro. Trazan a los CU de la [§5](#5-casos-de-uso).
+
+| ID | Prioridad | Requisito | CU |
+|---|---|---|---|
+| RF-01 | MUST | Home con propuesta de valor, servicios y CTA. | CU-01 |
+| RF-02 | MUST | Página por línea de servicio (plantilla común). | CU-01 |
+| RF-03 | MUST | Portfolio filtrable por sector/servicio/año. | CU-02 |
+| RF-04 | MUST | Ficha de caso con métricas, media y testimonio. | CU-02 |
+| RF-05 | MUST | «Sobre nosotros» (equipo, certificaciones). | CU-01 |
+| RF-06 | MUST | Formulario de solicitud de propuesta con validación. | CU-03 |
+| RF-07 | MUST | Envío de formularios a email + persistencia + CRM. | CU-03/09 |
+| RF-08 | MUST | Consentimiento de cookies y textos legales (RGPD/LSSI). | CU-08 |
+| RF-09 | MUST | CMS *headless* para servicios, casos y recursos. | CU-07 |
+| RF-10 | MUST | Analítica respetuosa con privacidad, con consentimiento. | — |
+| RF-11 | MUST | `sitemap.xml`, `robots.txt`, datos estructurados. | — |
+| RF-12 | SHOULD | Blog/Recursos con categorías y artículo detalle. | CU-04 |
+| RF-13 | SHOULD | Lead magnets (descarga con captura de email). | CU-04 |
+| RF-14 | SHOULD | Empleo + formulario de candidatura. | CU-06 |
+| RF-15 | SHOULD | Búsqueda semántica + asistente IA (versión mínima). | CU-05 |
+| RF-16 | SHOULD | Búsqueda interna de contenidos (texto). | CU-01 |
+| RF-17 | COULD | Multi-idioma ES/EN. | — |
+| RF-18 | COULD | Calculadora de ahorro energético. | — |
+| RF-19 | COULD | Área privada de cliente. | CU-10 |
+| RF-20 | COULD | Lead scoring y secuencias automatizadas. | CU-09 |
+
+**Justificación.** La priorización garantiza un MVP entregable y coherente con los objetivos.
+
+**Impacto.** Base del plan de sprints, de la trazabilidad y de las pruebas de aceptación.
+
+**Riesgos.** Requisitos ambiguos; mitigado con criterios de aceptación por historia (definidos en *backlog*, fuera de este documento pero regidos por él).
+
+**Dependencias.** CMS, CRM, proveedor IA, gestor de consentimiento.
+
+**Decisiones tomadas.** RF-15 (IA) se clasifica `SHOULD` en versión mínima: no bloquea el lanzamiento pero es objetivo del primer post-MVP inmediato.
+
+**Alternativas descartadas.** Marcar todos los requisitos como `MUST` — descartado: impide un MVP realista.
+
+---
+
+## 9. Requisitos no funcionales
+
+**Objetivo.** Definir atributos de calidad medibles.
+
+**Descripción.**
+
+| Categoría | Requisito | Umbral objetivo (medible) |
 |---|---|---|
-| **Grandes ingenierías nacionales** | Marca, capacidad, referencias. | Impersonales, caras, lentas, poco cercanas. |
-| **Estudios locales pequeños** | Cercanía, precio. | Poca capacidad, web pobre, sin métricas. |
-| **Consultoras energéticas puras** | Foco, agilidad. | Alcance limitado, no cubren proyecto integral. |
-| **Ingenierías internacionales** | Metodología, tecnología. | Menos conocimiento de normativa local española. |
+| Rendimiento | Core Web Vitals «Good» | LCP < 2,5 s · INP < 200 ms · CLS < 0,1 (P75 móvil). |
+| Rendimiento | Peso vista inicial | < 1,5 MB; imágenes AVIF/WebP. |
+| Rendimiento | Lighthouse | ≥ 90 en Performance, SEO, Accessibility, Best Practices. |
+| Disponibilidad | Uptime | ≥ 99,9 % mensual. |
+| Accesibilidad | Estándar | **WCAG 2.2 AA**. |
+| SEO técnico | Indexabilidad | 100 % de páginas clave indexables; *structured data* válido. |
+| Seguridad | Transporte y cabeceras | HTTPS/TLS, HSTS, CSP, X-Frame-Options, etc. ([§17](#17-seguridad)). |
+| Privacidad | RGPD/LOPDGDD | Consentimiento previo, minimización, DPA con proveedores. |
+| Escalabilidad | Picos | Soportar ×10 tráfico sin degradación (CDN + caché). |
+| Mantenibilidad | Calidad | CI verde obligatorio; cobertura en lógica crítica ([§32](#32-estrategia-de-testing)). |
+| Compatibilidad | Navegadores | Últimas 2 versiones de Chrome/Firefox/Safari/Edge; 320px–4K. |
+| Observabilidad | Monitorización | Logs estructurados, alertas de caída, RUM ([§34](#34-monitorización)). |
+| i18n | Internacionalización | Arquitectura lista para ES/EN aunque se lance en ES. |
+| Recuperación | Backups | Backup diario; RPO ≤ 24 h; RTO ≤ 4 h. |
 
-### 7.2 Ejes de comparación (plantilla de benchmarking)
-Para cada competidor real, evaluar (0–5): calidad web, SEO (visibilidad orgánica), casos de éxito publicados, claridad de servicios, presencia en LinkedIn, velocidad de carga, propuesta de valor diferenciada, generación de contenido/blog.
+**Justificación.** Convierten «calidad» en criterios verificables y auditables.
 
-### 7.3 Hallazgo estratégico (hipótesis)
-**Oportunidad detectada `[SUPUESTO]`:** la mayoría de webs de ingeniería españolas son técnicamente correctas pero **débiles en storytelling de resultados, SEO y captación**. Un sitio orientado a **datos, casos y conversión** genera ventaja competitiva significativa a bajo coste relativo.
+**Impacto.** Condicionan stack ([§11](#11-arquitectura-general)–[§13](#13-arquitectura-del-backend)) y pruebas.
 
----
+**Riesgos.** Degradación por contenido (imágenes pesadas); mitigado con *performance budget* y pipeline de imágenes.
 
-## 8. Posicionamiento
+**Dependencias.** CDN, herramientas de medición, CI.
 
-### 8.1 Declaración de posicionamiento
-> Ingeniería de **especialidad y resultados medibles** para empresas que quieren la solvencia de una gran firma con la cercanía de un equipo dedicado, con la **eficiencia energética y la sostenibilidad** como sello diferencial.
+**Decisiones tomadas.** Los umbrales son de aceptación (bloquean el despliegue si no se cumplen en páginas clave).
 
-### 8.2 Mapa de posicionamiento
-- **Eje X:** Generalista ←→ Especialista → *nos situamos en Especialista.*
-- **Eje Y:** Commodity/precio ←→ Valor/resultados → *nos situamos en Valor.*
-
-### 8.3 Territorio de marca a apropiar
-**«Ingeniería que ahorra energía y dinero, con datos.»** Todo el contenido refuerza este territorio.
-
----
-
-## 9. Tono y estilo de comunicación
-
-### 9.1 Principios
-- **Claro antes que técnico**: explicar como a un directivo inteligente, no a un tribunal de tesis.
-- **Datos antes que adjetivos**: «reducimos un 32 % el consumo» > «gran ahorro».
-- **Honesto**: no prometer lo que no se puede cumplir.
-- **Cercano y profesional**: trato de «usted» institucional en textos formales; «tú» permitido en blog/redes según canal *`[SUPUESTO — decisión de marca]`*.
-
-### 9.2 Guía rápida (Do / Don't)
-
-| ✅ Hacer | ❌ Evitar |
-|---|---|
-| Frases cortas, voz activa. | Jerga innecesaria, siglas sin explicar. |
-| Verbos de acción y resultado. | Superlativos vacíos («los mejores»). |
-| Cifras y unidades correctas. | Promesas absolutas o sin respaldo. |
-| Consistencia terminológica. | Anglicismos gratuitos. |
-
-### 9.3 Microcopy y CTAs
-CTAs orientados a valor: **«Solicitar propuesta»**, **«Hablar con un ingeniero»**, **«Ver casos de éxito»**. Evitar genéricos («Enviar», «Más info»).
+**Alternativas descartadas.** Requisitos cualitativos («que vaya rápido») — descartados por no auditables.
 
 ---
 
-## 10. Requisitos funcionales
+## 10. Restricciones
 
-> Notación: **`[MUST]`** imprescindible MVP · **`[SHOULD]`** deseable · **`[COULD]`** futuro (MoSCoW).
+**Objetivo.** Documentar límites impuestos.
 
-### 10.1 Público / marketing
-- **RF-01 `[MUST]`** Home con propuesta de valor, servicios destacados y CTA principal.
-- **RF-02 `[MUST]`** Página por cada línea de servicio (plantilla §5.2).
-- **RF-03 `[MUST]`** Portfolio / casos de éxito filtrable por sector y servicio.
-- **RF-04 `[MUST]`** Ficha de caso de éxito con métricas, imágenes y testimonio.
-- **RF-05 `[MUST]`** Página «Sobre nosotros» (equipo, historia, certificaciones).
-- **RF-06 `[MUST]`** Formulario de contacto / solicitud de propuesta con validación.
-- **RF-07 `[MUST]`** Página de contacto con datos, mapa y horarios.
-- **RF-08 `[SHOULD]`** Blog / centro de recursos (artículos técnicos, guías).
-- **RF-09 `[SHOULD]`** Página de empleo / «Trabaja con nosotros» + formulario de candidatura.
-- **RF-10 `[SHOULD]`** Descarga de recursos (whitepapers) con captación de email (lead magnet).
-- **RF-11 `[COULD]`** Calculadora interactiva (p. ej. ahorro energético estimado).
-- **RF-12 `[COULD]`** Portal de cliente / área privada de seguimiento de proyecto.
-- **RF-13 `[COULD]`** Multi-idioma (ES/EN) con conmutador.
+**Descripción.**
+- **Legales:** RGPD/LOPDGDD y LSSI-CE (España/UE) de obligado cumplimiento.
+- **Idioma:** contenido primario en español.
+- **Presupuesto y equipo:** **⚠️ INCERTIDUMBRE** — no facilitados; condicionan la elección de stack ([§49](#49-anexo-de-decisiones-abiertas), DA-1).
+- **Marca:** manual de marca no disponible; se usan directrices provisionales ([§22](#22-ui)).
+- **Contenido:** dependencia de que el cliente aporte casos, textos y fotos reales.
+- **Datos:** minimización — no se recogen datos personales innecesarios.
 
-### 10.2 Sistema / plataforma
-- **RF-14 `[MUST]`** Gestión de contenido (CMS) para editar servicios, casos y blog sin desarrollador.
-- **RF-15 `[MUST]`** Envío de formularios a email + almacenamiento + integración CRM.
-- **RF-16 `[MUST]`** Consentimiento de cookies (RGPD) y gestión de preferencias.
-- **RF-17 `[SHOULD]`** Búsqueda interna de contenidos.
-- **RF-18 `[SHOULD]`** Sitemap XML y feeds automáticos.
-- **RF-19 `[COULD]`** Automatización marketing (secuencias email, scoring de leads).
+**Justificación.** Explicitar restricciones evita decisiones inviables.
 
-### 10.3 Legal / cumplimiento
-- **RF-20 `[MUST]`** Aviso legal, Política de privacidad, Política de cookies (LSSI-CE + RGPD/LOPDGDD).
-- **RF-21 `[MUST]`** Registro de consentimientos de formularios.
+**Impacto.** Afecta a stack, plazos y diseño.
+
+**Riesgos.** Restricciones ocultas que emerjan tarde; mitigado con la sesión de descubrimiento (Fase 0).
+
+**Dependencias.** Validación de hipótesis ([§44](#44-hipótesis)).
+
+**Decisiones tomadas.** Se asume cumplimiento normativo UE/España como marco no negociable.
+
+**Alternativas descartadas.** Alojar datos personales fuera de la UE sin garantías — descartado por cumplimiento.
 
 ---
 
-## 11. Requisitos no funcionales
+## 11. Arquitectura general
 
-| Categoría | Requisito | Objetivo medible |
-|---|---|---|
-| **Rendimiento** | Web rápida | LCP < 2,5 s · INP < 200 ms · CLS < 0,1 (Core Web Vitals «Good») en móvil P75. |
-| **Rendimiento** | Peso de página | < 1,5 MB por vista inicial; imágenes en formatos modernos (AVIF/WebP). |
-| **Disponibilidad** | Uptime | ≥ 99,9 % mensual. |
-| **Accesibilidad** | Estándar | **WCAG 2.2 nivel AA**. |
-| **SEO técnico** | Indexabilidad | 100 % de páginas clave indexables; datos estructurados válidos. |
-| **Seguridad** | Transporte | HTTPS/TLS obligatorio, HSTS, cabeceras de seguridad (CSP, X-Frame-Options). |
-| **Seguridad** | Protección | Antispam en formularios, rate limiting, protección DDoS/CDN. |
-| **Privacidad** | RGPD | Consentimiento previo, minimización de datos, DPA con proveedores. |
-| **Escalabilidad** | Tráfico | Soportar picos ×10 sin degradación (CDN + caché). |
-| **Mantenibilidad** | Código | Cobertura de tests en lógica crítica; CI verde obligatorio para desplegar. |
-| **Compatibilidad** | Navegadores | Últimas 2 versiones de Chrome, Firefox, Safari, Edge; responsive 320px–4K. |
-| **Observabilidad** | Monitorización | Logs, alertas de caída, analítica de rendimiento y errores. |
-| **i18n** | Internacionalización | Arquitectura preparada para multi-idioma aunque se lance en ES. |
-| **Backups** | Recuperación | Backup diario, RPO ≤ 24 h, RTO ≤ 4 h. |
+**Objetivo.** Definir la arquitectura de referencia de la Plataforma.
 
----
-
-## 12. Arquitectura de la información
-
-### 12.1 Mapa del sitio (sitemap lógico)
+**Descripción.** Arquitectura **Jamstack** con contenido *headless* y capa de servicios serverless (BFF):
 
 ```
-/  (Home)
-├── /servicios
-│   ├── /servicios/ingenieria-industrial
-│   ├── /servicios/eficiencia-energetica
-│   ├── /servicios/energias-renovables
-│   ├── /servicios/instalaciones-mep
-│   ├── /servicios/consultoria-tecnica
-│   └── /servicios/digitalizacion-bim
-├── /proyectos            (portfolio filtrable)
-│   └── /proyectos/{slug} (caso de éxito)
-├── /sectores             (opcional: industria, terciario, público…)
-├── /sobre-nosotros
-│   ├── /sobre-nosotros/equipo
-│   └── /sobre-nosotros/certificaciones
-├── /recursos             (blog / guías)
-│   └── /recursos/{slug}
+[ Navegador ]
+     │  HTML/CSS/JS estático + islas interactivas
+     ▼
+[ CDN global ] ──sirve──▶ Sitio (Astro SSG/ISR) 
+     │                         │ build
+     │                         ▼
+     │                   [ CMS headless ]  ← Editores
+     │
+     ├──▶ [ BFF serverless ] ──▶ CRM (leads)
+     │            │          ──▶ Email transaccional
+     │            │          ──▶ Proveedor IA (RAG)  ──▶ [ Vector store / pgvector ]
+     │            └──────────▶ [ PostgreSQL gestionado ] (leads; área privada futura)
+     │
+     └──▶ Analítica (con consentimiento)
+```
+
+**Justificación.** Un sitio de contenido con foco en SEO/rendimiento se beneficia de generación estática + CDN (velocidad, seguridad, coste). El *headless* separa contenido de presentación (autonomía editorial). El BFF aísla la lógica dinámica (formularios, IA) sin mantener un servidor monolítico.
+
+**Impacto.** Determina frontend ([§12](#12-arquitectura-del-frontend)), backend ([§13](#13-arquitectura-del-backend)), datos ([§14](#14-arquitectura-de-datos)) y despliegue ([§33](#33-estrategia-de-despliegue)).
+
+**Riesgos.** *Vendor lock-in* con plataforma/CMS; mitigado eligiendo estándares abiertos y garantizando exportabilidad.
+
+**Dependencias.** Proveedor de hosting/CDN, CMS, base de datos gestionada, proveedor IA.
+
+**Decisiones tomadas (resumen, detalle en ADR §43).** Jamstack + Astro + React islands + CMS headless + BFF serverless + PostgreSQL gestionado con pgvector.
+
+**Alternativas descartadas.** (a) *Monolito tradicional (p. ej. WordPress clásico)* — descartado para la opción recomendada por menor control de rendimiento (se mantiene como alternativa de bajo mantenimiento técnico, ver [§49](#49-anexo-de-decisiones-abiertas) DA-1). (b) *SPA pura sin SSR/SSG* — descartado por penalización SEO.
+
+---
+
+## 12. Arquitectura del frontend
+
+**Objetivo.** Definir la construcción del Sitio.
+
+**Descripción.** **Astro** como framework (renderizado estático por defecto, ISR donde aplique), con **islas React** (TypeScript) solo en componentes interactivos (formularios, asistente IA, filtros). Estilos con **Tailwind CSS** gobernado por **design tokens** ([§22](#22-ui)). Contenido consumido del CMS en *build time* (y en *runtime* vía BFF para lo dinámico). Componentes reutilizables documentados (idealmente en Storybook).
+
+**Justificación.** Minimiza JavaScript enviado (mejor CWV y SEO) enviando HTML estático y «hidratando» solo lo imprescindible (arquitectura de islas).
+
+**Impacto.** Rendimiento, accesibilidad y mantenibilidad del Sitio.
+
+**Riesgos.** Complejidad de hidratación parcial; mitigado con guía de patrones y revisión.
+
+**Dependencias.** CMS, sistema de diseño, BFF para datos dinámicos.
+
+**Decisiones tomadas.** React como tecnología de isla (ecosistema/contratación/tipado); TypeScript estricto obligatorio.
+
+**Alternativas descartadas.** (a) *Next.js* — válido, descartado como recomendación por mayor peso JS por defecto para un sitio mayoritariamente estático (se mantiene como alternativa, ADR-002). (b) *Vue/Svelte* — descartados por preferencia de ecosistema/contratación, no por capacidad.
+
+---
+
+## 13. Arquitectura del backend
+
+**Objetivo.** Definir la capa de servicios dinámicos.
+
+**Descripción.** **BFF serverless** (funciones edge/Node en TypeScript) responsable de: recepción y validación de formularios, antispam, persistencia de leads, envío a CRM y email transaccional, y *proxy* seguro al proveedor de IA (las claves nunca en el cliente). Sin servidor de larga vida en el MVP. Para el **área privada futura** se prevé un backend de sesión/autenticación gestionado.
+
+**Justificación.** El serverless cubre cargas intermitentes (formularios, IA) con coste bajo, escalado automático y sin operación de servidores.
+
+**Impacto.** Seguridad (secretos server-side), coste y escalabilidad.
+
+**Riesgos.** *Cold starts* y límites de ejecución; mitigado con funciones ligeras y, si procede, runtime edge.
+
+**Dependencias.** Plataforma serverless, CRM, proveedor email, proveedor IA, PostgreSQL.
+
+**Decisiones tomadas.** Toda integración con terceros y toda clave secreta residen en el BFF, nunca en el frontend.
+
+**Alternativas descartadas.** (a) *Backend monolítico dedicado (Node/Nest siempre activo)* — descartado por operación/coste innecesarios para el MVP; reconsiderable con el área privada. (b) *Llamadas directas del cliente a la API de IA* — descartado por exposición de claves y falta de control de coste/abuso.
+
+---
+
+## 14. Arquitectura de datos
+
+**Objetivo.** Definir dónde y cómo viven los datos.
+
+**Descripción.** Tres dominios de datos separados por naturaleza:
+1. **Contenido editorial** (servicios, casos, artículos): en el **CMS headless** (fuente de verdad del contenido).
+2. **Datos operativos/personales** (leads, candidaturas, consentimientos): en **PostgreSQL gestionado** (región UE), con el CRM como sistema comercial de referencia.
+3. **Índice semántico** para RAG: **pgvector** dentro del mismo PostgreSQL (evita infraestructura adicional).
+
+Modelo conceptual en la [§28](#28-modelo-de-datos-de-alto-nivel).
+
+**Justificación.** Separar contenido (versionable, editorial) de datos personales (sensibles, RGPD) reduce riesgo y clarifica responsabilidades. Reutilizar PostgreSQL para vectores minimiza operación.
+
+**Impacto.** Cumplimiento, seguridad, portabilidad y coste.
+
+**Riesgos.** Dispersión/duplicidad de datos entre CMS, DB y CRM; mitigado definiendo la fuente de verdad de cada dato y evitando duplicar el mismo dato como maestro en dos sistemas.
+
+**Dependencias.** Proveedor PostgreSQL con pgvector y residencia UE; CRM.
+
+**Decisiones tomadas.** Región de datos **UE**; el CRM es maestro del ciclo comercial del lead; PostgreSQL es maestro del registro de consentimiento y del índice RAG.
+
+**Alternativas descartadas.** Base de datos vectorial dedicada (p. ej. servicio externo) — descartada en MVP por coste/operación; reconsiderable si el volumen lo exige (ADR-005).
+
+---
+
+## 15. Integraciones externas
+
+**Objetivo.** Catalogar sistemas de terceros y su rol.
+
+**Descripción.**
+
+| Integración | Función | Notas |
+|---|---|---|
+| **CRM** (HubSpot/Brevo/Pipedrive) | Gestión de leads y automatización. | Maestro comercial. Elección abierta ([§49](#49-anexo-de-decisiones-abiertas) DA-2). |
+| **Email transaccional** (p. ej. proveedor SMTP/API) | Acuses y notificaciones. | Server-side desde BFF. |
+| **Proveedor de IA** (Anthropic — Claude) | Asistente/RAG y clasificación. | Ver [§16](#16-inteligencia-artificial). |
+| **Analítica** (Plausible o GA4) | Métricas de uso. | Con consentimiento; *privacy-first* preferido. |
+| **Gestor de consentimiento (CMP)** | Cookies/RGPD. | Bloquea scripts hasta consentimiento. |
+| **Google Search Console / Business Profile** | SEO y SEO local. | Verificación y datos NAP. |
+| **CDN/WAF** | Distribución y protección. | Incluido con la plataforma de despliegue. |
+
+**Justificación.** Externalizar capacidades no diferenciales (email, CRM, analítica) acelera el desarrollo y reduce mantenimiento.
+
+**Impacto.** Dependencias operativas y de cumplimiento (DPA con cada proveedor que trate datos personales).
+
+**Riesgos.** *Lock-in* y disponibilidad de terceros; mitigado con abstracción en el BFF y contratos de tratamiento.
+
+**Dependencias.** Cuentas y claves de cada proveedor; DPAs firmados.
+
+**Decisiones tomadas.** Toda integración con datos personales exige DPA y residencia/garantías UE.
+
+**Alternativas descartadas.** Autogestionar email/analítica sin necesidad — descartado por coste de operación frente a valor.
+
+---
+
+## 16. Inteligencia Artificial
+
+**Objetivo.** Definir el uso de IA, su alcance y sus límites.
+
+**Descripción.** Dos capacidades, ambas con el contenido propio como base:
+1. **Búsqueda semántica + asistente RAG (versión mínima, `SHOULD` en MVP inmediato):** el asistente responde preguntas de visitantes usando **exclusivamente** contenido publicado (servicios, casos, recursos), citando las fuentes. Flujo: contenido → *embeddings* → índice pgvector; consulta → recuperación → generación con **Claude** (familia Anthropic; **Haiku 4.5** para clasificación/consultas económicas, **Sonnet/Opus 4.x** para respuestas complejas). Todas las llamadas pasan por el BFF (claves server-side, control de coste y *rate limiting*).
+2. **Asistencia interna de contenido y cualificación de leads (futuro/opcional):** ayuda a redactar borradores editoriales y a clasificar leads. Siempre con revisión humana.
+
+**Guardarraíles obligatorios:** el asistente no inventa datos de proyectos ni cifras; si no hay fuente, lo indica y ofrece contacto. No trata datos personales sensibles. Registro de consultas anonimizado para mejora, con consentimiento.
+
+**Justificación.** La IA sobre contenido propio mejora la conversión (respuestas inmediatas con fuentes) y diferencia frente a competidores, sin los riesgos de un agente autónomo con acciones.
+
+**Impacto.** Requiere BFF, índice vectorial, control de coste y una política de uso de IA.
+
+**Riesgos.** Alucinaciones y coste variable; mitigado con RAG estricto (respuestas ancladas a fuentes), límites de tasa y modelos económicos por defecto. **Riesgo legal/reputacional** si el asistente afirma capacidades no reales; mitigado con guardarraíles y revisión de *prompts*.
+
+**Dependencias.** Proveedor IA (Anthropic), contenido publicado, pgvector, presupuesto de tokens.
+
+**Decisiones tomadas.** RAG anclado a fuentes con cita obligatoria; sin acciones ejecutables en MVP; claves y lógica IA solo en el BFF; Anthropic/Claude como proveedor por defecto (alineado con el ecosistema del proyecto), con abstracción que permita sustituirlo.
+
+**Alternativas descartadas.** (a) *Chatbot de respuestas libres sin RAG* — descartado por riesgo de alucinación. (b) *Modelo propio auto-alojado* — descartado por coste/operación desproporcionados para el volumen esperado. (c) *Estimador de ahorro por ML* — descartado en favor de un cálculo determinista basado en reglas de ingeniería (más explicable y auditable) cuando se implemente la calculadora ([§7](#7-funcionalidades-futuras)).
+
+---
+
+## 17. Seguridad
+
+**Objetivo.** Proteger la Plataforma, sus datos y sus usuarios.
+
+**Descripción.** Medidas por capa:
+- **Transporte:** HTTPS/TLS obligatorio, HSTS.
+- **Cabeceras:** CSP restrictiva, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy.
+- **Formularios:** validación servidor, antispam (token/desafío), *rate limiting*, protección contra inyección.
+- **Secretos:** solo en el BFF/gestor de secretos; nunca en el repositorio ni en el cliente.
+- **IA:** *proxy* server-side, límites de tasa y de coste, saneado de entradas.
+- **Dependencias:** análisis de vulnerabilidades (SCA) en CI; actualizaciones controladas.
+- **Datos personales:** cifrado en tránsito y en reposo; acceso mínimo; registro de consentimientos.
+- **CDN/WAF:** mitigación DDoS y filtrado.
+
+**Justificación.** La superficie principal (formularios e IA) es el vector de abuso más probable; se protege de forma prioritaria.
+
+**Impacto.** Cumplimiento, confianza y continuidad.
+
+**Riesgos.** Spam/abuso de formularios e IA; fugas de secretos; dependencias vulnerables. Mitigaciones descritas arriba.
+
+**Dependencias.** WAF/CDN, gestor de secretos, herramientas SCA, CMP.
+
+**Decisiones tomadas.** Modelo *secure by default*: CSP restrictiva desde el inicio; ningún secreto en cliente; SCA bloqueante en CI para vulnerabilidades críticas.
+
+**Alternativas descartadas.** Validación solo en cliente — descartada por insegura. CAPTCHA intrusivo por defecto — descartado por fricción; se usa antispam de baja fricción y se escala solo si hay abuso.
+
+---
+
+## 18. Rendimiento
+
+**Objetivo.** Garantizar una experiencia rápida y sostenible.
+
+**Descripción.** *Performance budget* explícito ([§9](#9-requisitos-no-funcionales)): CWV en verde, JS mínimo (islas), imágenes AVIF/WebP con dimensiones reservadas y *lazy-loading*, fuentes con `font-display: swap`, caché agresiva en CDN, *code-splitting*. Medición continua con Lighthouse CI y RUM.
+
+**Justificación.** El rendimiento es factor de SEO y de conversión (impacto directo en objetivos de negocio).
+
+**Impacto.** Ranking, tasa de conversión y coste de infraestructura.
+
+**Riesgos.** Regresiones por contenido/terceros; mitigado con Lighthouse CI bloqueante y control de scripts de terceros vía CMP.
+
+**Dependencias.** CDN, pipeline de imágenes, CI.
+
+**Decisiones tomadas.** *Budget* de rendimiento verificado en CI como criterio de aceptación en páginas clave.
+
+**Alternativas descartadas.** Optimización manual puntual sin presupuesto ni CI — descartada por no sostenible.
+
+---
+
+## 19. Escalabilidad
+
+**Objetivo.** Asegurar que la Plataforma soporta crecimiento de tráfico y contenido.
+
+**Descripción.** El contenido estático servido por CDN escala horizontalmente casi sin coste marginal. El BFF serverless escala automáticamente con la demanda. PostgreSQL gestionado permite escalar verticalmente y con réplicas de lectura si el área privada crece.
+
+**Justificación.** El patrón Jamstack desacopla lecturas (estáticas, ilimitadas vía CDN) de escrituras (formularios/IA, serverless), que es exactamente el perfil de carga esperado.
+
+**Impacto.** Absorbe picos (campañas, viralidad) sin rediseño.
+
+**Riesgos.** Cuellos de botella en terceros (CRM/IA) o límites de plan serverless; mitigado con colas/reintentos y límites de tasa.
+
+**Dependencias.** Planes de CDN, serverless y DB adecuados.
+
+**Decisiones tomadas.** Objetivo de absorber ×10 de tráfico sin degradación ([§9](#9-requisitos-no-funcionales)).
+
+**Alternativas descartadas.** Servidor único vertical — descartado por límite de escalado y punto único de fallo.
+
+---
+
+## 20. Accesibilidad
+
+**Objetivo.** Garantizar una Plataforma usable por todas las personas.
+
+**Descripción.** Cumplimiento **WCAG 2.2 nivel AA**: contraste ≥ 4,5:1 (≥ 3:1 texto grande), navegación completa por teclado con foco visible, HTML semántico y *landmarks* ARIA cuando proceda, etiquetas y errores de formulario accesibles, alt text, respeto a `prefers-reduced-motion`. Verificación automatizada (axe) en CI y auditoría manual en páginas clave.
+
+**Justificación.** Es requisito de calidad, de alcance de audiencia y, en contratación pública, con frecuencia obligación legal (EN 301 549).
+
+**Impacto.** Cumplimiento, SEO (solapamiento con buenas prácticas) y reputación.
+
+**Riesgos.** Regresiones por nuevos componentes; mitigado con axe en CI y componentes accesibles por diseño.
+
+**Dependencias.** Sistema de diseño accesible; herramientas de test.
+
+**Decisiones tomadas.** WCAG 2.2 AA como criterio de aceptación; sin bloqueantes de accesibilidad para desplegar.
+
+**Alternativas descartadas.** Accesibilidad «best-effort» sin verificación — descartada por no auditable ni conforme.
+
+---
+
+## 21. UX
+
+**Objetivo.** Definir principios de experiencia de usuario.
+
+**Descripción.** Principios: **claridad sobre creatividad**; **orientación a conversión** (cada página con un objetivo y un CTA claro); **escaneabilidad** (títulos, listas, datos destacados); **mobile-first**; **consistencia** de patrones. Recorridos clave optimizados: descubrir servicio → ver casos → solicitar propuesta; y descargar recurso → *nurturing*.
+
+**Justificación.** El usuario B2B busca información y confianza, no ornamento; la experiencia debe reducir fricción hasta la conversión.
+
+**Impacto.** Tasa de conversión y satisfacción.
+
+**Riesgos.** Sobrecarga informativa; mitigado con jerarquía visual y contenido escaneable.
+
+**Dependencias.** UI ([§22](#22-ui)), contenido, arquitectura de la información.
+
+**Decisiones tomadas.** Máximo 3 clics de la Home a cualquier contenido clave; CTAs orientados a valor («Solicitar propuesta», «Hablar con un ingeniero»).
+
+**Alternativas descartadas.** Experiencias muy animadas/experimentales — descartadas por fricción y coste de rendimiento/accesibilidad.
+
+---
+
+## 22. UI
+
+**Objetivo.** Definir el sistema visual.
+
+**Descripción.** **Sistema de diseño basado en tokens** (color, tipografía, espaciado, radios, sombras) como fuente única compartida entre diseño y desarrollo. Rejilla de 12 columnas; escala de espaciado 4/8 px. Componentes reutilizables (botones, tarjetas de servicio, tarjeta de caso, formularios, banners CTA). **`[HIPÓTESIS]`** directrices provisionales (a validar con manual de marca): paleta primaria azul técnico, acento verde (sostenibilidad), neutros grises; tipografía sans-serif geométrica de licencia abierta; iconografía lineal; fotografía de proyectos reales sobre banco de imágenes.
+
+**Justificación.** Los tokens garantizan consistencia y velocidad de desarrollo, y permiten temas (claro/oscuro) e i18n.
+
+**Impacto.** Coherencia de marca, mantenibilidad y accesibilidad (contraste).
+
+**Riesgos.** Divergencia diseño-código; mitigado con tokens compartidos y biblioteca de componentes documentada.
+
+**Dependencias.** Manual de marca (pendiente); Tailwind + tokens.
+
+**Decisiones tomadas.** UI gobernada por tokens; contraste conforme a WCAG 2.2 AA por diseño.
+
+**Alternativas descartadas.** Estilos ad hoc por página — descartados por inconsistencia y deuda técnica.
+
+---
+
+## 23. Diseño responsive
+
+**Objetivo.** Asegurar una experiencia correcta en cualquier dispositivo.
+
+**Descripción.** **Mobile-first** real: layouts fluidos (flexbox/grid), unidades relativas, imágenes `max-width:100%` y `srcset` para servir el tamaño adecuado. Puntos de ruptura basados en contenido, no en dispositivos concretos. Verificación en rango 320px–4K.
+
+**Justificación.** Buena parte del tráfico B2B de investigación inicial ocurre en móvil; además el móvil es el criterio de indexación de Google (*mobile-first indexing*).
+
+**Impacto.** SEO, conversión y accesibilidad.
+
+**Riesgos.** *Layout shift* (CLS) por medios sin dimensiones; mitigado reservando espacio y con `srcset`.
+
+**Dependencias.** Sistema de diseño; pipeline de imágenes.
+
+**Decisiones tomadas.** Mobile-first como enfoque de diseño y desarrollo; sin *scroll* horizontal del cuerpo en ningún viewport.
+
+**Alternativas descartadas.** Diseño desktop-first adaptado a móvil — descartado por peor rendimiento y experiencia móvil.
+
+---
+
+## 24. Navegación
+
+**Objetivo.** Definir cómo se mueve el usuario por la Plataforma.
+
+**Descripción.** **Header:** Servicios (mega-menú), Proyectos, Sectores *(opcional)*, Sobre nosotros, Recursos, Contacto + CTA destacado «Solicitar propuesta». **Footer:** mapa reducido, contacto, redes, legal, certificaciones, selector de idioma (cuando i18n esté activo). Migas de pan en páginas profundas. Búsqueda accesible desde el header. Profundidad máxima de 3 clics.
+
+Mapa del sitio (sitemap lógico):
+
+```
+/
+├── /servicios/{ingenieria-industrial | eficiencia-energetica | energias-renovables |
+│                instalaciones-mep | consultoria-tecnica | digitalizacion-bim}
+├── /proyectos  →  /proyectos/{slug}
+├── /sectores   (opcional)
+├── /sobre-nosotros  →  /equipo, /certificaciones
+├── /recursos   →  /recursos/{slug}
 ├── /empleo
 ├── /contacto
-└── /legal
-    ├── /legal/aviso-legal
-    ├── /legal/privacidad
-    └── /legal/cookies
+└── /legal → /aviso-legal, /privacidad, /cookies
 ```
 
-### 12.2 Navegación
-- **Header:** Servicios (mega-menú), Proyectos, Sectores, Sobre nosotros, Recursos, Contacto + CTA destacado «Solicitar propuesta».
-- **Footer:** mapa reducido, datos de contacto, redes, legal, certificaciones, selector de idioma.
-- **Profundidad máxima:** 3 clics desde Home a cualquier contenido clave.
+**Justificación.** Estructura orientada a los CU y a las personas, con rutas cortas a la conversión.
 
-### 12.3 Taxonomía de contenidos
-- **Casos de éxito** etiquetados por: `sector`, `servicio`, `ubicación`, `año`, `métricas`.
-- **Recursos** por: `categoría`, `servicio relacionado`, `tipo` (artículo/guía/nota técnica).
+**Impacto.** Usabilidad, SEO (enlazado interno) y conversión.
 
----
+**Riesgos.** Menú sobrecargado; mitigado con jerarquía clara y mega-menú organizado por servicio.
 
-## 13. Estrategia SEO
+**Dependencias.** Arquitectura de la información; contenido.
 
-### 13.1 Objetivos
-Posicionar por intención **comercial y de especialidad**, no solo por marca. Convertir el sitio en fuente de leads orgánicos.
+**Decisiones tomadas.** URLs semánticas, en minúsculas y con guiones; una sola taxonomía de servicios reutilizada en navegación, filtros y SEO.
 
-### 13.2 Arquitectura SEO — clústeres temáticos (topic clusters)
-
-| Página pilar (pillar) | Contenido de apoyo (cluster) |
-|---|---|
-| Eficiencia energética industrial | auditoría energética, ISO 50001, ahorro en climatización, casos con ROI. |
-| Autoconsumo fotovoltaico | legalización, subvenciones, almacenamiento, amortización. |
-| Instalaciones MEP | PCI, climatización eficiente, BIM MEP, normativa CTE/RITE. |
-
-### 13.3 Investigación de palabras clave (marco)
-Combinar: **`[servicio] + [sector] + [ubicación]`** (p. ej. «ingeniería eficiencia energética industria [ciudad]»). Priorizar **long-tail** transaccional con intención comercial sobre términos genéricos de alto volumen. *`[SUPUESTO]` — el keyword research real es entregable de fase 1.*
-
-### 13.4 SEO on-page (checklist obligatorio por página)
-- Un solo `<h1>` con keyword principal.
-- `title` (≤ 60 car.) y `meta description` (≤ 155 car.) únicos y persuasivos.
-- URLs limpias, semánticas, en minúsculas y con guiones.
-- Encabezados jerárquicos (h2/h3) semánticos.
-- Enlazado interno hacia pilares y casos relacionados.
-- Alt text descriptivo en todas las imágenes.
-- Contenido original ≥ 600 palabras en páginas clave.
-
-### 13.5 SEO técnico
-- Datos estructurados **Schema.org**: `Organization`, `LocalBusiness`, `Service`, `Article`, `BreadcrumbList`, `FAQPage`.
-- `sitemap.xml` + `robots.txt` correctos; canónicas; sin contenido duplicado.
-- Core Web Vitals en verde (ver §11).
-- Renderizado SSR/SSG para indexación completa.
-- `hreflang` cuando se active multi-idioma.
-
-### 13.6 SEO local
-Perfil de **Google Business Profile** optimizado, NAP (Name-Address-Phone) consistente, reseñas, páginas de sedes si hay varias.
-
-### 13.7 Off-page / autoridad
-Notas técnicas de calidad enlazables, presencia en medios sectoriales, colaboración con asociaciones, perfil de LinkedIn corporativo activo.
-
-### 13.8 Medición
-Search Console + analítica sin cookies o con consentimiento; seguimiento de posiciones, CTR, conversiones orgánicas.
+**Alternativas descartadas.** Navegación por «sectores» como eje principal — descartada en favor de «servicios» (los sectores se mantienen como filtro/segmento).
 
 ---
 
-## 14. Stack tecnológico recomendado
+## 25. Gestión de usuarios
 
-> Recomendación con alternativas. La elección final depende del perfil del equipo de mantenimiento y del presupuesto. **`[SUPUESTO]` — decisión pendiente de aprobar.**
+**Objetivo.** Definir qué usuarios existen y cómo se gestionan.
 
-### 14.1 Opción recomendada (equilibrio rendimiento/SEO/DX)
+**Descripción.** En el MVP, los usuarios autenticados son **internos** (editores/administradores del CMS y del panel operativo). Los visitantes y leads **no** requieren cuenta. La autenticación interna la provee el CMS y/o un proveedor gestionado (p. ej. Auth0/Clerk/Supabase Auth). El **área privada de cliente** (futuro) introducirá usuarios externos autenticados; se prevé su modelo pero no se implementa en MVP.
 
-| Capa | Recomendación | Alternativa | Motivo |
-|---|---|---|---|
-| **Framework** | **Astro** (con islas React) | Next.js | SSG por defecto = máxima velocidad y SEO; ideal para sitio de contenido. |
-| **UI / componentes** | React + TypeScript | Vue/Svelte | Ecosistema, contratación, tipado. |
-| **Estilos** | Tailwind CSS + tokens de diseño | CSS Modules | Consistencia, velocidad, mantenibilidad. |
-| **CMS** | Headless (Strapi / Sanity / Storyblok) | WordPress headless | Edición sin tocar código; separación contenido/presentación. |
-| **Formularios/backend** | Serverless (funciones edge) + servicio de email | Backend Node dedicado | Coste bajo, escalable, sin servidor que mantener. |
-| **Base de datos** | PostgreSQL gestionado *(solo si hay área privada)* | — | Estándar, fiable. |
-| **Hosting/deploy** | Plataforma de despliegue con CDN global (Vercel/Netlify/Cloudflare) | VPS + Nginx | Deploy continuo, CDN, HTTPS automático. |
-| **Analítica** | Analítica respetuosa con privacidad (p. ej. Plausible) o GA4 con consentimiento | Matomo self-hosted | RGPD-friendly. |
-| **CRM/Marketing** | HubSpot / Brevo / Pipedrive | — | Captación y nurturing de leads. |
-| **Búsqueda** | Pagefind (estático) / Algolia | — | Búsqueda rápida sin backend pesado. |
+**Justificación.** Evitar autenticación de visitantes reduce fricción y superficie de seguridad; la autenticación gestionada delega la complejidad crítica (MFA, recuperación) en un proveedor especializado.
 
-### 14.2 Alternativa «bajo mantenimiento no técnico»
-Si el equipo no es técnico: **WordPress** con tema a medida ligero + plugins mínimos (SEO, caché, formularios, RGPD) y hosting gestionado. Menor control de rendimiento, mayor autonomía editorial.
+**Impacto.** Seguridad, cumplimiento y experiencia.
 
-### 14.3 Herramientas transversales
-Git + GitHub, CI/CD (GitHub Actions), gestor de dependencias, ESLint/Prettier, Lighthouse CI, gestor de secretos.
+**Riesgos.** Introducir área privada sin diseño de identidad sólido; mitigado difiriéndola y previendo el modelo desde ahora.
+
+**Dependencias.** Proveedor de identidad; CMS.
+
+**Decisiones tomadas.** Sin cuentas para visitantes en MVP; identidad interna gestionada por proveedor especializado.
+
+**Alternativas descartadas.** Autenticación propia desde cero — descartada por riesgo de seguridad y coste.
 
 ---
 
-## 15. Convenciones de desarrollo
+## 26. Roles
 
-### 15.1 Control de versiones
-- **Ramas:** `main` (producción, protegida) · `develop` *(opcional)* · `feat/*`, `fix/*`, `chore/*`, `docs/*`.
-- **Pull Requests obligatorios** con al menos 1 revisión y CI en verde para fusionar.
-- **Commits:** [Conventional Commits](https://www.conventionalcommits.org/) → `feat:`, `fix:`, `docs:`, `refactor:`, `test:`, `chore:`.
+**Objetivo.** Definir los roles del sistema.
 
-### 15.2 Estructura del repositorio (ya inicializada)
+**Descripción.**
+
+| Rol | Descripción | Ámbito |
+|---|---|---|
+| **Visitante** | Usuario anónimo del Sitio. | Público (MVP). |
+| **Lead** | Visitante que ha convertido (no autenticado). | Público (MVP). |
+| **Editor** | Gestiona contenido en el CMS. | Interno (MVP). |
+| **Administrador** | Gestiona usuarios, configuración y consentimientos. | Interno (MVP). |
+| **Desarrollador/DevOps** | Gestiona código, despliegues e infraestructura. | Interno (MVP). |
+| **Cliente** | Usuario externo autenticado del área privada. | Externo (**futuro**). |
+
+**Justificación.** Roles mínimos y claros que cubren los CU sin sobre-ingeniería.
+
+**Impacto.** Base de la matriz de permisos ([§27](#27-permisos)).
+
+**Riesgos.** Proliferación de roles; mitigado manteniendo el conjunto mínimo y añadiendo solo con justificación.
+
+**Dependencias.** Gestión de usuarios ([§25](#25-gestión-de-usuarios)).
+
+**Decisiones tomadas.** Seis roles canónicos; «Cliente» es futuro.
+
+**Alternativas descartadas.** Roles granulares por módulo desde el inicio — descartados por complejidad prematura.
+
+---
+
+## 27. Permisos
+
+**Objetivo.** Definir qué puede hacer cada rol (control de acceso).
+
+**Descripción.** Modelo **RBAC** (control de acceso basado en roles). Matriz resumida:
+
+| Recurso / Acción | Visitante | Lead | Editor | Administrador | DevOps | Cliente (futuro) |
+|---|:--:|:--:|:--:|:--:|:--:|:--:|
+| Ver contenido público | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Enviar formularios | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Crear/editar contenido (CMS) | ❌ | ❌ | ✅ | ✅ | ❌ | ❌ |
+| Publicar contenido | ❌ | ❌ | ✅* | ✅ | ❌ | ❌ |
+| Gestionar usuarios/roles | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ |
+| Ver consentimientos/leads | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ |
+| Configurar despliegue/infra | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ |
+| Ver estado de sus proyectos | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ |
+
+*`*` La publicación por Editor puede requerir aprobación según flujo editorial (decisión abierta [§49](#49-anexo-de-decisiones-abiertas) DA-4).*
+
+**Justificación.** RBAC es suficiente y comprensible para la escala prevista; el principio de **mínimo privilegio** guía la asignación.
+
+**Impacto.** Seguridad y cumplimiento.
+
+**Riesgos.** Configuración incorrecta de permisos; mitigado con pruebas de autorización y revisión.
+
+**Dependencias.** Roles ([§26](#26-roles)); proveedor de identidad.
+
+**Decisiones tomadas.** RBAC + mínimo privilegio; datos personales solo accesibles por Administrador.
+
+**Alternativas descartadas.** ABAC (basado en atributos) — descartado por complejidad innecesaria a esta escala.
+
+---
+
+## 28. Modelo de datos de alto nivel
+
+**Objetivo.** Describir las entidades principales y sus relaciones (conceptual, sin esquema físico).
+
+**Descripción.** Entidades canónicas:
+
+| Entidad | Descripción | Fuente de verdad |
+|---|---|---|
+| **Servicio** | Línea de servicio. | CMS |
+| **Proyecto (caso de éxito)** | Trabajo realizado con métricas y media. | CMS |
+| **Sector** | Segmento de mercado (taxonomía). | CMS |
+| **Artículo/Recurso** | Contenido editorial (blog, guías, lead magnets). | CMS |
+| **Miembro del equipo** | Persona del equipo. | CMS |
+| **Certificación** | Acreditaciones de la empresa. | CMS |
+| **Lead** | Contacto comercial capturado. | PostgreSQL + CRM |
+| **Candidatura** | Solicitud de empleo. | PostgreSQL |
+| **Consentimiento** | Registro RGPD de consentimientos. | PostgreSQL |
+| **Documento de embedding** | Fragmento de contenido + vector para RAG. | PostgreSQL (pgvector) |
+| **Cliente / Proyecto-cliente** *(futuro)* | Datos del área privada. | PostgreSQL |
+
+Relaciones clave: `Servicio 1—N Proyecto`; `Proyecto N—M Sector`; `Artículo N—1 Servicio` (relacionado); `Lead N—1 Servicio` (interés); `Documento de embedding N—1` (Servicio/Proyecto/Artículo de origen).
+
+**Justificación.** Modelo conceptual estable que orienta tanto el CMS como la base de datos operativa, evitando duplicar el maestro de cada dato.
+
+**Impacto.** Coherencia de datos, SEO (taxonomía única) y RAG (trazabilidad de fuentes).
+
+**Riesgos.** Duplicidad de taxonomías entre CMS y DB; mitigado con una taxonomía única de servicios/sectores.
+
+**Dependencias.** Arquitectura de datos ([§14](#14-arquitectura-de-datos)).
+
+**Decisiones tomadas.** Una sola taxonomía de `Servicio` y `Sector` compartida por contenido, navegación, filtros, SEO y RAG.
+
+**Alternativas descartadas.** Taxonomías separadas por módulo — descartadas por riesgo de incoherencia.
+
+---
+
+## 29. Convenciones del proyecto
+
+**Objetivo.** Fijar acuerdos de trabajo transversales.
+
+**Descripción.**
+- **Idioma del código y documentación técnica:** inglés en identificadores de código; español en documentación de producto (este documento) y contenido.
+- **Control de versiones:** Git; ramas `main` (protegida) y `feat/*`, `fix/*`, `chore/*`, `docs/*`; PR obligatorio con ≥ 1 revisión y CI verde para fusionar.
+- **Commits:** Conventional Commits (`feat`, `fix`, `docs`, `refactor`, `test`, `chore`).
+- **Gobernanza del SSOT:** cambios a este documento vía PR con justificación; decisiones de arquitectura significativas se registran como ADR ([§43](#43-decisiones-de-arquitectura-adr)); versionado SemVer del documento.
+- **Definición de Hecho (DoD):** código revisado y fusionado, tests en verde, sin regresiones de rendimiento/accesibilidad, contenido cargado, documentación actualizada, validado en *staging*.
+
+**Justificación.** Reglas explícitas reducen fricción y ambigüedad en un equipo multidisciplinar.
+
+**Impacto.** Calidad, trazabilidad y velocidad sostenible.
+
+**Riesgos.** Incumplimiento de convenciones; mitigado con automatización (linters, hooks, CI) y revisión.
+
+**Dependencias.** Herramientas de CI y calidad ([§30](#30-estándares-de-desarrollo)).
+
+**Decisiones tomadas.** `main` protegida; PR + CI verde bloqueantes; ADR para decisiones estructurales.
+
+**Alternativas descartadas.** *Trunk-based* con push directo a `main` — descartado por falta de revisión en un equipo con roles diversos.
+
+---
+
+## 30. Estándares de desarrollo
+
+**Objetivo.** Definir cómo se escribe y mantiene el código.
+
+**Descripción.**
+- **Lenguaje:** TypeScript en modo estricto (frontend, islas y BFF).
+- **Calidad automática:** ESLint + Prettier obligatorios, ejecutados en *pre-commit* (hooks) y en CI.
+- **Nomenclatura:** componentes `PascalCase`; funciones/variables `camelCase`; constantes `UPPER_SNAKE_CASE`; utilidades `kebab-case.ts`.
+- **Diseño de componentes:** pequeños, con una sola responsabilidad; lógica reutilizable en hooks/utils; contenido siempre desde el CMS, nunca *hardcoded*.
+- **Documentación:** JSDoc en utilidades públicas; `README` por paquete/carpeta relevante.
+- **Análisis de seguridad:** SCA de dependencias en CI ([§17](#17-seguridad)).
+
+**Justificación.** Estándares uniformes hacen el código legible, mantenible y seguro, y reducen la revisión manual.
+
+**Impacto.** Mantenibilidad y onboarding.
+
+**Riesgos.** Reglas demasiado rígidas que frenen; mitigado con configuración pragmática y revisable.
+
+**Dependencias.** CI/CD ([§33](#33-estrategia-de-despliegue)).
+
+**Decisiones tomadas.** TypeScript estricto y linters bloqueantes en CI.
+
+**Alternativas descartadas.** JavaScript sin tipado — descartado por menor robustez y peor mantenibilidad.
+
+---
+
+## 31. Organización del repositorio
+
+**Objetivo.** Definir la estructura de carpetas (ya inicializada en el repositorio).
+
+**Descripción.**
 
 ```
-/docs        Documentación del proyecto (incluye este PROJECT_BIBLE.md)
-/src         Código fuente de la aplicación
-/public      Recursos servidos tal cual (favicon, robots.txt, sitemap)
-/assets      Recursos de diseño (imágenes fuente, logos, iconos)
-/config      Configuración (entornos, linters, build)
-/tests       Pruebas automatizadas
-/scripts     Scripts de utilidad y automatización
-/.github     Workflows de CI/CD y plantillas
-/.vscode     Configuración recomendada del editor
+engineering-web/
+├── docs/            Documentación del proyecto (incluye este PROJECT_BIBLE.md)
+├── src/             Código fuente de la Plataforma (Sitio + islas + BFF)
+├── public/          Recursos servidos tal cual (favicon, robots.txt, sitemap)
+├── assets/          Recursos de diseño (imágenes fuente, logos, iconos)
+├── config/          Configuración (entornos, build, linters)
+├── tests/           Pruebas automatizadas
+├── scripts/         Scripts de utilidad y automatización
+├── .github/workflows/  CI/CD (GitHub Actions)
+└── .vscode/         Configuración recomendada del editor
 ```
 
-### 15.3 Calidad de código
-- **TypeScript** en modo estricto.
-- **Linter + formateador** obligatorios (ESLint + Prettier), ejecutados en pre-commit y en CI.
-- **Convención de nombres:** componentes `PascalCase`, funciones/variables `camelCase`, constantes `UPPER_SNAKE_CASE`, archivos de componente `PascalCase.tsx`, utilidades `kebab-case.ts`.
-- **Componentes pequeños y con una sola responsabilidad**; lógica reutilizable en hooks/utils.
+**Justificación.** Estructura estándar, plana y predecible que separa código, contenido, configuración y pruebas.
 
-### 15.4 Testing
-- **Unitarias** para lógica y utilidades.
-- **Integración** para formularios y flujos críticos.
-- **E2E** (Playwright) para rutas clave (contacto, envío de propuesta).
-- **Accesibilidad automatizada** (axe) en CI.
-- CI ejecuta lint + tests + build + Lighthouse antes de permitir merge.
+**Impacto.** Onboarding y mantenibilidad.
 
-### 15.5 Definición de «Hecho» (Definition of Done)
-Una tarea está terminada cuando: código revisado y fusionado, tests pasan, sin regresiones de accesibilidad/rendimiento, contenido cargado, documentación actualizada, y desplegado en entorno de *staging* validado.
+**Riesgos.** Estructura que no encaje con la herramienta final (p. ej. convenciones de Astro); mitigado ajustando `src/` a la convención del framework al iniciar el desarrollo (ADR-002).
 
-### 15.6 Entornos
-`local` → `staging` (preproducción, no indexable) → `production`. Variables de entorno por entorno, nunca secretos en el repositorio.
+**Dependencias.** Elección de framework ([§12](#12-arquitectura-del-frontend)).
+
+**Decisiones tomadas.** Se mantiene la estructura inicial ya creada; `src/` se subdividirá según Astro (p. ej. `pages/`, `components/`, `layouts/`, `lib/`) al comenzar el desarrollo.
+
+**Alternativas descartadas.** *Monorepo* multi-paquete complejo — descartado por innecesario a esta escala; reconsiderable si el área privada crece.
 
 ---
 
-## 16. Reglas UX/UI
+## 32. Estrategia de testing
 
-### 16.1 Principios de experiencia
-- **Claridad sobre creatividad**: el usuario B2B busca información, no efectos.
-- **Orientación a conversión**: cada página tiene un objetivo y un CTA claro.
-- **Escaneabilidad**: títulos, listas, datos destacados; no muros de texto.
-- **Mobile-first** y responsive real (no solo «que quepa»).
+**Objetivo.** Definir cómo se asegura la calidad funcional.
 
-### 16.2 Sistema de diseño
-- **Design tokens** para color, tipografía, espaciado, radios y sombras — fuente única compartida con desarrollo.
-- **Rejilla** de 12 columnas; espaciado en escala (4/8 px).
-- **Componentes reutilizables** documentados (idealmente en Storybook): botones, tarjetas de servicio, tarjeta de caso, formularios, banners de CTA.
+**Descripción.** Pirámide de pruebas:
+- **Unitarias:** lógica de utilidades, validaciones, transformación de datos.
+- **Integración:** flujos de formularios (validación → persistencia → CRM/email), endpoints del BFF, integración con IA (con *mocks* del proveedor).
+- **E2E (Playwright):** recorridos críticos — solicitar propuesta, descargar recurso, navegación clave.
+- **Accesibilidad (axe):** automatizada en CI.
+- **Rendimiento (Lighthouse CI):** presupuesto verificado en páginas clave.
+- **Visual/regresión** *(opcional/SHOULD)*: sobre componentes del sistema de diseño.
 
-### 16.3 Accesibilidad (obligatoria, WCAG 2.2 AA)
-- Contraste texto ≥ 4,5:1 (≥ 3:1 texto grande).
-- Navegable por teclado; foco visible.
-- Alt text, etiquetas de formulario, mensajes de error accesibles.
-- Respetar `prefers-reduced-motion`.
-- HTML semántico y landmarks ARIA cuando corresponda.
+CI ejecuta lint + unit + integración + build + axe + Lighthouse antes de permitir *merge*; E2E en *staging*.
 
-### 16.4 Reglas de formularios
-- Mínimos campos posibles; validación en tiempo real y mensajes claros.
-- Estados visibles: normal, foco, error, éxito, cargando.
-- Confirmación explícita tras envío + email de acuse.
+**Justificación.** Enfocar el esfuerzo en los flujos que generan valor de negocio (conversión) y en los atributos de calidad medibles.
 
-### 16.5 Rendimiento percibido
-Imágenes con `lazy-loading` y dimensiones reservadas (evitar CLS), *skeletons* en cargas, fuentes con `font-display: swap`.
+**Impacto.** Fiabilidad de las conversiones y prevención de regresiones.
 
-### 16.6 Consistencia
-Un único estilo de botones, iconos, tono de microcopy y tratamiento de imágenes en todo el sitio.
+**Riesgos.** Tests frágiles/lentos; mitigado priorizando pruebas de alto valor y datos estables.
+
+**Dependencias.** Entorno de *staging*; *mocks* de terceros.
+
+**Decisiones tomadas.** CI bloqueante con lint+unit+integración+axe+Lighthouse; E2E de rutas críticas obligatorio.
+
+**Alternativas descartadas.** Cobertura 100 % como objetivo — descartada por coste desproporcionado; se prioriza cobertura de lógica crítica.
 
 ---
 
-## 17. Estrategia de automatización y marketing
+## 33. Estrategia de despliegue
 
-> Base para las fases posteriores. El sitio debe generar los datos que alimentan estos flujos.
+**Objetivo.** Definir cómo llega el código a producción.
 
-### 17.1 Captación (lead generation)
-- Lead magnets (guías descargables) → captura de email con consentimiento.
-- Formularios conectados al CRM con etiquetado de origen (UTM).
-- Newsletter técnica periódica.
+**Descripción.** **CI/CD con GitHub Actions.** Entornos: `local` → `staging` (preproducción no indexable) → `production`. *Deploy* continuo en cada *merge* a `main` (tras CI verde) mediante la plataforma de despliegue (Vercel/Netlify/Cloudflare Pages, ver [§49](#49-anexo-de-decisiones-abiertas) DA-3), con **previews** por PR. *Rollback* inmediato a la versión anterior. Cambios de contenido del CMS disparan *rebuild* incremental (webhook).
 
-### 17.2 Automatización (marketing automation)
-- Secuencia de bienvenida tras descarga/contacto.
-- *Lead scoring* según interacción y servicio de interés.
-- Alertas al equipo comercial ante lead cualificado.
-- Recordatorios y *nurturing* segmentado por sector.
+**Justificación.** *Deploy* automatizado con previews reduce riesgo, acelera la iteración y permite revisar cambios visualmente antes de fusionar.
 
-### 17.3 Contenido
-Calendario editorial alineado con clústeres SEO (§13). Reutilización: 1 caso de éxito → artículo + post LinkedIn + nota para newsletter.
+**Impacto.** Velocidad de entrega y estabilidad.
 
-### 17.4 Canales
-LinkedIn (principal B2B), email, medios sectoriales, Google Business Profile. Publicidad de pago (Google/LinkedIn Ads) opcional en fase 3.
+**Riesgos.** Despliegue de contenido roto; mitigado con previews, CI y *rollback*.
 
-### 17.5 Medición de marketing
-Atribución de leads por canal, coste por lead, tasa de conversión lead→oportunidad→cliente.
+**Dependencias.** Plataforma de despliegue; CMS con webhooks.
+
+**Decisiones tomadas.** *Deploy* continuo a producción desde `main` con CI verde; `staging` con `noindex`; previews por PR.
+
+**Alternativas descartadas.** Despliegues manuales programados — descartados por lentitud y riesgo humano.
 
 ---
 
-## 18. Roadmap
+## 34. Monitorización
 
-> Estimaciones **`[SUPUESTO]`**; ajustar según recursos reales.
+**Objetivo.** Observar la salud de la Plataforma.
 
-### Fase 0 — Descubrimiento y base *(sem. 1–2)*
-- Validar supuestos de este documento, manual de marca, keyword research, inventario de contenidos y casos.
-- **Estructura del repositorio inicializada ✅** (hecho).
+**Descripción.** **Uptime/health checks** con alertas de caída; **RUM** (Real User Monitoring) de Core Web Vitals; **seguimiento de errores** (frontend y BFF) con agregación y alertas; panel de métricas clave. Integración con SEO (Search Console) y analítica de negocio (conversiones).
 
-### Fase 1 — MVP *(sem. 3–8)*
-- Diseño (design system + maquetas clave) y desarrollo de: Home, Servicios, Proyectos, Sobre nosotros, Contacto, Legal.
-- CMS operativo, formularios + CRM, SEO técnico base, analítica y RGPD.
-- **Hito: lanzamiento del sitio corporativo.**
+**Justificación.** No se puede garantizar disponibilidad y rendimiento ([§9](#9-requisitos-no-funcionales)) sin observabilidad.
 
-### Fase 2 — Contenido y SEO *(mes 3–4)*
-- Blog/recursos, clústeres de contenido, casos de éxito ampliados, lead magnets.
-- Optimización Core Web Vitals y datos estructurados completos.
+**Impacto.** MTTR reducido y cumplimiento de SLOs.
 
-### Fase 3 — Automatización y crecimiento *(mes 5–6)*
-- Automatización de marketing, secuencias, scoring, multi-idioma (ES/EN).
-- A/B testing de conversión, calculadoras interactivas.
+**Riesgos.** Fatiga de alertas; mitigado con umbrales y priorización de alertas accionables.
 
-### Fase 4 — Iteración continua *(6 m+)*
-- Mejora basada en datos, nuevos contenidos, expansión internacional.
+**Dependencias.** Herramientas de monitorización/errores; consentimiento para RUM si aplica.
+
+**Decisiones tomadas.** Alertas de caída y de error crítico activas desde el lanzamiento; RUM de CWV en producción.
+
+**Alternativas descartadas.** Monitorización solo reactiva (esperar a que el usuario reporte) — descartada por impacto en disponibilidad/negocio.
 
 ---
 
-## 19. Riesgos
+## 35. Gestión de errores
+
+**Objetivo.** Definir cómo se tratan los errores para usuario y sistema.
+
+**Descripción.**
+- **Usuario:** mensajes claros y accionables; páginas 404/500 útiles con navegación de retorno; estados de error de formulario específicos y accesibles; nunca exponer detalles técnicos ni datos sensibles.
+- **Sistema:** captura centralizada; distinción error esperado/inesperado; reintentos con *backoff* en integraciones (CRM, email, IA); *fallbacks* (p. ej. si el CRM falla, el lead se persiste igualmente y se reintenta el envío).
+- **Correlación:** identificador de traza por petición para diagnóstico.
+
+**Justificación.** La resiliencia en la captura de leads es crítica: un fallo de terceros no debe perder un lead.
+
+**Impacto.** No perder conversiones; mejor experiencia y diagnóstico.
+
+**Riesgos.** Errores silenciados; mitigado con registro y alertas ([§34](#34-monitorización)).
+
+**Dependencias.** Logs ([§36](#36-gestión-de-logs)); monitorización.
+
+**Decisiones tomadas.** Los leads se persisten en PostgreSQL **antes** de intentar el envío a CRM/email, con reintentos; los mensajes de error nunca exponen internals.
+
+**Alternativas descartadas.** Enviar a CRM sin persistencia previa — descartado por riesgo de pérdida de leads ante fallo del CRM.
+
+---
+
+## 36. Gestión de logs
+
+**Objetivo.** Definir el registro de eventos del sistema.
+
+**Descripción.** **Logs estructurados** (JSON) con nivel (`debug`/`info`/`warn`/`error`), *timestamp*, identificador de traza y contexto mínimo necesario. **Prohibido registrar datos personales o secretos** (cumplimiento y seguridad). Retención acotada y acorde a RGPD. Centralización y búsqueda en la herramienta de observabilidad.
+
+**Justificación.** Logs estructurados permiten diagnóstico y correlación; excluir datos personales evita convertir los logs en un tratamiento de datos no controlado.
+
+**Impacto.** Diagnóstico, cumplimiento y seguridad.
+
+**Riesgos.** Fuga de datos personales en logs; mitigado con reglas de saneado y revisión.
+
+**Dependencias.** Monitorización ([§34](#34-monitorización)); gestión de errores.
+
+**Decisiones tomadas.** Logs estructurados sin PII ni secretos; retención mínima necesaria.
+
+**Alternativas descartadas.** Logging verboso con volcado de peticiones completas — descartado por riesgo RGPD/seguridad.
+
+---
+
+## 37. Gestión de configuración
+
+**Objetivo.** Definir cómo se gestiona la configuración por entorno.
+
+**Descripción.** Configuración separada del código, por entorno (`local`/`staging`/`production`). **Secretos** en el gestor de secretos de la plataforma/CI, **nunca** en el repositorio. Configuración no sensible versionada en `config/`. Un archivo `.env.example` documenta las variables sin valores reales. Validación de la configuración al arranque del BFF (falla rápido si falta una variable requerida).
+
+**Justificación.** Separar configuración de código (12-factor) permite el mismo artefacto en todos los entornos y protege los secretos.
+
+**Impacto.** Seguridad, portabilidad y fiabilidad de despliegues.
+
+**Riesgos.** Variables faltantes en producción; mitigado con validación al arranque y `.env.example` mantenido.
+
+**Dependencias.** Gestor de secretos; CI/CD.
+
+**Decisiones tomadas.** Secretos solo en gestor seguro; validación de configuración *fail-fast*.
+
+**Alternativas descartadas.** Configuración *hardcoded* por entorno — descartada por insegura y frágil.
+
+---
+
+## 38. Variables de entorno
+
+**Objetivo.** Catalogar las variables de configuración previstas (contrato de configuración).
+
+**Descripción.** Listado de referencia (los nombres definitivos se fijan al integrar cada proveedor; valores reales **nunca** en el repositorio):
+
+| Variable | Propósito | Sensible |
+|---|---|---|
+| `CMS_API_URL` / `CMS_API_TOKEN` | Acceso al CMS headless. | Token: sí |
+| `CRM_API_BASE` / `CRM_API_KEY` | Envío de leads al CRM. | Sí |
+| `EMAIL_API_KEY` / `EMAIL_FROM` | Email transaccional. | Clave: sí |
+| `AI_PROVIDER_API_KEY` | Proveedor de IA (Anthropic). | Sí |
+| `AI_MODEL_DEFAULT` / `AI_MODEL_FAST` | Selección de modelos (p. ej. Sonnet / Haiku). | No |
+| `DATABASE_URL` | Conexión PostgreSQL (con pgvector). | Sí |
+| `ANALYTICS_ID` | Analítica (si aplica). | No |
+| `CMP_SITE_ID` | Gestor de consentimiento. | No |
+| `SITE_URL` / `NODE_ENV` / `ENVIRONMENT` | Entorno y URL base. | No |
+| `RATE_LIMIT_*` | Límites antiabuso de formularios/IA. | No |
+
+**Justificación.** Un contrato explícito de configuración evita fallos de despliegue y clarifica dependencias.
+
+**Impacto.** Fiabilidad de despliegues y seguridad.
+
+**Riesgos.** Deriva entre `.env.example` y la realidad; mitigado con validación al arranque ([§37](#37-gestión-de-configuración)).
+
+**Dependencias.** Integraciones ([§15](#15-integraciones-externas)).
+
+**Decisiones tomadas.** Toda variable sensible se gestiona como secreto; `.env.example` se mantiene actualizado.
+
+**Alternativas descartadas.** Claves embebidas en el frontend — descartadas por exposición ([§13](#13-arquitectura-del-backend)/[§17](#17-seguridad)).
+
+---
+
+## 39. Riesgos del proyecto
+
+**Objetivo.** Consolidar los riesgos generales de ejecución.
+
+**Descripción.**
 
 | # | Riesgo | Prob. | Impacto | Mitigación |
-|---|---|---|---|---|
-| R1 | Contenido real (casos, textos, fotos) llega tarde. | Alta | Alto | Inventario temprano; responsable de contenidos; plantillas; placeholders controlados. |
-| R2 | Supuestos de marca/servicios incorrectos. | Media | Alto | Validar este documento antes de diseñar (bloqueante). |
-| R3 | Falta de manual de marca. | Media | Medio | Definir directrices mínimas (§4.3) y formalizar en Fase 0. |
-| R4 | SEO sin resultados a corto plazo. | Alta | Medio | Gestión de expectativas: SEO es medio-largo plazo; combinar con LinkedIn/Ads. |
-| R5 | Rendimiento degradado por imágenes pesadas. | Media | Medio | Pipeline de optimización de imágenes obligatorio; presupuesto de rendimiento. |
-| R6 | Incumplimiento RGPD/cookies. | Baja | Alto | Revisión legal; gestor de consentimiento; DPA con proveedores. |
-| R7 | Dependencia de proveedor (CMS/hosting). | Media | Medio | Elegir estándares abiertos; exportabilidad de datos; evitar *lock-in*. |
-| R8 | Equipo interno sin capacidad de mantener el stack. | Media | Alto | Elegir stack acorde al perfil; formación; documentación; alternativa WordPress. |
-| R9 | Alcance creciente (scope creep). | Alta | Medio | MoSCoW estricto; cambios vía gobernanza (§22). |
-| R10 | Seguridad (spam, ataques a formularios). | Media | Medio | CDN/WAF, antispam, rate limiting, cabeceras de seguridad. |
+|---|---|:--:|:--:|---|
+| P1 | Contenido real (casos, textos, fotos) llega tarde. | Alta | Alto | Inventario temprano; responsable de contenidos; *placeholders* controlados. |
+| P2 | Hipótesis de negocio/marca incorrectas. | Media | Alto | Validación bloqueante en Fase 0 ([§44](#44-hipótesis)). |
+| P3 | *Scope creep*. | Alta | Medio | MoSCoW estricto; gobernanza; ADR. |
+| P4 | Falta de manual de marca. | Media | Medio | Directrices provisionales ([§22](#22-ui)); formalizar en Fase 0. |
+| P5 | Equipo del cliente sin capacidad de mantener el stack. | Media | Alto | Stack acorde al perfil; formación; alternativa de bajo mantenimiento (DA-1). |
+
+**Justificación.** Gestionar el riesgo explícitamente permite mitigarlo antes de que se materialice.
+
+**Impacto.** Plazos, coste y calidad.
+
+**Riesgos.** *(meta)* Subestimar riesgos; mitigado con revisión por fase.
+
+**Dependencias.** Gobernanza; roadmap.
+
+**Decisiones tomadas.** Validación de hipótesis como puerta de entrada a la Fase 1.
+
+**Alternativas descartadas.** Gestión de riesgos informal — descartada por poco fiable.
 
 ---
 
-## 20. Supuestos
+## 40. Riesgos técnicos
 
-> **Todos deben validarse antes de aprobar el documento (Estado → 🟢).** Sustituir cada uno por el dato real.
+**Objetivo.** Detallar riesgos de naturaleza técnica.
 
-| ID | Supuesto | Impacto si es falso |
+**Descripción.**
+
+| # | Riesgo | Mitigación |
 |---|---|---|
-| A1 | La empresa es una ingeniería española de tamaño medio (30–80 pers.). | Ajustar tono, servicios y escala del proyecto. |
-| A2 | Especialidad: industrial, energética, instalaciones, renovables. | Reescribir §5 Servicios y §13 SEO. |
-| A3 | Foco diferencial en eficiencia energética/sostenibilidad. | Cambia posicionamiento (§8) y mensajes (§3). |
-| A4 | Modelo B2B (empresas, promotores, administración). | Cambian personas (§6) y CTAs. |
-| A5 | Idiomas: ES principal, EN en fase 2. | Ajustar arquitectura i18n y roadmap. |
-| A6 | Certificaciones ISO 9001/14001/45001 disponibles. | Retirar prueba social; revisar §3.3. |
-| A7 | Existe presupuesto para stack moderno (Astro/headless). | Optar por WordPress (§14.2). |
-| A8 | El objetivo primario es generación de leads. | Reordenar prioridades funcionales. |
-| A9 | Habrá un responsable de contenidos por parte del cliente. | Riesgo R1 se agrava; replanificar. |
-| A10 | Paleta azul/verde y tipografía sans-serif abierta. | Rehacer directrices visuales (§4.3). |
-| A11 | Nombre comercial y tagline pendientes. | Bloqueante para diseño final. |
-| A12 | Estimaciones de roadmap orientativas. | Replanificar fechas. |
+| T1 | Rendimiento degradado por imágenes/terceros. | *Performance budget* + Lighthouse CI bloqueante; control de scripts vía CMP. |
+| T2 | *Vendor lock-in* (CMS/hosting/IA). | Estándares abiertos; exportabilidad; abstracción en BFF. |
+| T3 | Alucinaciones o coste variable de IA. | RAG anclado a fuentes; modelos económicos por defecto; *rate limiting*. |
+| T4 | Abuso/spam de formularios e IA. | Antispam, *rate limiting*, WAF, validación server-side. |
+| T5 | Pérdida de leads por fallo de terceros. | Persistencia previa + reintentos ([§35](#35-gestión-de-errores)). |
+| T6 | Dependencias vulnerables. | SCA en CI bloqueante para críticas. |
+| T7 | Deriva de configuración/entornos. | Validación *fail-fast* + `.env.example`. |
+
+**Justificación.** Anticipar los fallos técnicos más probables del patrón elegido.
+
+**Impacto.** Disponibilidad, coste, seguridad y conversión.
+
+**Riesgos.** *(meta)* Riesgos emergentes de nuevas dependencias; mitigado con revisión continua.
+
+**Dependencias.** Secciones [§16](#16-inteligencia-artificial)–[§18](#18-rendimiento), [§35](#35-gestión-de-errores)–[§38](#38-variables-de-entorno).
+
+**Decisiones tomadas.** Mitigaciones incorporadas como requisitos, no como buenas intenciones.
+
+**Alternativas descartadas.** Aceptar el *lock-in* sin abstracción — descartado por coste de salida futuro.
 
 ---
 
-## 21. Criterios de éxito (KPIs)
+## 41. Riesgos de negocio
 
-### 21.1 Negocio (los que importan)
-- **Leads cualificados/mes** desde canal digital: objetivo inicial **`[SUPUESTO]`** ≥ 15/mes a los 6 meses.
-- **Coste por lead** decreciente trimestre a trimestre.
-- **Tasa de conversión** visita → lead ≥ 2 % **`[SUPUESTO]`**.
-- **Oportunidades (RFP/RFQ)** originadas en web.
+**Objetivo.** Detallar riesgos de mercado y retorno.
 
-### 21.2 SEO / tráfico
-- Tráfico orgánico creciente (objetivo: +30 % semestral tras Fase 2 **`[SUPUESTO]`**).
-- Nº de keywords en top 10 para términos comerciales objetivo.
-- Autoridad de dominio y backlinks de calidad crecientes.
+**Descripción.**
 
-### 21.3 Experiencia / técnica
-- **Core Web Vitals en verde** (P75 móvil).
-- **WCAG 2.2 AA** cumplido (auditoría sin bloqueantes).
-- **Lighthouse** ≥ 90 en Rendimiento, SEO, Accesibilidad, Buenas prácticas.
-- **Uptime** ≥ 99,9 %.
+| # | Riesgo | Mitigación |
+|---|---|---|
+| N1 | SEO sin resultados a corto plazo. | Gestión de expectativas; canales complementarios (LinkedIn/Ads); foco en *long-tail* comercial. |
+| N2 | Bajo volumen de leads pese al sitio. | Optimización de conversión (CRO), lead magnets, iteración basada en datos. |
+| N3 | Diferenciación insuficiente frente a competencia. | Territorio de marca «resultados con datos»; casos con métricas. |
+| N4 | Desalineación entre marketing y comercial. | Definición común de «lead cualificado»; integración CRM; alertas al equipo. |
 
-### 21.4 Contenido / marca
-- Nº de casos de éxito publicados (objetivo: ≥ 12 en 6 meses **`[SUPUESTO]`**).
-- Cadencia de publicación de recursos sostenida.
-- Crecimiento de seguidores y engagement en LinkedIn.
+**Justificación.** El valor del proyecto se mide en negocio; sus riesgos deben gestionarse explícitamente.
 
-### 21.5 Criterio global de éxito
-> El proyecto es un éxito si a los **6 meses** el sitio genera un flujo **medible y creciente de leads cualificados**, cumple los estándares técnicos (rendimiento, accesibilidad, SEO) y es **mantenible de forma autónoma** por el equipo del cliente.
+**Impacto.** Retorno de la inversión.
+
+**Riesgos.** *(meta)* Métricas mal elegidas; mitigado con KPIs de negocio, no de vanidad.
+
+**Dependencias.** Objetivos ([§2](#2-objetivos-del-negocio)); automatización/marketing.
+
+**Decisiones tomadas.** Priorizar calidad de lead sobre volumen bruto.
+
+**Alternativas descartadas.** Medir el éxito solo por tráfico — descartado por ser métrica de vanidad.
 
 ---
 
-## 22. Gobernanza del documento
+## 42. Riesgos legales
 
-- **Propietario:** Dirección / Cliente *(por confirmar)*.
-- **Cómo proponer cambios:** *pull request* a este archivo con justificación; revisión del owner.
-- **Versionado:** SemVer del documento (`MAJOR.MINOR.PATCH`). Cambios de alcance = MAJOR.
-- **Cadencia de revisión:** al cierre de cada fase del roadmap.
-- **Regla de oro:** ante conflicto entre este documento y una decisión posterior, **prevalece este documento** hasta que se actualice formalmente.
+**Objetivo.** Detallar riesgos de cumplimiento.
+
+**Descripción.**
+
+| # | Riesgo | Mitigación |
+|---|---|---|
+| L1 | Incumplimiento RGPD/LOPDGDD (consentimiento, datos de formularios). | CMP; consentimiento previo; minimización; registro de consentimientos; DPA con proveedores. |
+| L2 | Incumplimiento LSSI-CE (aviso legal, cookies). | Textos legales completos; política de cookies; bloqueo de scripts hasta consentimiento. |
+| L3 | Transferencias internacionales de datos. | Proveedores con residencia/garantías UE; DPA con cláusulas adecuadas. |
+| L4 | IA que afirme capacidades no reales (publicidad engañosa). | Guardarraíles RAG; revisión de *prompts*; citación de fuentes. |
+| L5 | Accesibilidad obligatoria (sector público, EN 301 549). | WCAG 2.2 AA verificado. |
+
+**Justificación.** El marco UE/España impone obligaciones que, incumplidas, acarrean sanción y daño reputacional.
+
+**Impacto.** Legal, económico y reputacional.
+
+**Riesgos.** *(meta)* Cambios normativos; mitigado con revisión legal periódica.
+
+**Dependencias.** Asesoría legal; CMP; DPAs.
+
+**Decisiones tomadas.** Revisión legal de textos y flujos de datos antes del lanzamiento; datos personales en la UE.
+
+**Alternativas descartadas.** Lanzar con textos legales genéricos sin revisión — descartado por riesgo de sanción.
 
 ---
 
-## 23. Glosario
+## 43. Decisiones de arquitectura (ADR)
+
+**Objetivo.** Registrar las decisiones estructurales y su justificación (formato ADR resumido).
+
+**Descripción.**
+
+| ADR | Decisión | Estado | Justificación (resumen) | Alternativas descartadas |
+|---|---|---|---|---|
+| **ADR-001** | Arquitectura **Jamstack** (estático + CDN + headless + BFF serverless). | Aceptada | Rendimiento/SEO/coste/seguridad para sitio de contenido con captación. | Monolito clásico; SPA sin SSR. |
+| **ADR-002** | **Astro** + islas **React** + **TypeScript**. | Aceptada | Mínimo JS, gran SEO/CWV, ecosistema React para interactividad. | Next.js (alternativa viva); Vue/Svelte. |
+| **ADR-003** | **CMS headless** como fuente de verdad del contenido. | Aceptada | Autonomía editorial; separación contenido/presentación. | WordPress acoplado. |
+| **ADR-004** | **PostgreSQL gestionado (UE) con pgvector** para datos operativos + RAG. | Aceptada | Un solo motor para datos y vectores; residencia UE. | DB vectorial dedicada; NoSQL. |
+| **ADR-005** | **RAG anclado a fuentes** con **Claude (Anthropic)** vía BFF; sin acciones en MVP. | Aceptada | Diferenciación con bajo riesgo de alucinación; claves protegidas. | Chatbot libre; modelo auto-alojado. |
+| **ADR-006** | **RBAC + mínimo privilegio**; sin cuentas para visitantes en MVP. | Aceptada | Suficiente y seguro a esta escala; menor fricción. | ABAC; auth propia; login de visitantes. |
+| **ADR-007** | **CI/CD GitHub Actions** con *deploy* continuo, previews y `staging` no indexable. | Aceptada | Entrega rápida y segura con revisión visual. | Despliegues manuales. |
+| **ADR-008** | **Persistir leads antes de enviarlos** a CRM/email, con reintentos. | Aceptada | Evita pérdida de leads ante fallo de terceros. | Envío directo sin persistencia. |
+| **ADR-009** | **i18n diseñado desde el inicio, activado después**. | Aceptada | Prepara ES/EN sin coste de lanzamiento. | i18n completo en MVP; ignorarlo. |
+
+**Justificación.** Los ADR dejan trazabilidad del *porqué* de cada decisión, condición para que el SSOT sea coherente en el tiempo.
+
+**Impacto.** Coherencia arquitectónica y onboarding.
+
+**Riesgos.** ADR desactualizados; mitigado con la regla de que toda decisión estructural nueva genera o revisa un ADR ([§29](#29-convenciones-del-proyecto)).
+
+**Dependencias.** Todas las secciones de arquitectura.
+
+**Decisiones tomadas.** Las nueve ADR anteriores quedan aceptadas como línea base; los cambios se registran incrementando el número de ADR.
+
+**Alternativas descartadas.** Documentar decisiones solo en actas dispersas — descartado por falta de trazabilidad.
+
+---
+
+## 44. Hipótesis
+
+**Objetivo.** Consolidar los supuestos que deben validarse antes de aprobar el documento.
+
+**Descripción.** **Todas requieren validación (Estado del documento → 🟢 al confirmarlas).**
+
+| ID | Hipótesis | Si resulta falsa… |
+|---|---|---|
+| H1 | Ingeniería española de tamaño medio (30–80 pers.). | Ajustar escala, tono y stack. |
+| H2 | Especialidad: industrial, energética, instalaciones, renovables. | Reescribir servicios ([§6](#6-funcionalidades-principales)) y SEO. |
+| H3 | Diferenciación en eficiencia energética/sostenibilidad. | Revisar posicionamiento y mensajes. |
+| H4 | Modelo B2B con comité de compra. | Revisar personas ([§4](#4-público-objetivo)) y CTAs. |
+| H5 | Objetivo primario = generación de leads. | Reordenar prioridades funcionales. |
+| H6 | Certificaciones ISO disponibles (9001/14001/45001). | Retirar esa prueba social. |
+| H7 | Presupuesto/equipo compatibles con stack moderno (Astro/headless). | Adoptar alternativa de bajo mantenimiento (DA-1). |
+| H8 | El cliente aporta responsable de contenidos. | Se agrava el riesgo P1; replanificar. |
+| H9 | Idiomas ES (ahora) y EN (después). | Ajustar i18n y roadmap. |
+| H10 | Directrices visuales provisionales (azul/verde, sans-serif). | Rehacer UI ([§22](#22-ui)) con el manual real. |
+| H11 | Nombre comercial y *tagline* pendientes (`«[NOMBRE_EMPRESA]»`). | Bloqueante para diseño final. |
+
+**Justificación.** Separar hechos de supuestos evita construir sobre premisas no verificadas.
+
+**Impacto.** Condiciona todo el producto; por eso su validación es la puerta de la Fase 1.
+
+**Riesgos.** Avanzar sin validar; mitigado con la puerta de Fase 0.
+
+**Dependencias.** Sesión de descubrimiento con el cliente.
+
+**Decisiones tomadas.** Ninguna hipótesis se da por cierta sin confirmación documental del cliente.
+
+**Alternativas descartadas.** Inventar datos para «rellenar» — descartado por instrucción explícita y por riesgo.
+
+---
+
+## 45. Limitaciones conocidas
+
+**Objetivo.** Declarar con transparencia lo que el documento y el alcance inicial no cubren.
+
+**Descripción.**
+- Datos de empresa no confirmados (ver [§44](#44-hipótesis)); el documento es accionable pero **provisional** hasta validarlos.
+- El **manual de marca** definitivo no existe aún; la UI parte de directrices provisionales.
+- **Presupuesto, equipo y proveedores concretos** (CRM, hosting, CMS) están abiertos ([§49](#49-anexo-de-decisiones-abiertas)).
+- El **área privada**, la **calculadora** y la **automatización avanzada** son alcance futuro, no especificado a nivel de detalle.
+- Las **estimaciones de roadmap** son orientativas.
+
+**Justificación.** Declarar límites evita expectativas incorrectas y falsos supuestos de completitud.
+
+**Impacto.** Gestión de expectativas y planificación.
+
+**Riesgos.** Tomar lo provisional como definitivo; mitigado con el estado 🟡 del documento y las hipótesis.
+
+**Dependencias.** Fase 0 de descubrimiento.
+
+**Decisiones tomadas.** El documento se marca 🟡 hasta cerrar hipótesis y decisiones abiertas.
+
+**Alternativas descartadas.** Presentar el documento como cerrado/definitivo pese a las incógnitas — descartado por honestidad y rigor.
+
+---
+
+## 46. Roadmap de alto nivel
+
+**Objetivo.** Secuenciar la entrega en fases con hitos.
+
+**Descripción.** **⚠️ INCERTIDUMBRE** en fechas exactas (dependen de recursos, [§49](#49-anexo-de-decisiones-abiertas) DA-1). Secuencia lógica:
+
+| Fase | Contenido | Hito |
+|---|---|---|
+| **F0 — Descubrimiento** (sem. 1–2) | Validar hipótesis ([§44](#44-hipótesis)); manual de marca; keyword research; inventario de casos; decisiones abiertas. **Estructura de repo ✅ hecha.** | Documento 🟢 aprobado. |
+| **F1 — MVP** (sem. 3–8) | RF-01…RF-11: Home, servicios, portfolio, sobre nosotros, contacto, legal; CMS; formularios→CRM; SEO técnico; analítica; RGPD. | Lanzamiento del Sitio. |
+| **F2 — Contenido + IA mínima** (mes 3–4) | RF-12…RF-16: blog/recursos, lead magnets, empleo, **asistente IA/búsqueda semántica (mín.)**, búsqueda interna; datos estructurados completos; CWV afinados. | IA en producción; motor de contenido. |
+| **F3 — Automatización + i18n** (mes 5–6) | RF-17, RF-20 y parte de RF-18/19: multi-idioma ES/EN, automatización de marketing, A/B testing de conversión. | Crecimiento y multi-idioma. |
+| **F4 — Área privada + avanzado** (6 m+) | RF-19 y calculadoras; IA avanzada. | Autoservicio de cliente. |
+
+**Justificación.** Entregar valor incremental, validando antes de invertir en lo complejo.
+
+**Impacto.** Planificación, presupuesto y expectativas.
+
+**Riesgos.** Adelantar fases futuras; mitigado con gobernanza y MoSCoW.
+
+**Dependencias.** Validación de hipótesis; recursos.
+
+**Decisiones tomadas.** La Fase 1 no comienza hasta cerrar la Fase 0 (validación).
+
+**Alternativas descartadas.** *Big bang* (todo en un único lanzamiento) — descartado por riesgo y falta de validación temprana.
+
+---
+
+## 47. Glosario
+
+> *Sección de referencia: no aplica la microestructura de calidad de 8 puntos (ver justificación en [§50](#50-resultado-de-la-autoauditoría)).*
 
 | Término | Definición |
 |---|---|
-| **B2B** | *Business to Business*: venta entre empresas. |
+| **ADR** | *Architecture Decision Record*: registro de una decisión de arquitectura. |
+| **B2B** | *Business to Business*: negocio entre empresas. |
+| **BFF** | *Backend for Frontend*: capa de servicios orientada al frontend. |
 | **BIM** | *Building Information Modeling*: modelado de información de construcción. |
-| **CMS** | *Content Management System*: gestor de contenidos. |
-| **Core Web Vitals** | Métricas de Google de experiencia de página (LCP, INP, CLS). |
+| **CMP** | *Consent Management Platform*: gestor de consentimiento de cookies. |
+| **CMS** | *Content Management System* (aquí, *headless*). |
+| **CRM** | *Customer Relationship Management*: gestión de relaciones con clientes. |
+| **CRO** | *Conversion Rate Optimization*: optimización de conversión. |
+| **Core Web Vitals (CWV)** | Métricas de experiencia de página: LCP, INP, CLS. |
 | **CTA** | *Call To Action*: llamada a la acción. |
 | **DPA** | *Data Processing Agreement*: contrato de encargo de tratamiento (RGPD). |
+| **E2E** | *End-to-end*: pruebas de extremo a extremo. |
+| **i18n** | Internacionalización. |
+| **ISR** | *Incremental Static Regeneration*: regeneración estática incremental. |
+| **Jamstack** | Arquitectura de sitios con front estático + servicios vía API. |
 | **Lead** | Contacto comercial potencial. |
 | **MEP** | *Mechanical, Electrical, Plumbing*: instalaciones. |
 | **MoSCoW** | Priorización: Must/Should/Could/Won't. |
 | **MVP** | *Minimum Viable Product*: producto mínimo viable. |
-| **RGPD** | Reglamento General de Protección de Datos. |
-| **ROI** | *Return On Investment*: retorno de la inversión. |
+| **PII** | *Personally Identifiable Information*: datos personales. |
+| **RAG** | *Retrieval-Augmented Generation*. |
+| **RBAC** | *Role-Based Access Control*: control de acceso por roles. |
+| **RGPD/LOPDGDD** | Reglamento y ley españoles de protección de datos. |
+| **RPO/RTO** | Objetivo de punto/tiempo de recuperación (backups). |
+| **RUM** | *Real User Monitoring*: monitorización de usuarios reales. |
+| **SCA** | *Software Composition Analysis*: análisis de dependencias. |
 | **SSG/SSR** | Generación estática / renderizado en servidor. |
-| **WCAG** | *Web Content Accessibility Guidelines*: pautas de accesibilidad. |
+| **SSOT** | *Single Source of Truth*: este documento. |
+| **WCAG** | *Web Content Accessibility Guidelines*. |
 
 ---
 
-> **Siguiente paso recomendado:** revisar y validar la [sección 20 (Supuestos)](#20-supuestos) con dirección. Una vez confirmados, cambiar el `Estado` de la cabecera a **🟢 Aprobado** y comenzar la Fase 1 del [roadmap](#18-roadmap).
+## 48. Referencias
+
+> *Sección de referencia: no aplica la microestructura de calidad de 8 puntos.*
+
+- **RGPD** — Reglamento (UE) 2016/679, de protección de datos.
+- **LOPDGDD** — Ley Orgánica 3/2018 (España).
+- **LSSI-CE** — Ley 34/2002 de servicios de la sociedad de la información.
+- **WCAG 2.2** — W3C Web Content Accessibility Guidelines 2.2 (nivel AA).
+- **EN 301 549** — Requisitos de accesibilidad para productos y servicios TIC (contratación pública UE).
+- **Core Web Vitals** — Documentación de web.dev / Google Search.
+- **Schema.org** — Vocabulario de datos estructurados.
+- **Conventional Commits** — Especificación de mensajes de commit.
+- **The Twelve-Factor App** — Metodología de configuración y despliegue.
+- **Documentación oficial** de: Astro, React, TypeScript, Tailwind CSS, PostgreSQL/pgvector, GitHub Actions, y del proveedor de IA (Anthropic — Claude).
+- **Documento interno base:** borrador 0.1.0 de este PROJECT_BIBLE (reemplazado por esta versión).
+
+*Las URLs y versiones concretas se fijarán en la Fase 0 al elegir proveedores.*
+
+---
+
+## 49. Anexo de decisiones abiertas
+
+> Decisiones que **no** pueden cerrarse con la información disponible. Para cada una se documenta la incertidumbre y se propone la mejor alternativa con ventajas e inconvenientes. **No se cierran aquí; se resuelven en la Fase 0.**
+
+### DA-1 · Perfil de stack (moderno vs. bajo mantenimiento)
+- **Incertidumbre:** presupuesto y perfil técnico del equipo que mantendrá la Plataforma.
+- **Opción A (recomendada): Astro + headless + BFF.** ✅ Rendimiento/SEO/seguridad superiores; escalable. ❌ Requiere perfil técnico para mantener.
+- **Opción B: WordPress (tema a medida ligero) gestionado.** ✅ Autonomía editorial sin perfil técnico; menor coste inicial. ❌ Menor control de rendimiento y seguridad; más *plugins* que mantener.
+- **Propuesta:** A si hay perfil técnico o partner de mantenimiento; B si el equipo es no técnico y prima la autonomía. **Decidir en F0.**
+
+### DA-2 · Proveedor de CRM
+- **Incertidumbre:** herramientas ya usadas por el equipo comercial y presupuesto.
+- **Opciones:** HubSpot (potente, ecosistema; coste elevado al escalar) · Brevo (buena relación precio/valor; menos avanzado) · Pipedrive (ventas simples; automatización más limitada).
+- **Propuesta:** Brevo o HubSpot según madurez comercial. **Decidir en F0.**
+
+### DA-3 · Plataforma de despliegue/CDN
+- **Opciones:** Vercel (DX excelente; coste al escalar) · Netlify (similar) · Cloudflare Pages (coste/red muy competitivos; DX algo menor).
+- **Propuesta:** Cloudflare Pages por coste/rendimiento, o Vercel por DX. **Decidir en F0.**
+
+### DA-4 · Flujo editorial del CMS (¿publicación directa o con aprobación?)
+- **Incertidumbre:** tamaño y gobernanza del equipo de contenidos.
+- **Propuesta:** aprobación por Administrador si hay varios editores; publicación directa si el equipo es pequeño. Afecta a la matriz de permisos ([§27](#27-permisos)).
+
+### DA-5 · Residencia y proveedor concreto de PostgreSQL
+- **Opciones:** Supabase, Neon u otro gestionado, siempre con **región UE** y soporte de **pgvector**.
+- **Propuesta:** elegir el que garantice UE + pgvector + backups gestionados. **Decidir en F0.**
+
+### DA-6 · Alcance real del asistente IA en F2
+- **Incertidumbre:** volumen de consultas y apetito de coste.
+- **Propuesta:** empezar con búsqueda semántica + FAQ con fuentes (bajo coste, Haiku por defecto) y ampliar según uso.
+
+---
+
+## 50. Resultado de la autoauditoría
+
+**Objetivo.** Dejar constancia de la revisión de coherencia, duplicidades, ambigüedad y consistencia terminológica realizada antes de cerrar la versión 1.0.0.
+
+### 50.1 Problemas encontrados
+1. **Duplicidad potencial de riesgos:** los riesgos aparecían en varias secciones ([§39](#39-riesgos-del-proyecto)–[§42](#42-riesgos-legales)) con solapamiento posible con los riesgos técnicos por sección.
+2. **Ambigüedad del alcance de la IA:** el borrador previo trataba la IA como «futura», pero la estructura obligatoria exige una sección de IA de primer nivel.
+3. **Ambigüedad terminológica:** «Proyecto» podía significar tanto un caso de portfolio como el proyecto de software.
+4. **Contradicción de prioridad:** la IA figuraba como `COULD` (futura) y a la vez como funcionalidad principal esperada.
+5. **Duplicidad de taxonomías:** riesgo de definir «Servicio/Sector» por separado en CMS, navegación, SEO y datos.
+6. **Inconsistencia de nombre de empresa:** varios placeholders posibles para el nombre comercial.
+7. **Microestructura de 8 puntos poco natural** en secciones de referencia (Glosario, Referencias, Anexo).
+
+### 50.2 Correcciones realizadas
+1. **Riesgos reorganizados** en cuatro planos sin solapamiento: proyecto ([§39](#39-riesgos-del-proyecto)), técnicos ([§40](#40-riesgos-técnicos)), negocio ([§41](#41-riesgos-de-negocio)) y legales ([§42](#42-riesgos-legales)); los riesgos por sección remiten a estas tablas en lugar de duplicarlas.
+2. **IA reclasificada** como **versión mínima `SHOULD`** (objetivo de F2 inmediato), no como «futura», resolviendo la contradicción con la sección obligatoria de IA. La IA avanzada con acciones queda como futura.
+3. **Terminología fijada:** se usa «Proyecto (caso de éxito)» / «Proyecto (de portfolio)» para el contenido, y «proyecto» (minúscula, sin cualificar) para el proyecto de software; recogido en la [tabla de terminología canónica](#terminología-canónica).
+4. **Prioridad de IA unificada** en [§6](#6-funcionalidades-principales), [§8](#8-requisitos-funcionales) (RF-15 `SHOULD`) y [§16](#16-inteligencia-artificial): coherente en todo el documento.
+5. **Taxonomía única** de `Servicio`/`Sector` establecida como decisión ([§28](#28-modelo-de-datos-de-alto-nivel)) y referida desde navegación ([§24](#24-navegación)) y SEO.
+6. **Nombre de empresa unificado** en el token único **`«[NOMBRE_EMPRESA]»`** en todo el documento.
+7. **Deviación documentada:** las secciones 47–49 usan formato de referencia/anexo en lugar de la microestructura de 8 puntos, por ser catálogos (glosario/referencias) y registro de incertidumbres (anexo), donde «Riesgos/Dependencias» no aportaría valor. Se declara aquí explícitamente para no inducir a error.
+
+### 50.3 Decisiones tomadas durante la revisión
+- Este documento **reemplaza** al borrador 0.1.0 (23 secciones) y pasa a ser la única versión válida del PROJECT_BIBLE.
+- Se mantienen abiertas y **claramente marcadas** las incertidumbres (DA-1…DA-6) e hipótesis (H1…H11); **no se han inventado datos** para cerrarlas, conforme a las instrucciones.
+- El documento se etiqueta **🟡 En revisión** hasta que la Fase 0 valide hipótesis y cierre las decisiones abiertas; entonces pasará a **🟢 Aprobado** y versión 1.1.0.
+
+### 50.4 Verificaciones de consistencia superadas
+- ✅ Sin contradicciones de prioridad detectadas tras la corrección (IA, MoSCoW).
+- ✅ Terminología consistente (verificada contra la tabla canónica y el glosario).
+- ✅ Referencias cruzadas internas coherentes (roles↔permisos, datos↔arquitectura, riesgos↔mitigaciones, ADR↔decisiones de sección).
+- ✅ Cada decisión de arquitectura tiene justificación y alternativas descartadas ([§43](#43-decisiones-de-arquitectura-adr)).
+- ✅ Incertidumbres no resueltas trasladadas al anexo ([§49](#49-anexo-de-decisiones-abiertas)) en lugar de resolverse por suposición.
+
+---
+
+> **Siguiente paso:** ejecutar la **Fase 0** — validar las [hipótesis (§44)](#44-hipótesis) y cerrar las [decisiones abiertas (§49)](#49-anexo-de-decisiones-abiertas) con el cliente. Al completarse, actualizar la cabecera a **🟢 Aprobado (v1.1.0)** e iniciar la Fase 1 del [roadmap](#46-roadmap-de-alto-nivel).
