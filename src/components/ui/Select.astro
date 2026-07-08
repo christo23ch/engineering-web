@@ -1,0 +1,86 @@
+---
+/**
+ * Select — native <select> (DESIGN_SYSTEM §11.3). Native element keeps the
+ * accessible, platform picker (keyboard, mobile wheels); only the appearance is
+ * restyled (appearance-none + a decorative chevron). Same box/label/help/error
+ * as Input. Options are provided via the default slot. Zero JS.
+ */
+import type { HTMLAttributes } from 'astro/types';
+import FieldShell from '@/components/ui/FieldShell.astro';
+import { controlBox } from '@/lib/ui/control-variants';
+import { resolveFieldId, fieldParts, describedBy } from '@/lib/ui/field';
+import { cn } from '@/lib/utils/cn';
+
+type Props = {
+  label: string;
+  id?: string;
+  name?: string;
+  help?: string;
+  error?: string;
+  required?: boolean;
+  disabled?: boolean;
+  class?: string;
+  selectClass?: string;
+} & Omit<
+  HTMLAttributes<'select'>,
+  'name' | 'id' | 'required' | 'disabled' | 'class'
+>;
+
+const {
+  label,
+  id,
+  name,
+  help,
+  error,
+  required = false,
+  disabled = false,
+  class: className,
+  selectClass,
+  ...rest
+} = Astro.props;
+
+const { id: fieldId, helpId, errorId } = fieldParts(resolveFieldId(id, name));
+const description = describedBy(help && helpId, error && errorId);
+---
+
+<FieldShell
+  label={label}
+  htmlFor={fieldId}
+  helpId={helpId}
+  errorId={errorId}
+  help={help}
+  error={error}
+  required={required}
+  class={className}
+>
+  <div class="relative">
+    <select
+      id={fieldId}
+      name={name}
+      class={cn(
+        'h-12 cursor-pointer appearance-none pr-10',
+        controlBox({ error: Boolean(error), class: selectClass }),
+      )}
+      required={required || undefined}
+      disabled={disabled || undefined}
+      aria-invalid={error ? 'true' : undefined}
+      aria-describedby={description}
+      {...rest}
+    >
+      <slot />
+    </select>
+    <svg
+      class="pointer-events-none absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 text-text-muted"
+      viewBox="0 0 20 20"
+      fill="none"
+      aria-hidden="true"
+    >
+      <path
+        d="m6 8 4 4 4-4"
+        stroke="currentColor"
+        stroke-width="1.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"></path>
+    </svg>
+  </div>
+</FieldShell>
