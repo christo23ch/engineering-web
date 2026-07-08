@@ -1,0 +1,78 @@
+---
+/**
+ * Button — DESIGN_SYSTEM §11.1 (actions) + §10 (interactive states).
+ * Renders a native <button> or, when `href` is set, an <a> (polymorphic), so
+ * semantics stay correct for both actions and navigation (a11y, Radix-style:
+ * use the right element, expose state via ARIA). Zero JS — pure Astro.
+ *
+ * States covered: default · hover · focus (global ring) · active · disabled ·
+ * loading. Form-level error/success states belong to the form organism
+ * (§11.3), not to the button itself.
+ */
+import type { HTMLAttributes } from 'astro/types';
+import {
+  buttonVariants,
+  type ButtonVariant,
+  type ButtonSize,
+} from '@/lib/ui/button-variants';
+import Spinner from '@/components/ui/Spinner.astro';
+
+type Props = {
+  variant?: ButtonVariant;
+  size?: ButtonSize;
+  /** When set, renders an <a> instead of a <button>. */
+  href?: string;
+  /** Native button type; ignored for links. Defaults to "button". */
+  type?: 'button' | 'submit' | 'reset';
+  disabled?: boolean;
+  loading?: boolean;
+  class?: string;
+} & Omit<HTMLAttributes<'button'>, 'type'> &
+  Omit<HTMLAttributes<'a'>, 'href'>;
+
+const {
+  variant = 'primary',
+  size = 'md',
+  href,
+  type = 'button',
+  disabled = false,
+  loading = false,
+  class: className,
+  ...rest
+} = Astro.props;
+
+// Loading is a non-interactive, busy state → treat as disabled for interaction.
+const isDisabled = disabled || loading;
+const isLink = href != null;
+const classes = buttonVariants({ variant, size, class: className });
+---
+
+{
+  isLink ? (
+    <a
+      class={classes}
+      href={isDisabled ? undefined : href}
+      role={isDisabled ? 'link' : undefined}
+      aria-disabled={isDisabled ? 'true' : undefined}
+      data-disabled={isDisabled ? 'true' : undefined}
+      tabindex={isDisabled ? -1 : undefined}
+      aria-busy={loading ? 'true' : undefined}
+      {...rest}
+    >
+      {loading && <Spinner />}
+      <slot />
+    </a>
+  ) : (
+    <button
+      class={classes}
+      type={type}
+      disabled={isDisabled}
+      aria-disabled={isDisabled ? 'true' : undefined}
+      aria-busy={loading ? 'true' : undefined}
+      {...rest}
+    >
+      {loading && <Spinner />}
+      <slot />
+    </button>
+  )
+}

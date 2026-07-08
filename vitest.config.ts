@@ -1,13 +1,16 @@
+/// <reference types="vitest/config" />
 import { fileURLToPath } from 'node:url';
-import { defineConfig } from 'vitest/config';
+import { getViteConfig } from 'astro/config';
 
 // Unit + integration tests (docs/PROJECT_BIBLE.md §32). E2E runs via Playwright.
-// Decoupled from Astro's getViteConfig (Astro 7 uses a Rolldown-forked Vite whose
-// config type conflicts with Vitest's augmentation); path aliases are declared
-// here directly to mirror tsconfig.json — no extra dependency needed.
+// Uses Astro's getViteConfig so `.astro` components can be rendered in tests
+// (Astro Container API). Astro 7's Rolldown-forked Vite types don't expose
+// Vitest's `test` key, so the config object is asserted to the expected param
+// type — a narrow, documented cast; the `test` block itself is authored against
+// Vitest's own types via the reference above.
 const r = (p: string) => fileURLToPath(new URL(p, import.meta.url));
 
-export default defineConfig({
+const config = {
   resolve: {
     alias: {
       '@': r('./src'),
@@ -30,4 +33,6 @@ export default defineConfig({
       exclude: ['src/**/*.d.ts', 'src/env.d.ts'],
     },
   },
-});
+};
+
+export default getViteConfig(config as Parameters<typeof getViteConfig>[0]);

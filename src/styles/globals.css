@@ -31,22 +31,25 @@
   --color-gray-600: #4b5563;
   --color-gray-900: #111827;
   --color-amber-500: #f59e0b;
+  --color-amber-700: #b45309;
   --color-red-600: #dc2626;
 
-  /* ── Semantic aliases (consumed by components) ── */
+  /* ── Semantic aliases (consumed by components) — names/values per
+     DESIGN_SYSTEM §3.3 (all AA-verified) ── */
   --color-text-primary: #111827; /* gray-900  (AA ~17.7:1 on white) */
   --color-text-secondary: #4b5563; /* gray-600 (AA ~7.6:1) */
   --color-text-muted: #6b7280; /* gray-500   (AA ~4.8:1) */
-  --color-text-inverse: #ffffff;
+  --color-text-on-action: #ffffff; /* white on blue-700 (AA 6.3:1) */
+  --color-text-on-dark: #ffffff; /* white on blue-900 (AA 14.9:1) */
   --color-surface: #ffffff;
   --color-surface-subtle: #f9fafb;
   --color-surface-muted: #f3f4f6;
-  --color-border: #d1d5db;
+  --color-border: #d1d5db; /* gray-300 = DS border-default */
   --color-action: #1d4ed8; /* blue-700 (AA ~6.3:1) */
-  --color-action-hover: #1e40af; /* blue-800 */
-  --color-success: #047857; /* green-700 (sustainability/success only) */
-  --color-danger: #dc2626;
-  --color-warning: #f59e0b;
+  --color-action-hover: #1e40af; /* blue-800 (AA 8.6:1) */
+  --color-success: #047857; /* green-700 = DS color-success-text (AA 4.9:1) */
+  --color-error: #dc2626; /* red-600 (AA 4.5:1) */
+  --color-warning: #b45309; /* amber-700 (AA 4.6:1) — not amber-500 (fails AA) */
   --color-focus: #1d4ed8; /* blue-700 focus ring (DESIGN_SYSTEM §10) */
 
   /* ── Typography (DESIGN_SYSTEM §4): Inter variable, single family ── */
@@ -82,6 +85,7 @@
   /* ── Radius + elevation (DESIGN_SYSTEM §8): minimal depth, premium sobriety ── */
   --radius-sm: 0.25rem;
   --radius: 0.5rem;
+  --radius-md: 0.5rem; /* DS radius-md (button corner) */
   --radius-lg: 0.75rem;
   --shadow-sm: 0 1px 2px 0 rgb(17 24 39 / 0.05);
   --shadow-md: 0 4px 6px -1px rgb(17 24 39 / 0.08);
