@@ -18,6 +18,8 @@ const twMerge = extendTailwindMerge({
             'body',
             'body-sm',
             'body-lg',
+            'label',
+            'metric',
             'h1',
             'h2',
             'h3',

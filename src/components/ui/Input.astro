@@ -1,0 +1,70 @@
+---
+/**
+ * Input — text field (DESIGN_SYSTEM §11.3). 48px tall, gray-300 border,
+ * radius-sm, white fill, always-visible label, optional help, error per §10.
+ * A11y: label[for], aria-describedby → help/error, aria-invalid on error. Zero JS.
+ */
+import type { HTMLAttributes } from 'astro/types';
+import FieldShell from '@/components/ui/FieldShell.astro';
+import { controlBox } from '@/lib/ui/control-variants';
+import { resolveFieldId, fieldParts, describedBy } from '@/lib/ui/field';
+import { cn } from '@/lib/utils/cn';
+
+type Props = {
+  label: string;
+  id?: string;
+  name?: string;
+  type?: 'text' | 'email' | 'tel' | 'url' | 'password' | 'search' | 'number';
+  help?: string;
+  error?: string;
+  required?: boolean;
+  disabled?: boolean;
+  /** Wrapper (FieldShell) classes. */
+  class?: string;
+  /** Extra classes on the <input> element. */
+  inputClass?: string;
+} & Omit<
+  HTMLAttributes<'input'>,
+  'type' | 'name' | 'id' | 'required' | 'disabled' | 'class'
+>;
+
+const {
+  label,
+  id,
+  name,
+  type = 'text',
+  help,
+  error,
+  required = false,
+  disabled = false,
+  class: className,
+  inputClass,
+  ...rest
+} = Astro.props;
+
+const { id: fieldId, helpId, errorId } = fieldParts(resolveFieldId(id, name));
+const description = describedBy(help && helpId, error && errorId);
+---
+
+<FieldShell
+  label={label}
+  htmlFor={fieldId}
+  helpId={helpId}
+  errorId={errorId}
+  help={help}
+  error={error}
+  required={required}
+  class={className}
+>
+  <input
+    id={fieldId}
+    name={name}
+    type={type}
+    class={cn('h-12', controlBox({ error: Boolean(error), class: inputClass }))}
+    required={required || undefined}
+    disabled={disabled || undefined}
+    aria-invalid={error ? 'true' : undefined}
+    aria-describedby={description}
+    {...rest}
+  />
+</FieldShell>

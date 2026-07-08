@@ -77,6 +77,16 @@
   --text-h1--line-height: 1.1;
   --text-display: clamp(2.75rem, 2rem + 3.6vw, 4.5rem);
   --text-display--line-height: 1.05;
+  --text-label: 0.875rem; /* 14px form labels / small buttons */
+  --text-label--line-height: 1.4;
+  --text-label--font-weight: 500;
+  --text-metric: clamp(
+    2.5rem,
+    1.8rem + 3.2vw,
+    4rem
+  ); /* 40→64px result figures */
+  --text-metric--line-height: 1;
+  --text-metric--font-weight: 700;
 
   /* ── Layout (DESIGN_SYSTEM §5): container + prose max widths ── */
   --container-content: 1200px; /* page max width */

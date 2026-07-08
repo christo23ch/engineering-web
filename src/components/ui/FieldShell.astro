@@ -1,0 +1,87 @@
+---
+/**
+ * FieldShell — shared label + help + error layout for form controls
+ * (DESIGN_SYSTEM §11.3, Bible §20). The visible <label> is always present
+ * (never placeholder-as-label). Help and error are linked to the control via
+ * their ids (the control sets aria-describedby). Error carries an icon + text
+ * so colour is never the sole signal (§3.3). Zero JS.
+ */
+import { cn } from '@/lib/utils/cn';
+
+interface Props {
+  label: string;
+  htmlFor: string;
+  helpId: string;
+  errorId: string;
+  help?: string;
+  error?: string;
+  required?: boolean;
+  class?: string;
+}
+const {
+  label,
+  htmlFor,
+  helpId,
+  errorId,
+  help,
+  error,
+  required = false,
+  class: className,
+} = Astro.props;
+---
+
+<div class={cn('flex flex-col gap-2', className)}>
+  <label for={htmlFor} class="text-label text-text-primary">
+    {label}
+    {
+      required && (
+        <span class="text-error">
+          {' '}
+          *<span class="sr-only"> (obligatorio)</span>
+        </span>
+      )
+    }
+  </label>
+
+  <slot />
+
+  {
+    help && (
+      <p id={helpId} class="text-body-sm text-text-muted">
+        {help}
+      </p>
+    )
+  }
+
+  {
+    error && (
+      <p
+        id={errorId}
+        role="alert"
+        class="flex items-center gap-1 text-body-sm text-error"
+      >
+        <svg
+          class="h-4 w-4 shrink-0"
+          viewBox="0 0 20 20"
+          fill="none"
+          aria-hidden="true"
+        >
+          <path
+            d="M10 2 19 18H1L10 2Z"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linejoin="round"
+          />
+          <path
+            d="M10 8v4"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+          />
+          <circle cx="10" cy="15" r="0.75" fill="currentColor" />
+        </svg>
+        <span>{error}</span>
+      </p>
+    )
+  }
+</div>
