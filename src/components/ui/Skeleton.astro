@@ -1,0 +1,22 @@
+---
+/**
+ * Skeleton — content placeholder shown while BFF data loads (DESIGN_SYSTEM
+ * §11.6, Bible §9). Decorative: aria-hidden so assistive tech does not announce
+ * empty blocks — the real loading state is exposed by the container's aria-busy
+ * (the Loading-states pattern). Zero JS; animation honours reduced-motion via
+ * the global rule.
+ */
+import {
+  skeletonVariants,
+  type SkeletonVariant,
+} from '@/lib/ui/skeleton-variants';
+
+interface Props {
+  variant?: SkeletonVariant;
+  class?: string;
+}
+const { variant = 'block', class: className } = Astro.props;
+---
+
+<div class={skeletonVariants({ variant, class: className })} aria-hidden="true">
+</div>
