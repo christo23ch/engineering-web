@@ -53,6 +53,7 @@
   --color-error: #dc2626; /* red-600 (AA 4.5:1) */
   --color-warning: #b45309; /* amber-700 (AA 4.6:1) — not amber-500 (fails AA) */
   --color-focus: #1d4ed8; /* blue-700 focus ring (DESIGN_SYSTEM §10) */
+  --color-focus-halo: #ffffff; /* focus-ring contrast band (WCAG 1.4.11 on dark) */
 
   /* ── Typography (DESIGN_SYSTEM §4): Inter variable, single family ── */
   --font-sans:
@@ -118,10 +119,35 @@
     @apply bg-surface font-sans text-text-primary antialiased;
   }
 
-  /* Mandatory visible focus ring (docs/DESIGN_SYSTEM.md §10). */
+  /* Mandatory visible focus ring (docs/DESIGN_SYSTEM.md §10). Two layers keep the
+     indicator ≥3:1 (WCAG 1.4.11) on BOTH light and dark surfaces: the coloured
+     `outline` carries light surfaces; the `box-shadow` halo fills the offset gap
+     and carries dark surfaces. On light surfaces the halo is white — invisible
+     against the surface — so the appearance is identical to a plain blue ring. */
   :where(a, button, input, select, textarea, [tabindex]):focus-visible {
     outline: 2px solid var(--color-focus);
     outline-offset: 2px;
+    box-shadow: 0 0 0 2px var(--color-focus-halo);
+  }
+
+  /* Dark surfaces (blue-900: footer, final CTA band, metric band —
+     DESIGN_SYSTEM §9/§11.5). Any focusable inside a container opting in with
+     data-surface="dark" flips the ring to a light outline + dark halo, so it
+     stays ≥3:1 against blue-900 AND against inverted (white) controls placed on
+     it. Only the two focus tokens change; the rule above still draws the ring
+     (zero JS, no per-component change). */
+  [data-surface='dark']
+    :where(a, button, input, select, textarea, [tabindex]):focus-visible,
+  [data-surface='dark']:where(
+      a,
+      button,
+      input,
+      select,
+      textarea,
+      [tabindex]
+    ):focus-visible {
+    --color-focus: #ffffff; /* white outline on blue-900 (14.9:1) */
+    --color-focus-halo: var(--color-blue-900); /* dark halo vs white controls */
   }
 
   /* Honor reduced-motion (WCAG 2.2 AA, Bible §20). */

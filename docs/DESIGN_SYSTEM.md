@@ -113,7 +113,7 @@ Proporción de uso: **~80 % neutros / ~15 % azul / ~5 % verde**. El verde se res
 | `color-error` | `red-600` sobre `white` | 4,5:1 | AA ✅ |
 | `color-warning` | `amber-700` sobre `white` | 4,6:1 | AA ✅ |
 | `border-default` | `gray-300` | 1,5:1 (no textual) | — |
-| `focus-ring` | `blue-700`, 2 px + 2 px offset | ≥ 3:1 vs adyacentes | AA (2.2 · 2.4.13) ✅ |
+| `focus-ring` | `blue-700` outline 2 px + offset 2 px + halo `white` 2 px (bicapa) | ≥ 3:1 vs adyacentes (claro y oscuro) | AA (2.2 · 1.4.11 · 2.4.11) ✅ |
 
 **Reglas duras:**
 - Prohibido texto informativo por debajo de 4,5:1 (3:1 solo texto grande ≥ 24 px/19 px bold) `[Bible §20]`.
@@ -273,7 +273,7 @@ Todo componente interactivo define **obligatoriamente** los 7 estados `[Bible §
 |---|---|
 | **Default** | Según tokens del componente. |
 | **Hover** | Cambio de color de fondo/borde en `duration-fast`; solo en dispositivos con puntero (`@media (hover:hover)`). |
-| **Focus-visible** | Anillo `focus-ring` (2 px `blue-700`, offset 2 px) **idéntico en todo el sistema**; nunca `outline: none` sin sustituto. Foco no oculto por elementos fijos (WCAG 2.2 · 2.4.11). |
+| **Focus-visible** | Anillo `focus-ring` **bicapa idéntico en todo el sistema**: `outline` 2 px `blue-700` + offset 2 px + halo `box-shadow` 2 px que rellena el offset. La capa de color porta las superficies claras; el halo porta las oscuras, manteniendo ≥ 3:1 no textual (WCAG 1.4.11) en ambas. Las superficies oscuras (`blue-900`) invierten los tokens del anillo vía `data-surface="dark"` (outline `white` + halo `blue-900`), cubriendo también controles invertidos blancos. Nunca `outline: none` sin sustituto. Foco no oculto por elementos fijos (WCAG 2.2 · 2.4.11). |
 | **Active/Pressed** | Oscurecimiento un paso (`action-hover`) + `transform: scale(0.98)` opcional. |
 | **Disabled** | `gray-300` fondo / `gray-500` texto, `cursor: not-allowed`, `aria-disabled`. Nunca ocultar la razón: si un submit está deshabilitado, el formulario muestra qué falta. |
 | **Loading** | Spinner 20 px + texto («Enviando…»); el botón conserva su ancho (sin salto de layout, CLS). `aria-busy="true"`. |
