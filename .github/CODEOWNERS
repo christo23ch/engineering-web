@@ -1,0 +1,13 @@
+# CODEOWNERS — default reviewer for every change (docs/PROJECT_BIBLE.md §29:
+# `main` protected, PR + review required). Owner handle derived from the
+# repository owner / authenticated identity.
+#
+# NOTE: this file only becomes enforcing once branch protection on `main` has
+# "Require review from Code Owners" enabled (a manual GitHub setting — see the
+# infrastructure report). Until then it is advisory.
+
+# Default owner for the whole repository.
+*                          @christo23ch
+
+# The single source of truth and its documentary policy: owner sign-off required.
+/docs/PROJECT_BIBLE.md      @christo23ch
