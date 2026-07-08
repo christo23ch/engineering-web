@@ -12,7 +12,7 @@
 This is a **professional engineering firm website** (Jamstack: Astro + React islands + headless CMS + PostgreSQL + RAG). 
 
 **Complete Documentation Status:**
-- ✅ PROJECT_BIBLE.md (v1.0.0 **oficial · SSOT**) — 50 sections covering vision, requirements (20 RF), architecture, IA policy, security, performance, accessibility, testing, deployment, risk taxonomy, 9 ADRs, 11 hypotheses, **9 open decisions (DA-1…DA-9)**, internal consistency audit.
+- ✅ PROJECT_BIBLE.md (v1.0.0 **oficial · SSOT**) — 50 sections covering vision, requirements (20 RF), architecture, IA policy, security, performance, accessibility, testing, deployment, risk taxonomy, **10 ADRs**, 11 hypotheses, **10 decisions (DA-1 closed: Astro; DA-2…DA-10 open)**, internal consistency audit.
 - ✅ DESIGN_SYSTEM.md (473 lines, v1.0.0) — 15 sections implementing all UX/UI/responsive/accessibility directives from PROJECT_BIBLE with full traceability (every decision references [Bible §n]).
 
 **Current Deliverables:** Documentation + analysis complete. **Zero product code written yet.**
@@ -38,16 +38,17 @@ This is a **professional engineering firm website** (Jamstack: Astro + React isl
 - **Model:** B2B with buying committees (H4), lead generation primary (H5).
 - **MVP Goal:** Professional website (lead capture, project portfolio, thought leadership, team credibility).
 
-### Architecture Locked In (ADR-001 through ADR-009)
-1. **ADR-001:** Jamstack (SSG/ISR default, pre-render whenever possible).
-2. **ADR-002:** Astro (server components, zero JS by default) + React islands (TypeScript strict) + headless CMS.
+### Architecture Locked In (ADR-001 through ADR-010)
+1. **ADR-001:** Jamstack (SSG by default + rebuild-on-webhook; ISR is a provider-dependent optimization, not architecture — DA-3).
+2. **ADR-002:** Astro (server components, zero JS by default) + React islands (TypeScript strict) + headless CMS. **Astro is definitive (DA-1 closed);** frontend framework revisable only before F4 if the private-area scope changes significantly.
 3. **ADR-003:** Headless CMS (provider TBD in DA-7; candidates: Strapi, Sanity, Storyblok).
 4. **ADR-004:** PostgreSQL + pgvector (EU-hosted; provider TBD in DA-5; Supabase, Neon, etc.).
-5. **ADR-005:** RAG + Claude (Anthropic; via BFF proxy only; Haiku default, Sonnet/Opus for complex; **strict no-hallucination policy**).
+5. **ADR-005:** RAG + Claude (Anthropic; via BFF proxy only; Haiku default, Sonnet/Opus for complex; **strict no-hallucination policy**; mandatory prompt-injection guardrails). Embeddings via a dedicated provider (DA-10, Voyage AI recommended) — Anthropic has no embeddings API.
 6. **ADR-006:** RBAC: public, authenticated, admin (no guest checkout; lead forms only).
 7. **ADR-007:** CI/CD via GitHub Actions (lint + unit + integration + build + axe + Lighthouse blockers).
-8. **ADR-008:** Lead persistence: email + CRM webhook → PostgreSQL (CRM provider TBD in DA-2).
+8. **ADR-008:** Lead persistence: email + CRM webhook → PostgreSQL (CRM provider TBD in DA-2). Durable mechanism in ADR-010.
 9. **ADR-009:** i18n design-first: ES now, EN in F3.
+10. **ADR-010:** Outbox pattern + scheduled retry worker for durable lead delivery (in-memory retries don't survive serverless invocations).
 
 ### Design System (DESIGN_SYSTEM.md §1-§14)
 - **8 Principles:** Clarity > creativity, data as aesthetic, single CTA per page, premium sobriety, performance-first, WCAG 2.2 AA by default, mobile-first, tokens-driven.
@@ -94,24 +95,25 @@ This is a **professional engineering firm website** (Jamstack: Astro + React isl
 
 ## Decisions Status (Bible §49 & §44)
 
-### Locked Decisions (ADR-001 to ADR-009)
-All 9 ADRs approved. Stack confirmed: Astro + React + headless CMS + PostgreSQL + pgvector + Claude RAG.
+### Locked Decisions (ADR-001 to ADR-010)
+All 10 ADRs approved. Stack confirmed & definitive: Astro + React + headless CMS + PostgreSQL + pgvector + Claude RAG (DA-1 closed).
 
 ### Open Decisions (Blocking Development; Require Client/Direction Input)
 
-**Infrastructure & Vendors (DA-1 to DA-9 — canonical set defined in Bible §49):**
+**Infrastructure & Vendors (DA-1…DA-10 — canonical set in Bible §49; DA-1 CLOSED):**
 
 | Decision | Options | Owner | Timeline |
 |----------|---------|-------|----------|
-| DA-1: Stack confirmation | Astro ✅ vs WordPress | ~Locked | F0 |
+| DA-1: Stack | ✅ **CLOSED — Astro definitive** (WordPress discarded) | CTO | Done |
 | DA-2: CRM provider | HubSpot vs Brevo vs Pipedrive vs custom | Client/CTO | F0 |
-| DA-3: Hosting | Vercel vs Netlify vs Cloudflare Pages | Client/DevOps | F0 |
+| DA-3: Hosting | Vercel vs Netlify vs Cloudflare Pages — **must close before BFF** | Client/DevOps | F0 (week 1) |
 | DA-4: Editorial workflow | Direct publish vs approval gate | Product Owner | F0 |
-| DA-5: PostgreSQL provider | Supabase vs Neon vs AWS RDS (EU) | DevOps | F0 |
-| DA-6: IA scope F2 | Token budget, features, model routing | CTO | F0 |
-| DA-7: CMS provider | Strapi vs Sanity vs Storyblok vs Contentful | Client/CTO | F0 |
+| DA-5: PostgreSQL provider | Supabase vs Neon vs AWS RDS (EU) — **serverless pooler required** | DevOps | F0 |
+| DA-6: IA scope F2 | Features + **max monthly budget + hard-stop cutoff** | CTO | F0 |
+| DA-7: CMS provider | Strapi vs Sanity vs Storyblok vs Contentful — **evaluate cost per seat** | Client/CTO | F0 |
 | DA-8: Email transactional | SendGrid vs Brevo vs Resend vs other | DevOps | F0 |
 | DA-9: Analytics tool | Plausible vs GA4 (with consent) vs PostHog | Product Owner | F0 |
+| DA-10: Embeddings provider | **Voyage AI (recommended)** vs OpenAI vs Cohere — **must close before RAG** | AI/CTO | F0 |
 
 ### 11 Hypotheses Requiring Validation (§44 Bible)
 
@@ -171,7 +173,7 @@ engineering-web/
 
 **Milestone Acceptance Criteria:**
 - [ ] Validate 11 hypotheses (H1-H11)
-- [ ] Close 9 open decisions (DA-1 to DA-9, per Bible §49)
+- [ ] Close 9 open decisions (DA-2 to DA-10; DA-1 already closed = Astro), per Bible §49
 - [ ] Initialize Astro project (package.json, tsconfig, astro.config)
 - [ ] Setup CI/CD pipeline (GitHub Actions: lint + build blocker)
 - [ ] Create Tailwind config with design tokens
@@ -236,7 +238,7 @@ engineering-web/
 | Brand directive (H10) gap | 🔴 CRITICAL | Ship MVP with provisional tokens; update on brand manual arrival (tokens only, no refactor) |
 | Content author training | 🟡 MEDIUM | User manual for CMS + editorial workflow (part of DA-4 decision) |
 | WCAG compliance (axe CI) | 🟡 MEDIUM | Automated testing in CI; manual audit before launch (§13 DESIGN_SYSTEM) |
-| Core Web Vitals (LCP/INP/CLS) | 🔴 HIGH | Performance budget enforced in CI; Astro's SSG/ISR default helps; image optimization early |
+| Core Web Vitals (LCP/INP/CLS) | 🔴 HIGH | Performance budget enforced in CI; Astro's SSG default helps; image optimization early |
 
 ---
 
@@ -286,11 +288,18 @@ Then:
   CRM_API_KEY=
   CRM_WEBHOOK_SECRET=
   
-  # IA / Claude
+  # IA / Claude (generation)
   AI_PROVIDER=anthropic
   AI_PROVIDER_API_KEY=
   AI_MODEL_DEFAULT=claude-haiku-4.5
   AI_MODEL_COMPLEX=claude-opus-4-8
+  AI_MONTHLY_BUDGET=
+  AI_BUDGET_HARD_STOP=true
+  
+  # Embeddings (DA-10 — Voyage AI recommended)
+  EMBEDDINGS_PROVIDER=voyage
+  EMBEDDINGS_API_KEY=
+  EMBEDDINGS_MODEL=voyage-3-lite
   
   # Email
   EMAIL_PROVIDER=
@@ -365,7 +374,7 @@ Current issue: 403 Forbidden on `git push -u origin claude/repo-structure-setup-
 | PROJECT_BIBLE.md | SSOT: vision, requirements, architecture, policy | §1-§3 (vision), §8 (RF), §11-§14 (arch), §16 (IA), §28 (data model), §43 (ADRs), §44 (hypotheses), §46 (roadmap), §49 (decisions) |
 | DESIGN_SYSTEM.md | Visual implementation of Bible directives | §1 (principles), §2-§5 (tokens), §11 (components), §13 (screens), §14 (accessibility) |
 | CLAUDE.md | Session context + continuation guide | You are here |
-| (TBD) docs/adr/ | Individual ADR documents (optional) | ADR-001 through ADR-009 (reference Bible §43) |
+| (TBD) docs/adr/ | Individual ADR documents (optional) | ADR-001 through ADR-010 (reference Bible §43) |
 | (TBD) .env.example | Environment variables template | Reference Bible §38 |
 | (TBD) README.md | Developer onboarding | Project overview, stack, setup, CI/CD, contributing |
 
@@ -381,7 +390,7 @@ Current issue: 403 Forbidden on `git push -u origin claude/repo-structure-setup-
 - ✅ README.md documenting project + setup
 - ✅ Component library contract + structure ready
 - ✅ 11 hypotheses validated (or explicitly deferred with mitigation)
-- ✅ 9 open decisions closed (or documented as deferral + plan B)
+- ✅ 9 open decisions closed (DA-2…DA-10; DA-1 already closed) (or documented as deferral + plan B)
 - ✅ Git branch clean, commits squashed/organized, ready for PR
 
 ---

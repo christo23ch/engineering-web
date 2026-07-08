@@ -55,7 +55,7 @@ npm run dev
 ### Build & Deploy
 
 ```bash
-# Build static site (SSG + ISR)
+# Build static site (SSG + rebuild-on-webhook)
 npm run build
 
 # Preview production build locally
@@ -105,7 +105,7 @@ npm run preview
 ## 🛠 Tech Stack
 
 ### Frontend
-- **Astro** (SSG/ISR, server components, zero JS by default)
+- **Astro** (SSG + rebuild-on-webhook; ISR is a provider-dependent optimization — DA-3; zero JS by default)
 - **React** (islands architecture, TypeScript strict)
 - **Tailwind CSS** (design tokens, responsive, WCAG 2.2 AA)
 - **Inter** (variable font, 1 file ~48kB)
@@ -121,7 +121,8 @@ npm run preview
 - **Claude (Anthropic)** (RAG-anchored, no hallucinations, via BFF proxy only)
   - Haiku by default (cost optimization)
   - Sonnet/Opus for complex Q&A
-- **RAG Pipeline** (chunk → embed → pgvector → retrieve → prompt)
+- **Embeddings** (Voyage AI recommended — DA-10; Anthropic has no embeddings API)
+- **RAG Pipeline** (chunk → embed → pgvector → retrieve → prompt; prompt-injection guardrails)
 
 ### Tooling & Quality
 - **ESLint** (strict a11y rules)
@@ -263,7 +264,7 @@ engineering-web/
 3. **[docs/DESIGN_SYSTEM.md](./docs/DESIGN_SYSTEM.md)** — Design tokens (§2-§5), components (§11), screens (§13), accessibility (§14)
 
 ### Reference
-- **docs/adr/** — Individual Architecture Decision Records (ADR-001 through ADR-009, optional)
+- **docs/adr/** — Individual Architecture Decision Records (ADR-001 through ADR-010, optional)
 - **docs/SECURITY.md** — Security policy & threat model (stub — pending content; complements Bible §17)
 - **docs/{ARCHITECTURE, DATABASE, API, UI_UX, ROADMAP, IMPLEMENTATION_PLAN, CODING_STANDARDS, TESTING}.md** — topic stubs (pending content; each complements its Bible section)
 - **CONTRIBUTING.md** — Contribution guidelines (not yet created)
@@ -292,11 +293,18 @@ CRM_API_BASE=
 CRM_API_KEY=
 CRM_WEBHOOK_SECRET=
 
-# IA / Claude (Anthropic, via BFF proxy only)
+# IA / Claude — generation (Anthropic, via BFF proxy only)
 AI_PROVIDER=anthropic
 AI_PROVIDER_API_KEY=
 AI_MODEL_DEFAULT=claude-haiku-4.5
 AI_MODEL_COMPLEX=claude-opus-4-8
+AI_MONTHLY_BUDGET=
+AI_BUDGET_HARD_STOP=true
+
+# Embeddings (RAG vectorization, provider TBD via DA-10 — Voyage AI recommended)
+EMBEDDINGS_PROVIDER=voyage
+EMBEDDINGS_API_KEY=
+EMBEDDINGS_MODEL=voyage-3-lite
 
 # Email (transactional, provider TBD via DA-8)
 EMAIL_PROVIDER=
@@ -419,26 +427,30 @@ All architectural decisions documented in **CLAUDE.md** (Decisions Status table)
 
 | ADR | Decision | Status |
 |-----|----------|--------|
-| ADR-001 | Jamstack (SSG/ISR) | ✅ Locked |
-| ADR-002 | Astro + React islands + TypeScript strict | ✅ Locked |
+| ADR-001 | Jamstack (SSG + rebuild-on-webhook; ISR = provider-dependent optimization) | ✅ Locked |
+| ADR-002 | Astro + React islands + TypeScript strict (Astro definitive; revisable only pre-F4) | ✅ Locked |
 | ADR-003 | Headless CMS (provider TBD) | ⏳ Pending DA-7 |
 | ADR-004 | PostgreSQL + pgvector (EU-hosted) | ⏳ Pending DA-5 |
-| ADR-005 | RAG + Claude via BFF proxy only | ✅ Locked |
+| ADR-005 | RAG + Claude via BFF proxy only (prompt-injection guardrails; embeddings via DA-10) | ✅ Locked |
 | ADR-006 | RBAC: public/authenticated/admin | ✅ Locked |
 | ADR-007 | CI/CD via GitHub Actions | ✅ Locked |
 | ADR-008 | Lead persistence (email + CRM webhook → PostgreSQL) | ⏳ Pending DA-2 |
 | ADR-009 | i18n design-first (ES now, EN in F3) | ✅ Locked |
+| ADR-010 | Outbox pattern + scheduled retry worker (durable lead delivery) | ✅ Locked |
+
+**Closed Decision:**
+- ✅ DA-1: Stack — **Astro definitive** (WordPress discarded)
 
 **Open Decisions Blocking Development:**
-- DA-1: Stack (Astro ✅ vs WordPress)
 - DA-2: CRM provider (HubSpot/Brevo/Pipedrive/custom)
-- DA-3: Hosting (Vercel/Netlify/Cloudflare Pages)
+- DA-3: Hosting (Vercel/Netlify/Cloudflare Pages) — **must close before BFF**
 - DA-4: Editorial workflow (direct publish vs approval gate)
-- DA-5: PostgreSQL provider (Supabase/Neon/AWS RDS)
-- DA-6: IA scope in F2 (token budget, features)
-- DA-7: CMS provider (Strapi/Sanity/Storyblok/Contentful)
+- DA-5: PostgreSQL provider (Supabase/Neon/AWS RDS) — serverless pooler required
+- DA-6: IA scope in F2 (features + max monthly budget + hard-stop cutoff)
+- DA-7: CMS provider (Strapi/Sanity/Storyblok/Contentful) — evaluate cost per seat
 - DA-8: Email transactional provider (SendGrid/Brevo/Resend/other)
 - DA-9: Analytics tool (Plausible/GA4/PostHog)
+- DA-10: Embeddings provider — **Voyage AI recommended** (vs OpenAI/Cohere) — must close before RAG
 
 Canonical definitions in **Bible §49 (SSOT)**; see **CLAUDE.md** for tracking context and validation criteria.
 

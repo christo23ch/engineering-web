@@ -371,7 +371,7 @@
 **Descripción.**
 - **Legales:** RGPD/LOPDGDD y LSSI-CE (España/UE) de obligado cumplimiento.
 - **Idioma:** contenido primario en español.
-- **Presupuesto y equipo:** **⚠️ INCERTIDUMBRE** — no facilitados; condicionan la elección de stack ([§49](#49-anexo-de-decisiones-abiertas), DA-1).
+- **Presupuesto y equipo:** **⚠️ INCERTIDUMBRE** — no facilitados; condicionan el **modelo de mantenimiento** (partner externo vs. interno), **no** la elección de stack ([§49](#49-anexo-de-decisiones-abiertas) DA-1 cerrada: Astro). Ver [§44](#44-hipótesis) H7.
 - **Marca:** manual de marca no disponible; se usan directrices provisionales ([§22](#22-ui)).
 - **Contenido:** dependencia de que el cliente aporte casos, textos y fotos reales.
 - **Datos:** minimización — no se recogen datos personales innecesarios.
@@ -400,7 +400,7 @@
 [ Navegador ]
      │  HTML/CSS/JS estático + islas interactivas
      ▼
-[ CDN global ] ──sirve──▶ Sitio (Astro SSG/ISR) 
+[ CDN global ] ──sirve──▶ Sitio (Astro SSG + rebuild por webhook)
      │                         │ build
      │                         ▼
      │                   [ CMS headless ]  ← Editores
@@ -423,7 +423,7 @@
 
 **Decisiones tomadas (resumen, detalle en ADR §43).** Jamstack + Astro + React islands + CMS headless + BFF serverless + PostgreSQL gestionado con pgvector.
 
-**Alternativas descartadas.** (a) *Monolito tradicional (p. ej. WordPress clásico)* — descartado para la opción recomendada por menor control de rendimiento (se mantiene como alternativa de bajo mantenimiento técnico, ver [§49](#49-anexo-de-decisiones-abiertas) DA-1). (b) *SPA pura sin SSR/SSG* — descartado por penalización SEO.
+**Alternativas descartadas.** (a) *Monolito tradicional (p. ej. WordPress clásico)* — **descartado definitivamente** ([§49](#49-anexo-de-decisiones-abiertas) DA-1 cerrada) por menor control de rendimiento y seguridad. (b) *SPA pura sin SSR/SSG* — descartado por penalización SEO.
 
 ---
 
@@ -431,7 +431,7 @@
 
 **Objetivo.** Definir la construcción del Sitio.
 
-**Descripción.** **Astro** como framework (renderizado estático por defecto, ISR donde aplique), con **islas React** (TypeScript) solo en componentes interactivos (formularios, asistente IA, filtros). Estilos con **Tailwind CSS** gobernado por **design tokens** ([§22](#22-ui)). Contenido consumido del CMS en *build time* (y en *runtime* vía BFF para lo dinámico). Componentes reutilizables documentados (idealmente en Storybook).
+**Descripción.** **Astro** como framework con **generación estática (SSG) por defecto**; la actualización de contenido se resuelve mediante **rebuild disparado por webhook** del CMS (contrato portable, independiente del proveedor). La **regeneración incremental (ISR/ODB)** —regenerar solo las páginas afectadas sin reconstruir todo el sitio— es una **optimización dependiente del proveedor de hosting** ([§49](#49-anexo-de-decisiones-abiertas) DA-3), **no** una pieza arquitectónica: se adoptará solo si el proveedor elegido la ofrece y los tiempos de build lo justifican. Islas **React** (TypeScript) solo en componentes interactivos (formularios, asistente IA, filtros). Estilos con **Tailwind CSS** gobernado por **design tokens** ([§22](#22-ui)). Contenido consumido del CMS en *build time* (y en *runtime* vía BFF para lo dinámico). Componentes reutilizables documentados (idealmente en Storybook).
 
 **Justificación.** Minimiza JavaScript enviado (mejor CWV y SEO) enviando HTML estático y «hidratando» solo lo imprescindible (arquitectura de islas).
 
@@ -441,7 +441,9 @@
 
 **Dependencias.** CMS, sistema de diseño, BFF para datos dinámicos.
 
-**Decisiones tomadas.** React como tecnología de isla (ecosistema/contratación/tipado); TypeScript estricto obligatorio.
+**Decisiones tomadas.** React como tecnología de isla (ecosistema/contratación/tipado); TypeScript estricto obligatorio. **Astro es el framework definitivo del sitio público** (DA-1 cerrada); no se renegocia en F1–F3.
+
+> **Cláusula de reevaluación (única).** La elección de framework frontend podrá **revisarse únicamente antes del inicio de la Fase 4** y **solo si** el alcance del **área privada** cambia de forma significativa (p. ej. pasa a ser una aplicación autenticada extensa). En tal caso se evaluaría un framework orientado a app (p. ej. Next.js) **para el subdominio privado**, como aplicación separada, **sin migrar el sitio público**. Fuera de ese supuesto y ventana, el stack no se reabre.
 
 **Alternativas descartadas.** (a) *Next.js* — válido, descartado como recomendación por mayor peso JS por defecto para un sitio mayoritariamente estático (se mantiene como alternativa, ADR-002). (b) *Vue/Svelte* — descartados por preferencia de ecosistema/contratación, no por capacidad.
 
@@ -451,7 +453,9 @@
 
 **Objetivo.** Definir la capa de servicios dinámicos.
 
-**Descripción.** **BFF serverless** (funciones edge/Node en TypeScript) responsable de: recepción y validación de formularios, antispam, persistencia de leads, envío a CRM y email transaccional, y *proxy* seguro al proveedor de IA (las claves nunca en el cliente). Sin servidor de larga vida en el MVP. Para el **área privada futura** se prevé un backend de sesión/autenticación gestionado.
+**Descripción.** **BFF serverless** (funciones edge/Node en TypeScript) responsable de: recepción y validación de formularios, antispam, **persistencia de leads con *outbox* durable** ([ADR-010](#43-decisiones-de-arquitectura-adr)), envío a CRM y email transaccional (mediante un ***worker* programado** que procesa el *outbox* con reintentos), y *proxy* seguro a los proveedores de IA —generación y embeddings— (las claves nunca en el cliente). Sin servidor de larga vida en el MVP. Para el **área privada futura** se prevé un backend de sesión/autenticación gestionado.
+
+> **⚠️ Secuenciación obligatoria (DA-3 antes del BFF).** El *runtime* serverless **no es portable** entre proveedores (funciones Node de Vercel/Netlify ≠ Cloudflare Workers: APIs y limitaciones distintas). Por tanto, la **decisión de hosting ([§49](#49-anexo-de-decisiones-abiertas) DA-3) debe cerrarse ANTES de escribir el primer código del BFF** (en F0, no en F1). Mitigación recomendada para reducir el acoplamiento: adoptar una capa de BFF portable (p. ej. framework agnóstico Node/edge) que abstraiga el proveedor. No se selecciona proveedor en este documento; se fija únicamente la dependencia y su orden.
 
 **Justificación.** El serverless cubre cargas intermitentes (formularios, IA) con coste bajo, escalado automático y sin operación de servidores.
 
@@ -502,7 +506,8 @@ Modelo conceptual en la [§28](#28-modelo-de-datos-de-alto-nivel).
 |---|---|---|
 | **CRM** (HubSpot/Brevo/Pipedrive) | Gestión de leads y automatización. | Maestro comercial. Elección abierta ([§49](#49-anexo-de-decisiones-abiertas) DA-2). |
 | **Email transaccional** (p. ej. proveedor SMTP/API) | Acuses y notificaciones. | Server-side desde BFF. |
-| **Proveedor de IA** (Anthropic — Claude) | Asistente/RAG y clasificación. | Ver [§16](#16-inteligencia-artificial). |
+| **Proveedor de IA — generación** (Anthropic — Claude) | Asistente/RAG y clasificación. | Ver [§16](#16-inteligencia-artificial). |
+| **Proveedor de embeddings** (Voyage AI recomendado — [§49](#49-anexo-de-decisiones-abiertas) DA-10) | Vectorización de contenido y consultas para RAG. | Server-side desde BFF; procesa contenido → **requiere DPA** y garantías UE/adecuación. |
 | **Analítica** (Plausible o GA4) | Métricas de uso. | Con consentimiento; *privacy-first* preferido. |
 | **Gestor de consentimiento (CMP)** | Cookies/RGPD. | Bloquea scripts hasta consentimiento. |
 | **Google Search Console / Business Profile** | SEO y SEO local. | Verificación y datos NAP. |
@@ -527,10 +532,18 @@ Modelo conceptual en la [§28](#28-modelo-de-datos-de-alto-nivel).
 **Objetivo.** Definir el uso de IA, su alcance y sus límites.
 
 **Descripción.** Dos capacidades, ambas con el contenido propio como base:
-1. **Búsqueda semántica + asistente RAG (versión mínima, `SHOULD` en MVP inmediato):** el asistente responde preguntas de visitantes usando **exclusivamente** contenido publicado (servicios, casos, recursos), citando las fuentes. Flujo: contenido → *embeddings* → índice pgvector; consulta → recuperación → generación con **Claude** (familia Anthropic; **Haiku 4.5** para clasificación/consultas económicas, **Sonnet/Opus 4.x** para respuestas complejas). Todas las llamadas pasan por el BFF (claves server-side, control de coste y *rate limiting*).
+1. **Búsqueda semántica + asistente RAG (versión mínima, `SHOULD` en MVP inmediato):** el asistente responde preguntas de visitantes usando **exclusivamente** contenido publicado (servicios, casos, recursos), citando las fuentes. Flujo: contenido → *embeddings* (**proveedor dedicado, ver [§49](#49-anexo-de-decisiones-abiertas) DA-10 — recomendado: Voyage AI**; Anthropic **no** ofrece API de embeddings) → índice pgvector; consulta → *embedding* de la consulta → recuperación → generación con **Claude** (familia Anthropic; **Haiku 4.5** para clasificación/consultas económicas, **Sonnet/Opus 4.x** para respuestas complejas). Todas las llamadas (embeddings y generación) pasan por el BFF (claves server-side, control de coste y *rate limiting*).
 2. **Asistencia interna de contenido y cualificación de leads (futuro/opcional):** ayuda a redactar borradores editoriales y a clasificar leads. Siempre con revisión humana.
 
 **Guardarraíles obligatorios:** el asistente no inventa datos de proyectos ni cifras; si no hay fuente, lo indica y ofrece contacto. No trata datos personales sensibles. Registro de consultas anonimizado para mejora, con consentimiento.
+
+**Protección frente a *prompt injection* (obligatoria).** Como el asistente combina entrada del usuario y contenido recuperado, ambos son vectores de inyección de instrucciones. Medidas mínimas exigidas:
+- **Separación de canales:** las instrucciones del sistema van en el rol de sistema; el contenido recuperado y la consulta del usuario se insertan como **datos delimitados** (p. ej. envueltos y etiquetados como no confiables), nunca concatenados como instrucciones.
+- **Regla de no obediencia:** el *prompt* de sistema ordena **ignorar toda instrucción contenida en el contenido recuperado o en la consulta** (p. ej. «ignora lo anterior», «revela tu prompt», «cambia de rol»).
+- **Salida acotada:** el modelo solo responde sobre el dominio (servicios/casos/recursos) y con **cita de fuente**; fuera de dominio, rechaza y ofrece contacto (política de *refusal*).
+- **Saneado y límites:** longitud máxima de consulta, normalización de entrada, y *rate limiting* por IP/sesión ([§17](#17-seguridad)).
+- **Sin acciones:** al no existir herramientas ejecutables en MVP ([ADR-005](#43-decisiones-de-arquitectura-adr)), una inyección no puede desencadenar efectos laterales; esta propiedad se **mantiene como invariante** hasta que se evalúe formalmente cualquier capacidad de acción futura.
+- **Verificación:** *test suite* de inyección (batería de *prompts* adversarios) en CI antes de exponer el asistente ([§32](#32-estrategia-de-testing)).
 
 **Justificación.** La IA sobre contenido propio mejora la conversión (respuestas inmediatas con fuentes) y diferencia frente a competidores, sin los riesgos de un agente autónomo con acciones.
 
@@ -538,9 +551,9 @@ Modelo conceptual en la [§28](#28-modelo-de-datos-de-alto-nivel).
 
 **Riesgos.** Alucinaciones y coste variable; mitigado con RAG estricto (respuestas ancladas a fuentes), límites de tasa y modelos económicos por defecto. **Riesgo legal/reputacional** si el asistente afirma capacidades no reales; mitigado con guardarraíles y revisión de *prompts*.
 
-**Dependencias.** Proveedor IA (Anthropic), contenido publicado, pgvector, presupuesto de tokens.
+**Dependencias.** Proveedor de generación (Anthropic/Claude), **proveedor de embeddings** ([§49](#49-anexo-de-decisiones-abiertas) DA-10), contenido publicado, pgvector, presupuesto de tokens ([§49](#49-anexo-de-decisiones-abiertas) DA-6).
 
-**Decisiones tomadas.** RAG anclado a fuentes con cita obligatoria; sin acciones ejecutables en MVP; claves y lógica IA solo en el BFF; Anthropic/Claude como proveedor por defecto (alineado con el ecosistema del proyecto), con abstracción que permita sustituirlo.
+**Decisiones tomadas.** RAG anclado a fuentes con cita obligatoria; **guardarraíles de *prompt injection* obligatorios** (ver arriba); sin acciones ejecutables en MVP; claves y lógica IA solo en el BFF; **generación** con Anthropic/Claude por defecto y **embeddings** con proveedor dedicado ([§49](#49-anexo-de-decisiones-abiertas) DA-10, recomendado Voyage AI), ambos con abstracción que permita sustituirlos.
 
 **Alternativas descartadas.** (a) *Chatbot de respuestas libres sin RAG* — descartado por riesgo de alucinación. (b) *Modelo propio auto-alojado* — descartado por coste/operación desproporcionados para el volumen esperado. (c) *Estimador de ahorro por ML* — descartado en favor de un cálculo determinista basado en reglas de ingeniería (más explicable y auditable) cuando se implemente la calculadora ([§7](#7-funcionalidades-futuras)).
 
@@ -963,7 +976,7 @@ CI ejecuta lint + unit + integración + build + axe + Lighthouse antes de permit
 
 **Objetivo.** Definir cómo llega el código a producción.
 
-**Descripción.** **CI/CD con GitHub Actions.** Entornos: `local` → `staging` (preproducción no indexable) → `production`. *Deploy* continuo en cada *merge* a `main` (tras CI verde) mediante la plataforma de despliegue (Vercel/Netlify/Cloudflare Pages, ver [§49](#49-anexo-de-decisiones-abiertas) DA-3), con **previews** por PR. *Rollback* inmediato a la versión anterior. Cambios de contenido del CMS disparan *rebuild* incremental (webhook).
+**Descripción.** **CI/CD con GitHub Actions.** Entornos: `local` → `staging` (preproducción no indexable) → `production`. *Deploy* continuo en cada *merge* a `main` (tras CI verde) mediante la plataforma de despliegue (Vercel/Netlify/Cloudflare Pages, ver [§49](#49-anexo-de-decisiones-abiertas) DA-3), con **previews** por PR. *Rollback* inmediato a la versión anterior. Los cambios de contenido del CMS disparan un **rebuild del sitio vía webhook** (mecanismo base y portable); la regeneración incremental por página (ISR/ODB) es una optimización **opcional dependiente del proveedor** ([§49](#49-anexo-de-decisiones-abiertas) DA-3), no un requisito.
 
 **Justificación.** *Deploy* automatizado con previews reduce riesgo, acelera la iteración y permite revisar cambios visualmente antes de fusionar.
 
@@ -1005,7 +1018,7 @@ CI ejecuta lint + unit + integración + build + axe + Lighthouse antes de permit
 
 **Descripción.**
 - **Usuario:** mensajes claros y accionables; páginas 404/500 útiles con navegación de retorno; estados de error de formulario específicos y accesibles; nunca exponer detalles técnicos ni datos sensibles.
-- **Sistema:** captura centralizada; distinción error esperado/inesperado; reintentos con *backoff* en integraciones (CRM, email, IA); *fallbacks* (p. ej. si el CRM falla, el lead se persiste igualmente y se reintenta el envío).
+- **Sistema:** captura centralizada; distinción error esperado/inesperado; **reintentos durables** de integraciones (CRM, email) mediante el **patrón *outbox*** ([ADR-010](#43-decisiones-de-arquitectura-adr)) —no en memoria, inviables en serverless— con *backoff* exponencial e idempotencia; *fallbacks* (si el CRM falla, el lead ya está persistido y el *worker* reintenta el envío).
 - **Correlación:** identificador de traza por petición para diagnóstico.
 
 **Justificación.** La resiliencia en la captura de leads es crítica: un fallo de terceros no debe perder un lead.
@@ -1016,7 +1029,7 @@ CI ejecuta lint + unit + integración + build + axe + Lighthouse antes de permit
 
 **Dependencias.** Logs ([§36](#36-gestión-de-logs)); monitorización.
 
-**Decisiones tomadas.** Los leads se persisten en PostgreSQL **antes** de intentar el envío a CRM/email, con reintentos; los mensajes de error nunca exponen internals.
+**Decisiones tomadas.** Los leads se persisten en PostgreSQL **antes** de intentar el envío a CRM/email, con reintentos durables vía *outbox* ([ADR-010](#43-decisiones-de-arquitectura-adr)); los mensajes de error nunca exponen internals.
 
 **Alternativas descartadas.** Enviar a CRM sin persistencia previa — descartado por riesgo de pérdida de leads ante fallo del CRM.
 
@@ -1073,8 +1086,10 @@ CI ejecuta lint + unit + integración + build + axe + Lighthouse antes de permit
 | `CMS_API_URL` / `CMS_API_TOKEN` | Acceso al CMS headless. | Token: sí |
 | `CRM_API_BASE` / `CRM_API_KEY` / `CRM_WEBHOOK_SECRET` | Envío de leads al CRM y verificación de webhooks. | Sí |
 | `EMAIL_PROVIDER` / `EMAIL_API_KEY` / `EMAIL_FROM` | Email transaccional (selector de proveedor + credenciales). | Clave: sí |
-| `AI_PROVIDER` / `AI_PROVIDER_API_KEY` | Proveedor de IA (`anthropic`) y su clave. | Clave: sí |
+| `AI_PROVIDER` / `AI_PROVIDER_API_KEY` | Proveedor de IA de **generación** (`anthropic`) y su clave. | Clave: sí |
 | `AI_MODEL_DEFAULT` / `AI_MODEL_COMPLEX` | Selección de modelos: por defecto (Haiku, económico) y para consultas complejas (Sonnet/Opus). | No |
+| `EMBEDDINGS_PROVIDER` / `EMBEDDINGS_API_KEY` / `EMBEDDINGS_MODEL` | Proveedor de **embeddings** (`voyage`), su clave y modelo ([§49](#49-anexo-de-decisiones-abiertas) DA-10). | Clave: sí |
+| `AI_MONTHLY_BUDGET` / `AI_BUDGET_HARD_STOP` | Presupuesto máximo mensual de IA y activación del corte duro al alcanzarlo ([§49](#49-anexo-de-decisiones-abiertas) DA-6). | No |
 | `DATABASE_URL` / `DATABASE_VECTOR_POOL_SIZE` | Conexión PostgreSQL (con pgvector) y tamaño del pool vectorial. | URL: sí |
 | `ANALYTICS_PROVIDER` / `ANALYTICS_ID` | Analítica: selector de proveedor e identificador (si aplica). | No |
 | `CMP_SITE_ID` | Gestor de consentimiento. | No |
@@ -1107,7 +1122,7 @@ CI ejecuta lint + unit + integración + build + axe + Lighthouse antes de permit
 | P2 | Hipótesis de negocio/marca incorrectas. | Media | Alto | Validación bloqueante en Fase 0 ([§44](#44-hipótesis)). |
 | P3 | *Scope creep*. | Alta | Medio | MoSCoW estricto; gobernanza; ADR. |
 | P4 | Falta de manual de marca. | Media | Medio | Directrices provisionales ([§22](#22-ui)); formalizar en Fase 0. |
-| P5 | Equipo del cliente sin capacidad de mantener el stack. | Media | Alto | Stack acorde al perfil; formación; alternativa de bajo mantenimiento (DA-1). |
+| P5 | Equipo del cliente sin capacidad de mantener el stack. | Media | Alto | Partner de mantenimiento y/o formación (DA-1 cerrada: el stack Astro **no** se renegocia por este motivo). |
 
 **Justificación.** Gestionar el riesgo explícitamente permite mitigarlo antes de que se materialice.
 
@@ -1217,14 +1232,15 @@ CI ejecuta lint + unit + integración + build + axe + Lighthouse antes de permit
 | ADR | Decisión | Estado | Justificación (resumen) | Alternativas descartadas |
 |---|---|---|---|---|
 | **ADR-001** | Arquitectura **Jamstack** (estático + CDN + headless + BFF serverless). | Aceptada | Rendimiento/SEO/coste/seguridad para sitio de contenido con captación. | Monolito clásico; SPA sin SSR. |
-| **ADR-002** | **Astro** + islas **React** + **TypeScript**. | Aceptada | Mínimo JS, gran SEO/CWV, ecosistema React para interactividad. | Next.js (alternativa viva); Vue/Svelte. |
+| **ADR-002** | **Astro** + islas **React** + **TypeScript** (definitivo, DA-1 cerrada). | Aceptada | Mínimo JS, gran SEO/CWV, ecosistema React para interactividad. | Next.js — descartado para el sitio; **reevaluable solo para el área privada antes de F4** ([§12](#12-arquitectura-del-frontend)). Vue/Svelte descartados. |
 | **ADR-003** | **CMS headless** como fuente de verdad del contenido. | Aceptada | Autonomía editorial; separación contenido/presentación. | WordPress acoplado. |
 | **ADR-004** | **PostgreSQL gestionado (UE) con pgvector** para datos operativos + RAG. | Aceptada | Un solo motor para datos y vectores; residencia UE. | DB vectorial dedicada; NoSQL. |
 | **ADR-005** | **RAG anclado a fuentes** con **Claude (Anthropic)** vía BFF; sin acciones en MVP. | Aceptada | Diferenciación con bajo riesgo de alucinación; claves protegidas. | Chatbot libre; modelo auto-alojado. |
 | **ADR-006** | **RBAC + mínimo privilegio**; sin cuentas para visitantes en MVP. | Aceptada | Suficiente y seguro a esta escala; menor fricción. | ABAC; auth propia; login de visitantes. |
 | **ADR-007** | **CI/CD GitHub Actions** con *deploy* continuo, previews y `staging` no indexable. | Aceptada | Entrega rápida y segura con revisión visual. | Despliegues manuales. |
-| **ADR-008** | **Persistir leads antes de enviarlos** a CRM/email, con reintentos. | Aceptada | Evita pérdida de leads ante fallo de terceros. | Envío directo sin persistencia. |
+| **ADR-008** | **Persistir leads antes de enviarlos** a CRM/email, con reintentos (mecanismo durable en ADR-010). | Aceptada | Evita pérdida de leads ante fallo de terceros. | Envío directo sin persistencia. |
 | **ADR-009** | **i18n diseñado desde el inicio, activado después**. | Aceptada | Prepara ES/EN sin coste de lanzamiento. | i18n completo en MVP; ignorarlo. |
+| **ADR-010** | **Patrón *Outbox* + reintento programado** para leads (persistencia durable). | Aceptada | En serverless los reintentos en memoria no sobreviven a la invocación; el *outbox* garantiza la entrega sin perder leads. | Reintentos solo en memoria; cola/broker dedicado (sobredimensionado a esta escala). |
 
 **Justificación.** Los ADR dejan trazabilidad del *porqué* de cada decisión, condición para que el SSOT sea coherente en el tiempo.
 
@@ -1234,7 +1250,9 @@ CI ejecuta lint + unit + integración + build + axe + Lighthouse antes de permit
 
 **Dependencias.** Todas las secciones de arquitectura.
 
-**Decisiones tomadas.** Las nueve ADR anteriores quedan aceptadas como línea base; los cambios se registran incrementando el número de ADR.
+**Decisiones tomadas.** Las diez ADR anteriores quedan aceptadas como línea base; los cambios se registran incrementando el número de ADR.
+
+> **ADR-010 · Patrón *Outbox* (detalle).** El BFF, dentro de la **misma transacción** que crea el `Lead` en PostgreSQL, escribe un registro en una tabla ***outbox*** con estado `pending`. La respuesta al usuario se da tras esa persistencia (el lead **nunca** se pierde). Un **worker programado** (cron de la plataforma de despliegue) toma los `pending`, intenta el envío a CRM/email con ***backoff* exponencial**, y marca `sent` o incrementa el contador de reintentos hasta `failed` (con alerta, [§34](#34-monitorización)). Es **idempotente** (clave de deduplicación por registro) para tolerar reintentos y ejecuciones solapadas. Sustituye a los reintentos en memoria de [ADR-008](#43-decisiones-de-arquitectura-adr)/[§35](#35-gestión-de-errores), inviables en funciones efímeras. Depende de la persistencia de [§14](#14-arquitectura-de-datos) y de un *scheduler* del proveedor ([§49](#49-anexo-de-decisiones-abiertas) DA-3).
 
 **Alternativas descartadas.** Documentar decisiones solo en actas dispersas — descartado por falta de trazabilidad.
 
@@ -1254,7 +1272,7 @@ CI ejecuta lint + unit + integración + build + axe + Lighthouse antes de permit
 | H4 | Modelo B2B con comité de compra. | Revisar personas ([§4](#4-público-objetivo)) y CTAs. |
 | H5 | Objetivo primario = generación de leads. | Reordenar prioridades funcionales. |
 | H6 | Certificaciones ISO disponibles (9001/14001/45001). | Retirar esa prueba social. |
-| H7 | Presupuesto/equipo compatibles con stack moderno (Astro/headless). | Adoptar alternativa de bajo mantenimiento (DA-1). |
+| H7 | Presupuesto/equipo compatibles con stack moderno (Astro/headless). | Contratar partner de mantenimiento/formación; **el stack no cambia** (DA-1 cerrada). |
 | H8 | El cliente aporta responsable de contenidos. | Se agrava el riesgo P1; replanificar. |
 | H9 | Idiomas ES (ahora) y EN (después). | Ajustar i18n y roadmap. |
 | H10 | Directrices visuales provisionales (azul/verde, sans-serif). | Rehacer UI ([§22](#22-ui)) con el manual real. |
@@ -1303,11 +1321,11 @@ CI ejecuta lint + unit + integración + build + axe + Lighthouse antes de permit
 
 **Objetivo.** Secuenciar la entrega en fases con hitos.
 
-**Descripción.** **⚠️ INCERTIDUMBRE** en fechas exactas (dependen de recursos, [§49](#49-anexo-de-decisiones-abiertas) DA-1). Secuencia lógica:
+**Descripción.** **⚠️ INCERTIDUMBRE** en fechas exactas (dependen de recursos y del modelo de mantenimiento, ver [§44](#44-hipótesis) H7). Secuencia lógica:
 
 | Fase | Contenido | Hito |
 |---|---|---|
-| **F0 — Descubrimiento** (sem. 1–2) | Validar hipótesis ([§44](#44-hipótesis)); manual de marca; keyword research; inventario de casos; cerrar decisiones abiertas ([§49](#49-anexo-de-decisiones-abiertas)). **Estructura de repo ✅ hecha. Bible 🟢 v1.0 oficial ✅.** | Hipótesis validadas y decisiones cerradas → **actualización de contenido v1.1** del SSOT. |
+| **F0 — Descubrimiento** (sem. 1–2) | Validar hipótesis ([§44](#44-hipótesis)); manual de marca; keyword research; inventario de casos; cerrar decisiones abiertas ([§49](#49-anexo-de-decisiones-abiertas)). **DA-3 (hosting) y DA-10 (embeddings) deben cerrarse en F0, antes del BFF/RAG de F1–F2.** **Estructura de repo ✅ hecha. Bible 🟢 v1.0 oficial ✅.** | Hipótesis validadas y decisiones cerradas → **actualización de contenido v1.1** del SSOT. |
 | **F1 — MVP** (sem. 3–8) | RF-01…RF-11: Home, servicios, portfolio, sobre nosotros, contacto, legal; CMS; formularios→CRM; SEO técnico; analítica; RGPD. | Lanzamiento del Sitio. |
 | **F2 — Contenido + IA mínima** (mes 3–4) | RF-12…RF-16: blog/recursos, lead magnets, empleo, **asistente IA/búsqueda semántica (mín.)**, búsqueda interna; datos estructurados completos; CWV afinados. | IA en producción; motor de contenido. |
 | **F3 — Automatización + i18n** (mes 5–6) | RF-17 y RF-20: multi-idioma ES/EN, automatización de marketing (lead scoring), A/B testing de conversión. | Crecimiento y multi-idioma. |
@@ -1346,7 +1364,7 @@ CI ejecuta lint + unit + integración + build + axe + Lighthouse antes de permit
 | **DPA** | *Data Processing Agreement*: contrato de encargo de tratamiento (RGPD). |
 | **E2E** | *End-to-end*: pruebas de extremo a extremo. |
 | **i18n** | Internacionalización. |
-| **ISR** | *Incremental Static Regeneration*: regeneración estática incremental. |
+| **ISR** | *Incremental Static Regeneration*: regeneración estática incremental. En este proyecto es una **optimización opcional dependiente del proveedor de hosting** (DA-3), no una pieza arquitectónica; la base es SSG + rebuild por webhook ([§12](#12-arquitectura-del-frontend)). |
 | **Jamstack** | Arquitectura de sitios con front estático + servicios vía API. |
 | **Lead** | Contacto comercial potencial. |
 | **MEP** | *Mechanical, Electrical, Plumbing*: instalaciones. |
@@ -1389,11 +1407,10 @@ CI ejecuta lint + unit + integración + build + axe + Lighthouse antes de permit
 
 > Decisiones que **no** pueden cerrarse con la información disponible. Para cada una se documenta la incertidumbre y se propone la mejor alternativa con ventajas e inconvenientes. **No se cierran aquí; se resuelven en la Fase 0.**
 
-### DA-1 · Perfil de stack (moderno vs. bajo mantenimiento)
-- **Incertidumbre:** presupuesto y perfil técnico del equipo que mantendrá la Plataforma.
-- **Opción A (recomendada): Astro + headless + BFF.** ✅ Rendimiento/SEO/seguridad superiores; escalable. ❌ Requiere perfil técnico para mantener.
-- **Opción B: WordPress (tema a medida ligero) gestionado.** ✅ Autonomía editorial sin perfil técnico; menor coste inicial. ❌ Menor control de rendimiento y seguridad; más *plugins* que mantener.
-- **Propuesta:** A si hay perfil técnico o partner de mantenimiento; B si el equipo es no técnico y prima la autonomía. **Decidir en F0.**
+### DA-1 · Perfil de stack — ✅ **CERRADA: Astro (definitiva)**
+- **Decisión (cerrada):** el stack **definitivo** del proyecto es **Astro + CMS headless + BFF serverless** (ver [ADR-001](#43-decisiones-de-arquitectura-adr)/[ADR-002](#43-decisiones-de-arquitectura-adr)). **WordPress queda descartado** como plataforma; no es una alternativa viva.
+- **Justificación:** control total de rendimiento, SEO y seguridad, alineado con los umbrales de [§9](#9-requisitos-no-funcionales) y con el objetivo de captación de [§2](#2-objetivos-del-negocio). Es la base sobre la que se apoyan el resto de ADR.
+- **Mitigación del antiguo motivo de duda (mantenimiento):** si el equipo del cliente careciera de perfil técnico suficiente ([§44](#44-hipótesis) H7), la respuesta **no** es cambiar de stack, sino **contratar un partner de mantenimiento y/o formación** ([§39](#39-riesgos-del-proyecto) P5). El stack **no se renegocia** por este motivo.
 
 ### DA-2 · Proveedor de CRM
 - **Incertidumbre:** herramientas ya usadas por el equipo comercial y presupuesto.
@@ -1410,15 +1427,18 @@ CI ejecuta lint + unit + integración + build + axe + Lighthouse antes de permit
 
 ### DA-5 · Residencia y proveedor concreto de PostgreSQL
 - **Opciones:** Supabase, Neon u otro gestionado, siempre con **región UE** y soporte de **pgvector**.
-- **Propuesta:** elegir el que garantice UE + pgvector + backups gestionados. **Decidir en F0.**
+- **Criterio de selección obligatorio:** **pooler de conexiones apto para serverless** (p. ej. PgBouncer/pooler integrado en modo *transaction*). El BFF serverless abre muchas conexiones efímeras; sin pooler se agota el límite de PostgreSQL. Requisito eliminatorio.
+- **Propuesta:** elegir el que garantice UE + pgvector + backups gestionados + pooler serverless. **Decidir en F0.**
 
-### DA-6 · Alcance real del asistente IA en F2
+### DA-6 · Alcance real del asistente IA en F2 (y presupuesto)
 - **Incertidumbre:** volumen de consultas y apetito de coste.
-- **Propuesta:** empezar con búsqueda semántica + FAQ con fuentes (bajo coste, Haiku por defecto) y ampliar según uso.
+- **Criterio de selección obligatorio:** fijar un **presupuesto máximo mensual de IA (€/mes)** y una **política de corte** al alcanzarlo: al llegar al umbral, el BFF **degrada con elegancia** (deshabilita el asistente y ofrece búsqueda léxica + contacto) en lugar de seguir gastando. No basta con *rate limiting*: debe existir **corte duro por presupuesto** (`AI_MONTHLY_BUDGET` / `AI_BUDGET_HARD_STOP`, ver [§38](#38-variables-de-entorno)).
+- **Propuesta:** empezar con búsqueda semántica + FAQ con fuentes (bajo coste, Haiku por defecto), presupuesto conservador con corte duro, y ampliar según uso. **Decidir en F0.**
 
 ### DA-7 · Proveedor de CMS headless
 - **Incertidumbre:** presupuesto, modelo de contenido y preferencia de alojamiento (SaaS vs. autogestionado).
 - **Opciones:** Strapi (open source, autogestionado; control total, más operación) · Sanity (tiempo real, potente; coste al escalar) · Storyblok (editor visual; orientado a marketing) · Contentful (maduro; coste elevado).
+- **Criterio de selección obligatorio:** evaluar el **coste por usuario/editor (*seat*)** del plan, ya que los CMS SaaS escalan el precio por asiento y es la partida que más crece con el equipo de contenidos; contrastarlo con el nº de editores previsto ([§26](#26-roles)).
 - **Propuesta:** Sanity o Storyblok si se prioriza SaaS y rapidez editorial; Strapi si se prioriza control y coste. Concreta el ADR-003. **Decidir en F0.**
 
 ### DA-8 · Proveedor de email transaccional
@@ -1430,6 +1450,17 @@ CI ejecuta lint + unit + integración + build + axe + Lighthouse antes de permit
 - **Incertidumbre:** requisitos de medición y equilibrio privacidad/RGPD vs. profundidad de datos.
 - **Opciones:** Plausible (sin cookies, RGPD-friendly, sin banner) · GA4 (gratuito, potente; requiere consentimiento y banner) · PostHog (producto+analítica; más operación).
 - **Propuesta:** Plausible por defecto (privacidad y simplicidad); GA4 solo si el negocio exige su ecosistema, gestionando consentimiento ([§17](#17-seguridad)/CMP). **Decidir en F0.**
+
+### DA-10 · Proveedor de embeddings para RAG
+- **Contexto (por qué existe):** el pipeline RAG ([§16](#16-inteligencia-artificial)) necesita **vectorizar** contenido y consultas. **Anthropic/Claude —proveedor de generación— NO ofrece API de embeddings**, por lo que se requiere un proveedor específico. Sin esta decisión, el RAG (RF-15) es inconstruible.
+- **Opciones analizadas:**
+  - **Voyage AI** — *embeddings* de máxima calidad en *retrieval* (líder en *benchmarks*); es el proveedor **recomendado oficialmente por Anthropic** como complemento de Claude; modelos económicos (`voyage-3-lite`) y de dominio; buen coste/rendimiento. ❌ Empresa más pequeña (riesgo de proveedor menor); tratamiento de datos a revisar (DPA).
+  - **OpenAI** (`text-embedding-3-small/large`) — muy barato, ubicuo, excelente *tooling* y estabilidad; gran comunidad. ❌ Introduce un **segundo gran proveedor de IA** en el stack (competidor del de generación) y su gobernanza de datos/UE debe revisarse con cuidado.
+  - **Cohere** (`embed-v3`) — fuerte en *retrieval* multilingüe, con modo específico *search document/query*; opción empresarial sólida. ❌ Coste algo superior; menor tracción que OpenAI.
+- **Decisión (recomendada, confirmar coste/DPA en F0): Voyage AI.**
+  - **Justificación:** (1) **mejor calidad de recuperación** disponible, lo que impacta directamente en la utilidad del asistente y en el guardarraíl anti-alucinación (mejores fuentes recuperadas = respuestas mejor ancladas); (2) **alineamiento con Anthropic** (proveedor recomendado para el ecosistema Claude), coherente con [ADR-005](#43-decisiones-de-arquitectura-adr); (3) **coste bajo** con `voyage-3-lite` para el volumen esperado ([§16](#16-inteligencia-artificial)); (4) el diseño exige **abstracción del proveedor** en el BFF, de modo que sustituirlo por OpenAI/Cohere sea re-embeber el corpus (horas) sin cambios de arquitectura — decisión **reversible barata**.
+  - **Requisitos de cierre en F0:** firmar **DPA** con garantías UE/adecuación (el proveedor procesa el contenido); fijar modelo (`voyage-3-lite` por defecto) y coste dentro del presupuesto de DA-6; verificar consistencia de dimensiones con el esquema pgvector ([§14](#14-arquitectura-de-datos)).
+  - **Plan B:** OpenAI `text-embedding-3-small` si el coste, la disponibilidad o el DPA de Voyage no encajaran.
 
 ---
 
@@ -1457,7 +1488,7 @@ CI ejecuta lint + unit + integración + build + axe + Lighthouse antes de permit
 
 ### 50.3 Decisiones tomadas durante la revisión
 - Este documento **reemplaza** al borrador 0.1.0 (23 secciones) y pasa a ser la única versión válida del PROJECT_BIBLE.
-- Se mantienen abiertas y **claramente marcadas** las incertidumbres (DA-1…DA-9) e hipótesis (H1…H11); **no se han inventado datos** para cerrarlas, conforme a las instrucciones.
+- Se mantienen **claramente marcadas** las incertidumbres (**DA-1 cerrada: Astro definitivo**; abiertas **DA-2…DA-10**) e hipótesis (H1…H11); **no se han inventado datos** para cerrarlas, conforme a las instrucciones.
 - El documento se adopta oficialmente como **🟢 versión 1.0 y SSOT** del proyecto. La validación de hipótesis y el cierre de las decisiones abiertas en la Fase 0 producirán **actualizaciones de contenido (v1.1)**, pero **no condicionan** la oficialidad de esta versión 1.0: el estado 🟢 se refiere a la **adopción del documento como fuente única de verdad**, no a que todo supuesto esté ya confirmado.
 
 ### 50.4 Verificaciones de consistencia superadas
@@ -1466,6 +1497,20 @@ CI ejecuta lint + unit + integración + build + axe + Lighthouse antes de permit
 - ✅ Referencias cruzadas internas coherentes (roles↔permisos, datos↔arquitectura, riesgos↔mitigaciones, ADR↔decisiones de sección).
 - ✅ Cada decisión de arquitectura tiene justificación y alternativas descartadas ([§43](#43-decisiones-de-arquitectura-adr)).
 - ✅ Incertidumbres no resueltas trasladadas al anexo ([§49](#49-anexo-de-decisiones-abiertas)) en lugar de resolverse por suposición.
+
+### 50.5 Consolidación de preparación para desarrollo (revisión del comité de arquitectura)
+
+Ronda de endurecimiento del SSOT tras la revisión crítica del comité de arquitectura, sin cambiar stack ni arquitectura general:
+1. **DA-1 cerrada** — **Astro definitivo**; WordPress descartado y eliminada toda ambigüedad ([§10](#10-restricciones), [§11](#11-arquitectura-general), [§39](#39-riesgos-del-proyecto), [§44](#44-hipótesis), [§46](#46-roadmap-de-alto-nivel), [§49](#49-anexo-de-decisiones-abiertas)).
+2. **DA-10 creada** — proveedor de **embeddings** (recomendado **Voyage AI**), pieza que faltaba en el pipeline RAG ([§15](#15-integraciones-externas), [§16](#16-inteligencia-artificial), [§38](#38-variables-de-entorno), [§49](#49-anexo-de-decisiones-abiertas)).
+3. **ADR-010 creada** — patrón ***outbox*** para persistencia durable de leads y reintentos, sustituyendo los reintentos en memoria inviables en serverless ([§13](#13-arquitectura-del-backend), [§35](#35-gestión-de-errores), [§43](#43-decisiones-de-arquitectura-adr)).
+4. **DA-3 secuenciada** — el hosting debe cerrarse **antes** del BFF (dependencia de *runtime*), sin elegir aún proveedor ([§13](#13-arquitectura-del-backend), [§46](#46-roadmap-de-alto-nivel)).
+5. **ISR reencuadrado** — la base es **SSG + rebuild por webhook**; ISR es optimización opcional dependiente del hosting, no arquitectura ([§11](#11-arquitectura-general), [§12](#12-arquitectura-del-frontend), [§33](#33-estrategia-de-despliegue), [§47](#47-glosario)).
+6. **Prompt injection** — guardarraíles obligatorios añadidos al RAG ([§16](#16-inteligencia-artificial)).
+7. **Criterios de selección** — pooler serverless (DA-5), coste por *seat* del CMS (DA-7), presupuesto mensual de IA + corte duro (DA-6, [§38](#38-variables-de-entorno)).
+8. **Cláusula de reevaluación frontend** — solo antes de F4 y solo si el área privada cambia significativamente ([§12](#12-arquitectura-del-frontend), [ADR-002](#43-decisiones-de-arquitectura-adr)).
+
+Resultado: **10 ADR** (ADR-001…010) y **10 decisiones** de anexo (**DA-1 cerrada**, **DA-2…DA-10 abiertas**). Documento apto como especificación oficial para iniciar desarrollo.
 
 ---
 
