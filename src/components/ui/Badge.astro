@@ -1,0 +1,16 @@
+---
+/**
+ * Badge / chip — presentational label (DESIGN_SYSTEM §11.5). Non-interactive by
+ * default (a <span>); when used as a filter it should be wrapped in a real
+ * <button>/<a> by the consumer. Zero JS.
+ */
+import { badgeVariants, type BadgeVariant } from '@/lib/ui/badge-variants';
+
+interface Props {
+  variant?: BadgeVariant;
+  class?: string;
+}
+const { variant = 'sector', class: className } = Astro.props;
+---
+
+<span class={badgeVariants({ variant, class: className })}><slot /></span>
