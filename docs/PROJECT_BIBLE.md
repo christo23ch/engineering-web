@@ -103,7 +103,7 @@
 
 **Descripción.** **`[HIPÓTESIS]`** La Plataforma es el sitio web corporativo y motor de captación de **«[NOMBRE_EMPRESA]»**, una ingeniería española moderna (30–80 personas) especializada en ingeniería industrial, energética, instalaciones (MEP) y renovables, con foco diferencial en **eficiencia energética y sostenibilidad rentable**. No es un folleto: es la infraestructura digital central de credibilidad, captación y conversión. A medio plazo incorpora **asistencia por IA** (búsqueda semántica y asistente sobre contenido propio) y un **área privada** de seguimiento para clientes.
 
-**Justificación.** El sector de la ingeniería española tiene, en general, presencia digital técnicamente correcta pero débil en narrativa de resultados, SEO y captación (ver [§3](#3-problemas-que-resuelve) y análisis de competencia heredado del borrador). Una plataforma orientada a datos, casos y conversión genera ventaja competitiva a coste relativo bajo.
+**Justificación.** El sector de la ingeniería española tiene, en general, presencia digital técnicamente correcta pero débil en narrativa de resultados, SEO y captación (ver [§3](#3-problemas-que-resuelve); el análisis de competencia se formaliza como entrada de la Fase 0, ver [§44](#44-hipótesis)/[§46](#46-roadmap-de-alto-nivel)). Una plataforma orientada a datos, casos y conversión genera ventaja competitiva a coste relativo bajo.
 
 **Impacto.** Alto y transversal: condiciona diseño, contenido, arquitectura técnica, SEO y procesos comerciales. Es el activo digital nuclear de la empresa.
 
@@ -1310,8 +1310,8 @@ CI ejecuta lint + unit + integración + build + axe + Lighthouse antes de permit
 | **F0 — Descubrimiento** (sem. 1–2) | Validar hipótesis ([§44](#44-hipótesis)); manual de marca; keyword research; inventario de casos; cerrar decisiones abiertas ([§49](#49-anexo-de-decisiones-abiertas)). **Estructura de repo ✅ hecha. Bible 🟢 v1.0 oficial ✅.** | Hipótesis validadas y decisiones cerradas → **actualización de contenido v1.1** del SSOT. |
 | **F1 — MVP** (sem. 3–8) | RF-01…RF-11: Home, servicios, portfolio, sobre nosotros, contacto, legal; CMS; formularios→CRM; SEO técnico; analítica; RGPD. | Lanzamiento del Sitio. |
 | **F2 — Contenido + IA mínima** (mes 3–4) | RF-12…RF-16: blog/recursos, lead magnets, empleo, **asistente IA/búsqueda semántica (mín.)**, búsqueda interna; datos estructurados completos; CWV afinados. | IA en producción; motor de contenido. |
-| **F3 — Automatización + i18n** (mes 5–6) | RF-17, RF-20 y parte de RF-18/19: multi-idioma ES/EN, automatización de marketing, A/B testing de conversión. | Crecimiento y multi-idioma. |
-| **F4 — Área privada + avanzado** (6 m+) | RF-19 y calculadoras; IA avanzada. | Autoservicio de cliente. |
+| **F3 — Automatización + i18n** (mes 5–6) | RF-17 y RF-20: multi-idioma ES/EN, automatización de marketing (lead scoring), A/B testing de conversión. | Crecimiento y multi-idioma. |
+| **F4 — Área privada + avanzado** (6 m+) | RF-18 (calculadora de ahorro) y RF-19 (área privada); IA avanzada. | Autoservicio de cliente. |
 
 **Justificación.** Entregar valor incremental, validando antes de invertir en lo complejo.
 

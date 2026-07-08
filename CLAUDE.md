@@ -73,18 +73,22 @@ This is a **professional engineering firm website** (Jamstack: Astro + React isl
 - **Guardrails:** Mandatory source citation in UI. Refusal policy for out-of-domain questions. Tokens budget enforced per F2 scope (DA-6 pending).
 - **Model Strategy:** Haiku by default (cost), Sonnet/Opus for complex technical Q&A.
 
-### Data Model (11 Canonical Entities, §28 Bible)
-1. Service (6 core offerings, ISO certs, sustainability metrics)
-2. Project (portfolio cases, client logos, metrics, testimonials)
-3. Sector (industrial, energetic, MEP, renewables, infrastructure)
-4. Article (thought leadership, blog, resources)
-5. Lead (form submissions, email, company, role, consent, origin)
-6. Candidature (job applications, CV, screening)
-7. Consentimiento (GDPR, email, cookies, privacy)
-8. Embedding (pgvector index for RAG, chunked content)
-9. TeamMember (bios, certs, specialities)
-10. Metric (KPIs: LCP, INP, CLS, lead cost, conversion rate)
-11. AuditLog (compliance, changes, access)
+### Data Model (11 Canonical Entities, §28 Bible — SSOT, source-of-truth per entity)
+1. Servicio / Service — line of service (CMS)
+2. Proyecto (caso de éxito) / Project — portfolio case, metrics, media (CMS)
+3. Sector — market segment taxonomy (CMS)
+4. Artículo/Recurso / Article — editorial content, blog, lead magnets (CMS)
+5. Miembro del equipo / TeamMember — team person (CMS)
+6. Certificación / Certification — company accreditations (CMS)
+7. Lead — captured commercial contact (PostgreSQL + CRM)
+8. Candidatura / Candidature — job application (PostgreSQL)
+9. Consentimiento / Consent — GDPR consent record (PostgreSQL)
+10. Documento de embedding / Embedding — content chunk + vector for RAG (PostgreSQL + pgvector)
+11. Cliente / Proyecto-cliente *(futuro)* — private-area data (PostgreSQL)
+
+> Note: KPIs/metrics (LCP, INP, CLS, CPL…) and audit/compliance logs are **operational
+> telemetry** (§34 monitoring / §36 logs), not canonical domain entities — do not model
+> them as such. Matches Bible §28 verbatim.
 
 ---
 
