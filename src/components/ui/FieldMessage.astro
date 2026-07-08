@@ -1,0 +1,59 @@
+---
+/**
+ * FieldMessage — the help + error region shared by every form control
+ * (DESIGN_SYSTEM §11.3 / §10). Error carries an icon + text so colour is never
+ * the sole signal (§3.3) and uses role="alert" (Bible §20). Ids are supplied by
+ * the control so aria-describedby can link them. Zero JS.
+ */
+import { cn } from '@/lib/utils/cn';
+
+interface Props {
+  helpId: string;
+  errorId: string;
+  help?: string;
+  error?: string;
+  /** Optional indentation to align under a control (e.g. checkbox label). */
+  class?: string;
+}
+const { helpId, errorId, help, error, class: className } = Astro.props;
+---
+
+{
+  help && (
+    <p id={helpId} class={cn('text-body-sm text-text-muted', className)}>
+      {help}
+    </p>
+  )
+}
+
+{
+  error && (
+    <p
+      id={errorId}
+      role="alert"
+      class={cn('flex items-center gap-1 text-body-sm text-error', className)}
+    >
+      <svg
+        class="h-4 w-4 shrink-0"
+        viewBox="0 0 20 20"
+        fill="none"
+        aria-hidden="true"
+      >
+        <path
+          d="M10 2 19 18H1L10 2Z"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-linejoin="round"
+        />
+        <path
+          d="M10 8v4"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-linecap="round"
+        />
+        <circle cx="10" cy="15" r="0.75" fill="currentColor" />
+      </svg>
+      <span>{error}</span>
+    </p>
+  )
+}

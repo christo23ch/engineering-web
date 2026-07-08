@@ -1,0 +1,84 @@
+---
+/**
+ * Checkbox — native checkbox (DESIGN_SYSTEM §11.3). 20px, blue-700 mark via
+ * accent-color, the whole label text is clickable (wrapped in <label>). Label
+ * content comes from the default slot so it can hold links (e.g. the GDPR
+ * consent checkbox linking to the privacy policy, Bible §42 L1 — render it
+ * unchecked). Help/error reuse FieldMessage. Zero JS.
+ */
+import type { HTMLAttributes } from 'astro/types';
+import FieldMessage from '@/components/ui/FieldMessage.astro';
+import { resolveFieldId, fieldParts, describedBy } from '@/lib/ui/field';
+import { cn } from '@/lib/utils/cn';
+
+type Props = {
+  id?: string;
+  name?: string;
+  value?: string;
+  checked?: boolean;
+  required?: boolean;
+  disabled?: boolean;
+  help?: string;
+  error?: string;
+  class?: string;
+} & Omit<
+  HTMLAttributes<'input'>,
+  | 'type'
+  | 'name'
+  | 'id'
+  | 'value'
+  | 'checked'
+  | 'required'
+  | 'disabled'
+  | 'class'
+>;
+
+const {
+  id,
+  name,
+  value,
+  checked = false,
+  required = false,
+  disabled = false,
+  help,
+  error,
+  class: className,
+  ...rest
+} = Astro.props;
+
+const { id: fieldId, helpId, errorId } = fieldParts(resolveFieldId(id, name));
+const description = describedBy(help && helpId, error && errorId);
+---
+
+<div class={cn('flex flex-col gap-1', className)}>
+  <label
+    class="flex items-start gap-2 text-body text-text-primary"
+    class:list={[
+      disabled && 'cursor-not-allowed',
+      !disabled && 'cursor-pointer',
+    ]}
+  >
+    <input
+      type="checkbox"
+      id={fieldId}
+      name={name}
+      value={value}
+      checked={checked || undefined}
+      required={required || undefined}
+      disabled={disabled || undefined}
+      aria-invalid={error ? 'true' : undefined}
+      aria-describedby={description}
+      class="mt-0.5 size-5 shrink-0 accent-action"
+      {...rest}
+    />
+    <span><slot /></span>
+  </label>
+
+  <FieldMessage
+    helpId={helpId}
+    errorId={errorId}
+    help={help}
+    error={error}
+    class="pl-7"
+  />
+</div>
