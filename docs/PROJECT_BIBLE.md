@@ -2,13 +2,15 @@
 
 > **Fuente única de verdad (Single Source of Truth, SSOT).**
 > Este documento gobierna todas las fases del proyecto: producto, diseño, desarrollo, datos, IA, seguridad, SEO, automatización, marketing y operación. **Toda decisión posterior debe ser coherente con este documento.** Si una decisión lo contradice, o bien se alinea con él, o bien se actualiza este documento mediante el proceso de gobernanza descrito en la [§29](#29-convenciones-del-proyecto) y registrado como ADR en la [§43](#43-decisiones-de-arquitectura-adr).
+>
+> **Política documental (oficial).** Todos los demás documentos del repositorio (`CLAUDE.md`, `README.md`, `docs/ARCHITECTURE.md`, `docs/DATABASE.md`, `docs/API.md`, `docs/UI_UX.md`, `docs/DESIGN_SYSTEM.md`, `docs/ROADMAP.md`, `docs/IMPLEMENTATION_PLAN.md`, `docs/CODING_STANDARDS.md`, `docs/SECURITY.md`, `docs/TESTING.md`) **complementan** a este Bible y **nunca** pueden contener decisiones distintas. **Toda decisión nueva se incorpora primero aquí** (como ADR en [§43](#43-decisiones-de-arquitectura-adr) o como decisión abierta en [§49](#49-anexo-de-decisiones-abiertas)) y solo después se refleja en los documentos derivados. Ante cualquier discrepancia, **prevalece el Bible**.
 
 | Metadato | Valor |
 |---|---|
 | **Documento** | `docs/PROJECT_BIBLE.md` |
-| **Versión** | 1.0.0 |
-| **Estado** | 🟡 En revisión — pendiente de validar hipótesis (ver [§44](#44-hipótesis)) |
-| **Fecha** | 2026-07-07 |
+| **Versión** | 1.0.0 (oficial) |
+| **Estado** | 🟢 Aprobado — versión **oficial 1.0** y **SSOT** del proyecto. Las hipótesis ([§44](#44-hipótesis)) y las decisiones abiertas ([§49](#49-anexo-de-decisiones-abiertas)) permanecen **en seguimiento** para la Fase 0; su cierre producirá actualizaciones de contenido (v1.1) pero **no condiciona** la oficialidad de esta versión. |
+| **Fecha** | 2026-07-08 |
 | **Propietario (owner)** | Dirección / Cliente *(por confirmar)* |
 | **Redactado por** | Equipo multidisciplinar: Software Architect · Product Owner · CTO · Lead Backend · Lead Frontend · Database Architect · UX/UI Lead · AI Engineer · QA Lead · DevOps · Security Engineer · Technical Writer |
 | **Ámbito** | Plataforma web corporativa y de captación de leads B2B |
@@ -1069,12 +1071,12 @@ CI ejecuta lint + unit + integración + build + axe + Lighthouse antes de permit
 | Variable | Propósito | Sensible |
 |---|---|---|
 | `CMS_API_URL` / `CMS_API_TOKEN` | Acceso al CMS headless. | Token: sí |
-| `CRM_API_BASE` / `CRM_API_KEY` | Envío de leads al CRM. | Sí |
-| `EMAIL_API_KEY` / `EMAIL_FROM` | Email transaccional. | Clave: sí |
-| `AI_PROVIDER_API_KEY` | Proveedor de IA (Anthropic). | Sí |
-| `AI_MODEL_DEFAULT` / `AI_MODEL_FAST` | Selección de modelos (p. ej. Sonnet / Haiku). | No |
-| `DATABASE_URL` | Conexión PostgreSQL (con pgvector). | Sí |
-| `ANALYTICS_ID` | Analítica (si aplica). | No |
+| `CRM_API_BASE` / `CRM_API_KEY` / `CRM_WEBHOOK_SECRET` | Envío de leads al CRM y verificación de webhooks. | Sí |
+| `EMAIL_PROVIDER` / `EMAIL_API_KEY` / `EMAIL_FROM` | Email transaccional (selector de proveedor + credenciales). | Clave: sí |
+| `AI_PROVIDER` / `AI_PROVIDER_API_KEY` | Proveedor de IA (`anthropic`) y su clave. | Clave: sí |
+| `AI_MODEL_DEFAULT` / `AI_MODEL_COMPLEX` | Selección de modelos: por defecto (Haiku, económico) y para consultas complejas (Sonnet/Opus). | No |
+| `DATABASE_URL` / `DATABASE_VECTOR_POOL_SIZE` | Conexión PostgreSQL (con pgvector) y tamaño del pool vectorial. | URL: sí |
+| `ANALYTICS_PROVIDER` / `ANALYTICS_ID` | Analítica: selector de proveedor e identificador (si aplica). | No |
 | `CMP_SITE_ID` | Gestor de consentimiento. | No |
 | `SITE_URL` / `NODE_ENV` / `ENVIRONMENT` | Entorno y URL base. | No |
 | `RATE_LIMIT_*` | Límites antiabuso de formularios/IA. | No |
@@ -1240,9 +1242,9 @@ CI ejecuta lint + unit + integración + build + axe + Lighthouse antes de permit
 
 ## 44. Hipótesis
 
-**Objetivo.** Consolidar los supuestos que deben validarse antes de aprobar el documento.
+**Objetivo.** Consolidar los supuestos que deben validarse en la Fase 0.
 
-**Descripción.** **Todas requieren validación (Estado del documento → 🟢 al confirmarlas).**
+**Descripción.** **Todas requieren validación en Fase 0.** Su confirmación **no** condiciona la oficialidad del documento (ya adoptado como **🟢 v1.0 / SSOT**): al validarse, se integran como actualización de contenido (v1.1). Mientras no se confirmen, el contenido dependiente se trata como **provisional** y así se marca.
 
 | ID | Hipótesis | Si resulta falsa… |
 |---|---|---|
@@ -1287,11 +1289,11 @@ CI ejecuta lint + unit + integración + build + axe + Lighthouse antes de permit
 
 **Impacto.** Gestión de expectativas y planificación.
 
-**Riesgos.** Tomar lo provisional como definitivo; mitigado con el estado 🟡 del documento y las hipótesis.
+**Riesgos.** Tomar lo provisional como definitivo; mitigado con el **seguimiento explícito** de hipótesis ([§44](#44-hipótesis)) y decisiones abiertas ([§49](#49-anexo-de-decisiones-abiertas)), y con el marcado de todo contenido dependiente como provisional.
 
 **Dependencias.** Fase 0 de descubrimiento.
 
-**Decisiones tomadas.** El documento se marca 🟡 hasta cerrar hipótesis y decisiones abiertas.
+**Decisiones tomadas.** El documento es **oficial (🟢 v1.0 / SSOT)**; los supuestos y proveedores pendientes se rastrean en [§44](#44-hipótesis) y [§49](#49-anexo-de-decisiones-abiertas), y su cierre se integrará como actualización de contenido (v1.1).
 
 **Alternativas descartadas.** Presentar el documento como cerrado/definitivo pese a las incógnitas — descartado por honestidad y rigor.
 
@@ -1305,7 +1307,7 @@ CI ejecuta lint + unit + integración + build + axe + Lighthouse antes de permit
 
 | Fase | Contenido | Hito |
 |---|---|---|
-| **F0 — Descubrimiento** (sem. 1–2) | Validar hipótesis ([§44](#44-hipótesis)); manual de marca; keyword research; inventario de casos; decisiones abiertas. **Estructura de repo ✅ hecha.** | Documento 🟢 aprobado. |
+| **F0 — Descubrimiento** (sem. 1–2) | Validar hipótesis ([§44](#44-hipótesis)); manual de marca; keyword research; inventario de casos; cerrar decisiones abiertas ([§49](#49-anexo-de-decisiones-abiertas)). **Estructura de repo ✅ hecha. Bible 🟢 v1.0 oficial ✅.** | Hipótesis validadas y decisiones cerradas → **actualización de contenido v1.1** del SSOT. |
 | **F1 — MVP** (sem. 3–8) | RF-01…RF-11: Home, servicios, portfolio, sobre nosotros, contacto, legal; CMS; formularios→CRM; SEO técnico; analítica; RGPD. | Lanzamiento del Sitio. |
 | **F2 — Contenido + IA mínima** (mes 3–4) | RF-12…RF-16: blog/recursos, lead magnets, empleo, **asistente IA/búsqueda semántica (mín.)**, búsqueda interna; datos estructurados completos; CWV afinados. | IA en producción; motor de contenido. |
 | **F3 — Automatización + i18n** (mes 5–6) | RF-17, RF-20 y parte de RF-18/19: multi-idioma ES/EN, automatización de marketing, A/B testing de conversión. | Crecimiento y multi-idioma. |
@@ -1414,6 +1416,21 @@ CI ejecuta lint + unit + integración + build + axe + Lighthouse antes de permit
 - **Incertidumbre:** volumen de consultas y apetito de coste.
 - **Propuesta:** empezar con búsqueda semántica + FAQ con fuentes (bajo coste, Haiku por defecto) y ampliar según uso.
 
+### DA-7 · Proveedor de CMS headless
+- **Incertidumbre:** presupuesto, modelo de contenido y preferencia de alojamiento (SaaS vs. autogestionado).
+- **Opciones:** Strapi (open source, autogestionado; control total, más operación) · Sanity (tiempo real, potente; coste al escalar) · Storyblok (editor visual; orientado a marketing) · Contentful (maduro; coste elevado).
+- **Propuesta:** Sanity o Storyblok si se prioriza SaaS y rapidez editorial; Strapi si se prioriza control y coste. Concreta el ADR-003. **Decidir en F0.**
+
+### DA-8 · Proveedor de email transaccional
+- **Incertidumbre:** volumen de envíos, plantillas y ecosistema del CRM elegido (DA-2).
+- **Opciones:** SendGrid (maduro, escalable) · Brevo (integra CRM+email; sinergia si DA-2 = Brevo) · Resend (DX moderna, sencillo).
+- **Propuesta:** alinear con DA-2 (Brevo si se elige como CRM); Resend/SendGrid en caso contrario. **Decidir en F0.**
+
+### DA-9 · Herramienta de analítica
+- **Incertidumbre:** requisitos de medición y equilibrio privacidad/RGPD vs. profundidad de datos.
+- **Opciones:** Plausible (sin cookies, RGPD-friendly, sin banner) · GA4 (gratuito, potente; requiere consentimiento y banner) · PostHog (producto+analítica; más operación).
+- **Propuesta:** Plausible por defecto (privacidad y simplicidad); GA4 solo si el negocio exige su ecosistema, gestionando consentimiento ([§17](#17-seguridad)/CMP). **Decidir en F0.**
+
 ---
 
 ## 50. Resultado de la autoauditoría
@@ -1440,8 +1457,8 @@ CI ejecuta lint + unit + integración + build + axe + Lighthouse antes de permit
 
 ### 50.3 Decisiones tomadas durante la revisión
 - Este documento **reemplaza** al borrador 0.1.0 (23 secciones) y pasa a ser la única versión válida del PROJECT_BIBLE.
-- Se mantienen abiertas y **claramente marcadas** las incertidumbres (DA-1…DA-6) e hipótesis (H1…H11); **no se han inventado datos** para cerrarlas, conforme a las instrucciones.
-- El documento se etiqueta **🟡 En revisión** hasta que la Fase 0 valide hipótesis y cierre las decisiones abiertas; entonces pasará a **🟢 Aprobado** y versión 1.1.0.
+- Se mantienen abiertas y **claramente marcadas** las incertidumbres (DA-1…DA-9) e hipótesis (H1…H11); **no se han inventado datos** para cerrarlas, conforme a las instrucciones.
+- El documento se adopta oficialmente como **🟢 versión 1.0 y SSOT** del proyecto. La validación de hipótesis y el cierre de las decisiones abiertas en la Fase 0 producirán **actualizaciones de contenido (v1.1)**, pero **no condicionan** la oficialidad de esta versión 1.0: el estado 🟢 se refiere a la **adopción del documento como fuente única de verdad**, no a que todo supuesto esté ya confirmado.
 
 ### 50.4 Verificaciones de consistencia superadas
 - ✅ Sin contradicciones de prioridad detectadas tras la corrección (IA, MoSCoW).
@@ -1452,4 +1469,4 @@ CI ejecuta lint + unit + integración + build + axe + Lighthouse antes de permit
 
 ---
 
-> **Siguiente paso:** ejecutar la **Fase 0** — validar las [hipótesis (§44)](#44-hipótesis) y cerrar las [decisiones abiertas (§49)](#49-anexo-de-decisiones-abiertas) con el cliente. Al completarse, actualizar la cabecera a **🟢 Aprobado (v1.1.0)** e iniciar la Fase 1 del [roadmap](#46-roadmap-de-alto-nivel).
+> **Siguiente paso:** con el documento ya adoptado como **🟢 v1.0 oficial (SSOT)**, ejecutar la **Fase 0** — validar las [hipótesis (§44)](#44-hipótesis) y cerrar las [decisiones abiertas (§49)](#49-anexo-de-decisiones-abiertas) con el cliente. El cierre de esos puntos se integrará como **actualización de contenido (v1.1)** manteniendo la oficialidad del SSOT, y habilitará la Fase 1 del [roadmap](#46-roadmap-de-alto-nivel).

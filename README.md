@@ -24,6 +24,8 @@ A premium, performance-first website platform for a Spanish engineering firm spe
 
 ## 🚀 Quick Start
 
+> ⚠️ **Estado real (2026-07-08):** el repositorio contiene **solo documentación y estructura de carpetas**. El tooling (`package.json`, `tsconfig.json`, `astro.config.ts`, `tailwind.config.ts`), la configuración de lint/format, los workflows de CI y el `.env.example` **todavía no existen** — se crearán en el **scaffolding técnico de Fase 0**. Los comandos y la estructura de esta sección describen el **objetivo**, no el estado actual; `npm install` / `npm run dev` aún no funcionarán. Fuente de verdad del estado: **Bible §46 (roadmap)** y **CLAUDE.md**.
+
 ### Prerequisites
 - **Node.js** 18+ (with npm or pnpm)
 - **Git**
@@ -47,7 +49,7 @@ cp .env.example .env.local
 npm run dev
 
 # Open browser
-# http://localhost:3000
+# http://localhost:4321  (Astro dev server default)
 ```
 
 ### Build & Deploy
@@ -136,9 +138,11 @@ npm run preview
 
 ## 📁 Repository Structure
 
+> **Nota:** el árbol siguiente es la **estructura objetivo**. Hoy existen las carpetas (con `.gitkeep`) y la documentación; los archivos de código, tooling y CI marcados abajo se irán creando en Fase 0/1. Lo ya presente: `docs/*`, `CLAUDE.md`, `README.md`, `.gitignore`, `.editorconfig`, `.nvmrc` y las carpetas vacías.
+
 ```
 engineering-web/
-├── docs/                              # Documentation (SSOT)
+├── docs/                              # Documentation (Bible = SSOT)
 │   ├── PROJECT_BIBLE.md               # Vision, requirements, architecture, policy (1,455 lines)
 │   ├── DESIGN_SYSTEM.md               # Design tokens, components, screens (473 lines)
 │   ├── adr/                           # Architecture Decision Records (optional)
@@ -251,15 +255,18 @@ engineering-web/
 
 ## 📚 Key Documentation
 
+> **Documentary policy (official):** **`docs/PROJECT_BIBLE.md` is the single source of truth (v1.0 official).** Every other document complements it and must never contradict it; new decisions land in the Bible first (§43/§49) and then propagate here. On any discrepancy, **the Bible wins.**
+
 ### Must Read
-1. **[CLAUDE.md](./CLAUDE.md)** — Session context, roadmap, open decisions, how to resume work
-2. **[docs/PROJECT_BIBLE.md](./docs/PROJECT_BIBLE.md)** — SSOT: vision (§1-§3), requirements (§8), architecture (§11-§14), IA policy (§16), data model (§28), ADRs (§43), hypotheses (§44), roadmap (§46), decisions (§49)
+1. **[docs/PROJECT_BIBLE.md](./docs/PROJECT_BIBLE.md)** — **SSOT (v1.0 official):** vision (§1-§3), requirements (§8), architecture (§11-§14), IA policy (§16), data model (§28), env vars (§38), ADRs (§43), hypotheses (§44), roadmap (§46), decisions §49 (DA-1…DA-9)
+2. **[CLAUDE.md](./CLAUDE.md)** — Session context, roadmap, open decisions, how to resume work
 3. **[docs/DESIGN_SYSTEM.md](./docs/DESIGN_SYSTEM.md)** — Design tokens (§2-§5), components (§11), screens (§13), accessibility (§14)
 
 ### Reference
 - **docs/adr/** — Individual Architecture Decision Records (ADR-001 through ADR-009, optional)
-- **CONTRIBUTING.md** — Contribution guidelines (TBD)
-- **SECURITY.md** — Security policy & threat model (TBD)
+- **docs/SECURITY.md** — Security policy & threat model (stub — pending content; complements Bible §17)
+- **docs/{ARCHITECTURE, DATABASE, API, UI_UX, ROADMAP, IMPLEMENTATION_PLAN, CODING_STANDARDS, TESTING}.md** — topic stubs (pending content; each complements its Bible section)
+- **CONTRIBUTING.md** — Contribution guidelines (not yet created)
 
 ---
 
@@ -270,6 +277,8 @@ engineering-web/
 Copy `.env.example` to `.env.local` and fill in required values:
 
 ```bash
+# Canonical names — must match Bible §38 (SSOT) verbatim.
+
 # CMS (Headless, provider TBD via DA-7)
 CMS_API_URL=
 CMS_API_TOKEN=
@@ -279,29 +288,36 @@ DATABASE_URL=postgresql://user:password@host:5432/engineering_web
 DATABASE_VECTOR_POOL_SIZE=20
 
 # CRM (for lead webhook, provider TBD via DA-2)
+CRM_API_BASE=
 CRM_API_KEY=
 CRM_WEBHOOK_SECRET=
-CRM_WEBHOOK_URL=
 
 # IA / Claude (Anthropic, via BFF proxy only)
 AI_PROVIDER=anthropic
-AI_API_KEY=
-AI_MODEL_DEFAULT=claude-haiku-4.5-20251001
+AI_PROVIDER_API_KEY=
+AI_MODEL_DEFAULT=claude-haiku-4.5
 AI_MODEL_COMPLEX=claude-opus-4-8
 
-# Email (transactional, provider TBD)
+# Email (transactional, provider TBD via DA-8)
 EMAIL_PROVIDER=
 EMAIL_API_KEY=
 EMAIL_FROM=noreply@engineering-firm.es
-EMAIL_REPLY_TO=info@engineering-firm.es
 
-# Analytics (provider TBD)
+# Analytics (provider TBD via DA-9)
 ANALYTICS_PROVIDER=plausible
 ANALYTICS_ID=
 
-# Hosting (provider TBD via DA-3)
-VERCEL_DEPLOYMENT_URLS=
+# Consent management (CMP)
+CMP_SITE_ID=
+
+# Anti-abuse (forms / IA)
+RATE_LIMIT_WINDOW=
+RATE_LIMIT_MAX=
+
+# Environment (host-agnostic — hosting is DA-3, undecided; no vendor-specific vars)
+SITE_URL=
 NODE_ENV=production
+ENVIRONMENT=
 ```
 
 ### Astro Configuration
@@ -421,10 +437,10 @@ All architectural decisions documented in **CLAUDE.md** (Decisions Status table)
 - DA-5: PostgreSQL provider (Supabase/Neon/AWS RDS)
 - DA-6: IA scope in F2 (token budget, features)
 - DA-7: CMS provider (Strapi/Sanity/Storyblok/Contentful)
-- Email transactional provider (SendGrid/Brevo/Resend/other)
-- Analytics tool (Plausible/GA4/PostHog)
+- DA-8: Email transactional provider (SendGrid/Brevo/Resend/other)
+- DA-9: Analytics tool (Plausible/GA4/PostHog)
 
-See **CLAUDE.md** for full context and validation criteria.
+Canonical definitions in **Bible §49 (SSOT)**; see **CLAUDE.md** for tracking context and validation criteria.
 
 ---
 
@@ -553,7 +569,7 @@ npm run audit:lighthouse
 - No CSRF (SameSite cookies, CSRF tokens on forms)
 - No sensitive data exposure (HTTPS only, secure headers)
 
-See **SECURITY.md** (TBD) for full security policy.
+Canonical security policy: **Bible §17** (SSOT). See **docs/SECURITY.md** (stub, pending content) for the expanded operational detail.
 
 ---
 

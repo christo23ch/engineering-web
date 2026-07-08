@@ -6,9 +6,9 @@
 |---|---|
 | **Documento** | `docs/DESIGN_SYSTEM.md` |
 | **Versión** | 1.0.0 |
-| **Estado** | 🟡 Provisional — la paleta y tipografía dependen de la hipótesis **H10** y del manual de marca pendiente `[Bible §44, §45]` |
-| **Fecha** | 2026-07-07 |
-| **Depende de** | `PROJECT_BIBLE.md` v1.0.0 (§9, §16, §18, §20–§24, §35, §46) |
+| **Estado** | 🟢 Alineado con el SSOT (Bible v1.0 oficial). ⚠️ **Tokens de marca provisionales** (paleta y tipografía) por depender de la hipótesis **H10** y del manual de marca pendiente `[Bible §44, §45]`; se sustituirán sin romper el sistema (arquitectura de tokens). |
+| **Fecha** | 2026-07-08 |
+| **Depende de** | `PROJECT_BIBLE.md` **v1.0 oficial (SSOT)** (§9, §16, §18, §20–§24, §35, §38, §46) |
 | **Audiencia** | UX/UI, frontend, contenido, QA |
 
 **Convención de trazabilidad:** toda regla lleva su justificación en línea con el formato `[Bible §n]`. Las decisiones que el Bible deja abiertas se marcan `⚠️ PROVISIONAL (H10)` y se sustituirán al aprobarse el manual de marca sin romper el sistema (por eso todo se define como **tokens** `[Bible §22]`).

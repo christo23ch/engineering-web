@@ -12,12 +12,21 @@
 This is a **professional engineering firm website** (Jamstack: Astro + React islands + headless CMS + PostgreSQL + RAG). 
 
 **Complete Documentation Status:**
-- ✅ PROJECT_BIBLE.md (1,455 lines, v1.0.0) — 49 sections covering vision, requirements (20 RF), architecture, IA policy, security, performance, accessibility, testing, deployment, risk taxonomy, 9 ADRs, 11 hypotheses, 6 open decisions, internal consistency audit.
+- ✅ PROJECT_BIBLE.md (v1.0.0 **oficial · SSOT**) — 50 sections covering vision, requirements (20 RF), architecture, IA policy, security, performance, accessibility, testing, deployment, risk taxonomy, 9 ADRs, 11 hypotheses, **9 open decisions (DA-1…DA-9)**, internal consistency audit.
 - ✅ DESIGN_SYSTEM.md (473 lines, v1.0.0) — 15 sections implementing all UX/UI/responsive/accessibility directives from PROJECT_BIBLE with full traceability (every decision references [Bible §n]).
 
 **Current Deliverables:** Documentation + analysis complete. **Zero product code written yet.**
 
 **Immediate Next Step:** Phase 0 Technical Scaffolding (approved by user to proceed with provisional directives).
+
+---
+
+## Documentary Policy (OFFICIAL) — SSOT
+
+- **`docs/PROJECT_BIBLE.md` is the single source of truth (v1.0 official).** Every other document — this `CLAUDE.md`, `README.md`, and all `docs/*` — **complements** the Bible and must **never** contain a different decision.
+- **New decisions land in the Bible first** (as an ADR in §43 or an open decision in §49), and only then propagate to derived docs.
+- On any discrepancy, **the Bible wins.** When you change a decision, update the Bible in the same change and reconcile the derived docs.
+- Vendor/config names (e.g. environment variables) follow the **canonical catalog in Bible §38** verbatim.
 
 ---
 
@@ -86,7 +95,7 @@ All 9 ADRs approved. Stack confirmed: Astro + React + headless CMS + PostgreSQL 
 
 ### Open Decisions (Blocking Development; Require Client/Direction Input)
 
-**Infrastructure & Vendors (DA-1 to DA-6 + Extensions):**
+**Infrastructure & Vendors (DA-1 to DA-9 — canonical set defined in Bible §49):**
 
 | Decision | Options | Owner | Timeline |
 |----------|---------|-------|----------|
@@ -96,9 +105,9 @@ All 9 ADRs approved. Stack confirmed: Astro + React + headless CMS + PostgreSQL 
 | DA-4: Editorial workflow | Direct publish vs approval gate | Product Owner | F0 |
 | DA-5: PostgreSQL provider | Supabase vs Neon vs AWS RDS (EU) | DevOps | F0 |
 | DA-6: IA scope F2 | Token budget, features, model routing | CTO | F0 |
-| **DA-7: CMS provider** | Strapi vs Sanity vs Storyblok vs Contentful | Client/CTO | F0 |
-| **Email transactional** | SendGrid vs Brevo vs Resend vs other | DevOps | F0 |
-| **Analytics tool** | Plausible vs GA4 (with consent) vs PostHog | Product Owner | F0 |
+| DA-7: CMS provider | Strapi vs Sanity vs Storyblok vs Contentful | Client/CTO | F0 |
+| DA-8: Email transactional | SendGrid vs Brevo vs Resend vs other | DevOps | F0 |
+| DA-9: Analytics tool | Plausible vs GA4 (with consent) vs PostHog | Product Owner | F0 |
 
 ### 11 Hypotheses Requiring Validation (§44 Bible)
 
@@ -158,7 +167,7 @@ engineering-web/
 
 **Milestone Acceptance Criteria:**
 - [ ] Validate 11 hypotheses (H1-H11)
-- [ ] Close 9 open decisions (DA-1 to DA-7 + email + analytics)
+- [ ] Close 9 open decisions (DA-1 to DA-9, per Bible §49)
 - [ ] Initialize Astro project (package.json, tsconfig, astro.config)
 - [ ] Setup CI/CD pipeline (GitHub Actions: lint + build blocker)
 - [ ] Create Tailwind config with design tokens
@@ -257,6 +266,9 @@ Then:
 **4. Environment & Configuration**
 - `.env.example` with all §38 variables:
   ```
+  # Nomenclatura canónica: ver Bible §38 (SSOT). Estos nombres deben coincidir
+  # exactamente con esa tabla; cualquier variable nueva se añade primero al Bible.
+
   # CMS
   CMS_API_URL=
   CMS_API_TOKEN=
@@ -266,12 +278,13 @@ Then:
   DATABASE_VECTOR_POOL_SIZE=
   
   # CRM
+  CRM_API_BASE=
   CRM_API_KEY=
   CRM_WEBHOOK_SECRET=
   
   # IA / Claude
   AI_PROVIDER=anthropic
-  AI_API_KEY=
+  AI_PROVIDER_API_KEY=
   AI_MODEL_DEFAULT=claude-haiku-4.5
   AI_MODEL_COMPLEX=claude-opus-4-8
   
@@ -284,8 +297,17 @@ Then:
   ANALYTICS_PROVIDER=
   ANALYTICS_ID=
   
-  # Hosting
-  VERCEL_DEPLOYMENT_URLS=
+  # Consent management (CMP)
+  CMP_SITE_ID=
+  
+  # Anti-abuse (forms / IA)
+  RATE_LIMIT_WINDOW=
+  RATE_LIMIT_MAX=
+  
+  # Environment (host-agnostic — hosting is DA-3, undecided; no vendor-specific vars)
+  SITE_URL=
+  NODE_ENV=production
+  ENVIRONMENT=
   ```
 - `README.md` (project overview, stack, setup, contributing)
 
