@@ -1,0 +1,71 @@
+---
+/**
+ * Textarea — multiline text control (DESIGN_SYSTEM §11.3). Same box as Input
+ * (gray-300 border, radius-sm, white), but grows vertically: min-height + rows
+ * instead of a fixed 48px. Always-visible label, help, error per §10. A11y as
+ * Input (label[for], aria-describedby, aria-invalid). Zero JS.
+ */
+import type { HTMLAttributes } from 'astro/types';
+import FieldShell from '@/components/ui/FieldShell.astro';
+import { controlBox } from '@/lib/ui/control-variants';
+import { resolveFieldId, fieldParts, describedBy } from '@/lib/ui/field';
+import { cn } from '@/lib/utils/cn';
+
+type Props = {
+  label: string;
+  id?: string;
+  name?: string;
+  rows?: number;
+  help?: string;
+  error?: string;
+  required?: boolean;
+  disabled?: boolean;
+  class?: string;
+  textareaClass?: string;
+} & Omit<
+  HTMLAttributes<'textarea'>,
+  'name' | 'id' | 'required' | 'disabled' | 'class' | 'rows'
+>;
+
+const {
+  label,
+  id,
+  name,
+  rows = 5,
+  help,
+  error,
+  required = false,
+  disabled = false,
+  class: className,
+  textareaClass,
+  ...rest
+} = Astro.props;
+
+const { id: fieldId, helpId, errorId } = fieldParts(resolveFieldId(id, name));
+const description = describedBy(help && helpId, error && errorId);
+---
+
+<FieldShell
+  label={label}
+  htmlFor={fieldId}
+  helpId={helpId}
+  errorId={errorId}
+  help={help}
+  error={error}
+  required={required}
+  class={className}
+>
+  <textarea
+    id={fieldId}
+    name={name}
+    rows={rows}
+    class={cn(
+      'min-h-28 py-3 leading-relaxed',
+      controlBox({ error: Boolean(error), class: textareaClass }),
+    )}
+    required={required || undefined}
+    disabled={disabled || undefined}
+    aria-invalid={error ? 'true' : undefined}
+    aria-describedby={description}
+    {...rest}></textarea>
+</FieldShell>
