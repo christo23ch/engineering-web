@@ -24,7 +24,7 @@ A premium, performance-first website platform for a Spanish engineering firm spe
 
 ## 🚀 Quick Start
 
-> ⚠️ **Estado real (2026-07-08):** el repositorio contiene **solo documentación y estructura de carpetas**. El tooling (`package.json`, `tsconfig.json`, `astro.config.ts`, `tailwind.config.ts`), la configuración de lint/format, los workflows de CI y el `.env.example` **todavía no existen** — se crearán en el **scaffolding técnico de Fase 0**. Los comandos y la estructura de esta sección describen el **objetivo**, no el estado actual; `npm install` / `npm run dev` aún no funcionarán. Fuente de verdad del estado: **Bible §46 (roadmap)** y **CLAUDE.md**.
+> ✅ **Estado real (2026-07-08):** el **scaffolding técnico está completo y verificado** — `package.json`, TypeScript strict, `astro.config.ts`, `tailwind.config.ts` (tokens), ESLint + Prettier, Vitest, Playwright + axe, workflows de CI y `.env.example` existen y funcionan (`npm install` → `npm run dev`/`build`/`lint`/`test` ✓). Lo que **aún no existe es el código de producto** (componentes y páginas reales): se desarrolla en **F1** (Bible §46). La `src/pages/index.astro` actual es un *placeholder* de scaffolding, no producto.
 
 ### Prerequisites
 - **Node.js** 18+ (with npm or pnpm)
@@ -139,7 +139,7 @@ npm run preview
 
 ## 📁 Repository Structure
 
-> **Nota:** el árbol siguiente es la **estructura objetivo**. Hoy existen las carpetas (con `.gitkeep`) y la documentación; los archivos de código, tooling y CI marcados abajo se irán creando en Fase 0/1. Lo ya presente: `docs/*`, `CLAUDE.md`, `README.md`, `.gitignore`, `.editorconfig`, `.nvmrc` y las carpetas vacías.
+> **Nota:** el árbol siguiente es la **estructura objetivo**. Ya presente y funcional: toda la **infraestructura** (`package.json`, `tsconfig.json`, `astro.config.ts`, `tailwind.config.ts`, `eslint.config.mjs`, `prettier.config.mjs`, `vitest.config.ts`, `playwright.config.ts`, `.env.example`, workflows de CI, `src/` base con layout/estilos/utils y una página placeholder, `tests/`). **Pendiente (F1):** el código de producto (componentes y páginas reales de `src/components`, `src/pages`, BFF de `src/lib`).
 
 ```
 engineering-web/

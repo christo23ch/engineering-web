@@ -1,0 +1,25 @@
+name: Lighthouse
+
+# Performance/SEO/a11y/best-practices budget (docs/PROJECT_BIBLE.md §18/§20).
+# Non-blocking for now (warn) — becomes a blocker once real pages exist.
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  lighthouse:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: npm
+      - run: npm ci
+      - name: Build
+        run: npm run build
+      - name: Lighthouse CI
+        run: npm run audit:lighthouse

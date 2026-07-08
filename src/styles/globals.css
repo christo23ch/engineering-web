@@ -1,0 +1,38 @@
+/* Global styles — Tailwind layers + design-system base.
+   Tokens: tailwind.config.ts (docs/DESIGN_SYSTEM.md §2–§6). */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-surface font-sans text-text-primary antialiased;
+  }
+
+  /* Mandatory visible focus ring (docs/DESIGN_SYSTEM.md §10). */
+  :where(a, button, input, select, textarea, [tabindex]):focus-visible {
+    outline: 2px solid theme('colors.focus');
+    outline-offset: 2px;
+  }
+
+  /* Honor reduced-motion (WCAG 2.2 AA, Bible §20). */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
