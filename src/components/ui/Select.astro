@@ -7,6 +7,7 @@
  */
 import type { HTMLAttributes } from 'astro/types';
 import FieldShell from '@/components/ui/FieldShell.astro';
+import Icon from '@/components/ui/Icon.astro';
 import { controlBox } from '@/lib/ui/control-variants';
 import { resolveFieldId, fieldParts, describedBy } from '@/lib/ui/field';
 import { cn } from '@/lib/utils/cn';
@@ -69,18 +70,10 @@ const description = describedBy(help && helpId, error && errorId);
     >
       <slot />
     </select>
-    <svg
-      class="pointer-events-none absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 text-text-muted"
-      viewBox="0 0 20 20"
-      fill="none"
-      aria-hidden="true"
-    >
-      <path
-        d="m6 8 4 4 4-4"
-        stroke="currentColor"
-        stroke-width="1.5"
-        stroke-linecap="round"
-        stroke-linejoin="round"></path>
-    </svg>
+    <Icon
+      name="chevron-down"
+      size={20}
+      class="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-text-muted"
+    />
   </div>
 </FieldShell>

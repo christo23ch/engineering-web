@@ -13,6 +13,7 @@
  * on close. Everything else is native.
  */
 import { cn } from '@/lib/utils/cn';
+import Icon from '@/components/ui/Icon.astro';
 
 interface Props {
   /** Unique id; the trigger references it via data-modal-open="<id>". */
@@ -43,17 +44,7 @@ const titleId = `${id}-title`;
       aria-label="Cerrar"
       class="-m-2 shrink-0 rounded p-2 text-text-muted hover:text-text-primary"
     >
-      <svg
-        class="h-5 w-5"
-        viewBox="0 0 20 20"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="1.5"
-        stroke-linecap="round"
-        aria-hidden="true"
-      >
-        <path d="m6 6 8 8M14 6l-8 8"></path>
-      </svg>
+      <Icon name="x" size={20} />
     </button>
   </div>
 

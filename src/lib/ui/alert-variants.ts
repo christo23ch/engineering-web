@@ -1,4 +1,5 @@
 import { cn } from '@/lib/utils/cn';
+import type { IconName } from '@/lib/ui/icons';
 
 /**
  * Alert variants (DESIGN_SYSTEM §11.6, colours §3.3). Four semantic tones with a
@@ -27,6 +28,14 @@ export const alertIconColor: Record<AlertVariant, string> = {
   success: 'text-success',
   warning: 'text-warning',
   error: 'text-error',
+};
+
+/** Icon glyph per variant (from the shared Icon set). */
+export const alertIcon: Record<AlertVariant, IconName> = {
+  info: 'info',
+  success: 'check-circle',
+  warning: 'alert-triangle',
+  error: 'x-circle',
 };
 
 /**
