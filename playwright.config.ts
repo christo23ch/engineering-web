@@ -24,7 +24,11 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'npm run build && npm run preview',
+    // In CI the build artifact is downloaded from the build job, so just serve
+    // it. Locally, build first so `npm run test:e2e` works from a clean tree.
+    command: process.env.CI
+      ? 'npm run preview'
+      : 'npm run build && npm run preview',
     url: 'http://localhost:4321',
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,

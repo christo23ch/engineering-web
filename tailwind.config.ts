@@ -7,9 +7,11 @@ import type { Config } from 'tailwindcss';
  * for the real brand manual by editing only these values — components unchanged.
  */
 export default {
-  content: ['./src/**/*.{astro,html,js,jsx,md,mdx,ts,tsx}'],
+  content: ['./src/**/*.{astro,html,js,jsx,md,ts,tsx}'],
   theme: {
     // Breakpoints — mobile-first (DESIGN_SYSTEM §6): 320 base, then 640/768/1024/1280.
+    // NOTE: this REPLACES Tailwind's defaults (intentionally drops the 1536px
+    // `2xl` breakpoint, which is out of the design system's range).
     screens: {
       sm: '640px',
       md: '768px',
@@ -99,19 +101,8 @@ export default {
           { lineHeight: '1.05' },
         ],
       },
-      spacing: {
-        // 4px base scale (DESIGN_SYSTEM §5.1).
-        '1': '0.25rem',
-        '2': '0.5rem',
-        '3': '0.75rem',
-        '4': '1rem',
-        '6': '1.5rem',
-        '8': '2rem',
-        '12': '3rem',
-        '16': '4rem',
-        '24': '6rem',
-        '32': '8rem',
-      },
+      // Spacing: the 4px base scale (DESIGN_SYSTEM §5.1) matches Tailwind's
+      // default scale exactly, so it is inherited rather than redeclared.
       maxWidth: {
         content: '1200px', // page max width (DESIGN_SYSTEM §5)
         prose: '68ch', // technical prose max (60–75ch)

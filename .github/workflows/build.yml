@@ -1,7 +1,7 @@
 name: Build & Test
 
-# Blocking gates: build + unit/integration tests + accessibility (axe).
-# docs/PROJECT_BIBLE.md §32 (testing) and §33 (deploy pipeline).
+# Blocking gates: build + unit/integration tests + accessibility (axe) + SCA.
+# docs/PROJECT_BIBLE.md §32 (testing), §33 (deploy), §17/§30 (SCA).
 on:
   push:
     branches: [main]
@@ -9,6 +9,10 @@ on:
 
 permissions:
   contents: read
+
+concurrency:
+  group: build-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build-and-test:
@@ -32,6 +36,7 @@ jobs:
           retention-days: 7
 
   a11y:
+    needs: build-and-test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -40,7 +45,35 @@ jobs:
           node-version-file: '.nvmrc'
           cache: npm
       - run: npm ci
+      # Reuse the build from build-and-test instead of rebuilding.
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+      # Cache the Playwright browser between runs (keyed on the lockfile).
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
       - name: Install Playwright Chromium
         run: npx playwright install --with-deps chromium
       - name: Accessibility scan (axe, WCAG 2.2 AA)
         run: npm run audit:a11y
+
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: npm
+      - run: npm ci
+      # Blocking gate: fail on CRITICAL advisories (Bible §30).
+      - name: SCA — block on critical
+        run: npm audit --audit-level=critical
+      # Non-blocking visibility for high/moderate (e.g. build-tool advisories).
+      - name: SCA — report high (non-blocking)
+        run: npm audit --audit-level=high || true
