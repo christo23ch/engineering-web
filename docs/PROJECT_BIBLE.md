@@ -1241,6 +1241,7 @@ CI ejecuta lint + unit + integración + build + axe + Lighthouse antes de permit
 | **ADR-008** | **Persistir leads antes de enviarlos** a CRM/email, con reintentos (mecanismo durable en ADR-010). | Aceptada | Evita pérdida de leads ante fallo de terceros. | Envío directo sin persistencia. |
 | **ADR-009** | **i18n diseñado desde el inicio, activado después**. | Aceptada | Prepara ES/EN sin coste de lanzamiento. | i18n completo en MVP; ignorarlo. |
 | **ADR-010** | **Patrón *Outbox* + reintento programado** para leads (persistencia durable). | Aceptada | En serverless los reintentos en memoria no sobreviven a la invocación; el *outbox* garantiza la entrega sin perder leads. | Reintentos solo en memoria; cola/broker dedicado (sobredimensionado a esta escala). |
+| **ADR-011** | **Línea base de versiones: Astro 7 + Tailwind CSS v4 + Node ≥22.12** (motivada por seguridad). | Aceptada | Astro ≤ 5/6 arrastra 5 advisories **HIGH** (XSS en `define:vars`, replay de server islands, XSS por *slot*/*spread props*, SSRF en página de error) sin fix fuera del *major* 7. `@astrojs/tailwind` no soporta Astro 7 → se adopta **Tailwind v4 (`@tailwindcss/vite`, config CSS-first)**. No cambia la arquitectura (sigue Astro + islas React + Tailwind por tokens). | Permanecer en Astro 5 con XSS abiertos (descartado por seguridad); congelar primitivas de Astro (inviable para el producto). |
 
 **Justificación.** Los ADR dejan trazabilidad del *porqué* de cada decisión, condición para que el SSOT sea coherente en el tiempo.
 
@@ -1250,7 +1251,7 @@ CI ejecuta lint + unit + integración + build + axe + Lighthouse antes de permit
 
 **Dependencias.** Todas las secciones de arquitectura.
 
-**Decisiones tomadas.** Las diez ADR anteriores quedan aceptadas como línea base; los cambios se registran incrementando el número de ADR.
+**Decisiones tomadas.** Las once ADR anteriores quedan aceptadas como línea base; los cambios se registran incrementando el número de ADR.
 
 > **ADR-010 · Patrón *Outbox* (detalle).** El BFF, dentro de la **misma transacción** que crea el `Lead` en PostgreSQL, escribe un registro en una tabla ***outbox*** con estado `pending`. La respuesta al usuario se da tras esa persistencia (el lead **nunca** se pierde). Un **worker programado** (cron de la plataforma de despliegue) toma los `pending`, intenta el envío a CRM/email con ***backoff* exponencial**, y marca `sent` o incrementa el contador de reintentos hasta `failed` (con alerta, [§34](#34-monitorización)). Es **idempotente** (clave de deduplicación por registro) para tolerar reintentos y ejecuciones solapadas. Sustituye a los reintentos en memoria de [ADR-008](#43-decisiones-de-arquitectura-adr)/[§35](#35-gestión-de-errores), inviables en funciones efímeras. Depende de la persistencia de [§14](#14-arquitectura-de-datos) y de un *scheduler* del proveedor ([§49](#49-anexo-de-decisiones-abiertas) DA-3).
 
@@ -1511,6 +1512,10 @@ Ronda de endurecimiento del SSOT tras la revisión crítica del comité de arqui
 8. **Cláusula de reevaluación frontend** — solo antes de F4 y solo si el área privada cambia significativamente ([§12](#12-arquitectura-del-frontend), [ADR-002](#43-decisiones-de-arquitectura-adr)).
 
 Resultado: **10 ADR** (ADR-001…010) y **10 decisiones** de anexo (**DA-1 cerrada**, **DA-2…DA-10 abiertas**). Documento apto como especificación oficial para iniciar desarrollo.
+
+### 50.6 Actualización de línea base por seguridad (ADR-011)
+
+Auditoría de infraestructura del comité de arquitectura: Astro ≤ 5/6 arrastra 5 advisories **HIGH** (XSS/SSRF) cuyo *fix* solo existe en Astro 7 (*major*), y `@astrojs/tailwind` no soporta Astro 7 → obliga a **Tailwind v4**. Se decide (**ADR-011**, aprobado por CTO) actualizar la línea base a **Astro 7 + Tailwind CSS v4 + Node ≥22.12**. **No cambia la arquitectura** (Jamstack + Astro + islas React + Tailwind por tokens intactos); solo cambian versiones y el mecanismo de config de Tailwind (JS → CSS-first `@theme`). El `DESIGN_SYSTEM.md` conserva todos sus tokens; solo se adapta su vehículo de implementación. Resultado: **11 ADR** (ADR-001…011).
 
 ---
 

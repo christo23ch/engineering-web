@@ -5,7 +5,7 @@
   "type": "module",
   "description": "Professional engineering firm website — Jamstack (Astro + React islands + headless CMS + PostgreSQL/pgvector + RAG). See docs/PROJECT_BIBLE.md (SSOT).",
   "engines": {
-    "node": ">=20"
+    "node": ">=22.12.0"
   },
   "scripts": {
     "dev": "astro dev",
@@ -38,18 +38,18 @@
     ]
   },
   "dependencies": {
-    "@astrojs/react": "^4.2.1",
-    "@astrojs/sitemap": "^3.2.1",
-    "@astrojs/tailwind": "^5.1.5",
-    "astro": "^5.4.2",
+    "@astrojs/react": "^6.0.1",
+    "@astrojs/sitemap": "^3.7.3",
+    "@tailwindcss/vite": "^4.3.2",
+    "astro": "^7.0.6",
     "clsx": "^2.1.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "tailwind-merge": "^2.6.0",
-    "tailwindcss": "^3.4.17"
+    "tailwindcss": "^4.3.2"
   },
   "devDependencies": {
-    "@astrojs/check": "^0.9.4",
+    "@astrojs/check": "^0.9.9",
     "@axe-core/playwright": "^4.10.1",
     "@commitlint/cli": "^19.7.1",
     "@commitlint/config-conventional": "^19.7.1",

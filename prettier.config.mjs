@@ -8,6 +8,9 @@ export default {
   trailingComma: 'all',
   bracketSpacing: true,
   plugins: ['prettier-plugin-astro', 'prettier-plugin-tailwindcss'],
+  // Tailwind v4 is CSS-first (no config file): point the class sorter at the
+  // stylesheet that imports Tailwind and declares the theme.
+  tailwindStylesheet: './src/styles/globals.css',
   overrides: [
     {
       files: '*.astro',

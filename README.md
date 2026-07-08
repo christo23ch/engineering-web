@@ -24,10 +24,10 @@ A premium, performance-first website platform for a Spanish engineering firm spe
 
 ## 🚀 Quick Start
 
-> ✅ **Estado real (2026-07-08):** el **scaffolding técnico está completo y verificado** — `package.json`, TypeScript strict, `astro.config.ts`, `tailwind.config.ts` (tokens), ESLint + Prettier, Vitest, Playwright + axe, workflows de CI y `.env.example` existen y funcionan (`npm install` → `npm run dev`/`build`/`lint`/`test` ✓). Lo que **aún no existe es el código de producto** (componentes y páginas reales): se desarrolla en **F1** (Bible §46). La `src/pages/index.astro` actual es un *placeholder* de scaffolding, no producto.
+> ✅ **Estado real (2026-07-08):** el **scaffolding técnico está completo y verificado** — `package.json` (Astro 7 + Tailwind v4, ADR-011), TypeScript strict, `astro.config.ts`, design tokens en `src/styles/globals.css` (`@theme`, CSS-first), ESLint + Prettier, Vitest, Playwright + axe, workflows de CI y `.env.example` existen y funcionan (`npm install` → `npm run dev`/`build`/`lint`/`test` ✓, `npm audit` = 0 vulnerabilidades). Lo que **aún no existe es el código de producto** (componentes y páginas reales): se desarrolla en **F1** (Bible §46). La `src/pages/index.astro` actual es un *placeholder* de scaffolding, no producto.
 
 ### Prerequisites
-- **Node.js** 18+ (with npm or pnpm)
+- **Node.js** 22.12+ (required by Astro 7 — ADR-011)
 - **Git**
 - Environment variables (see `.env.example`)
 
@@ -105,9 +105,9 @@ npm run preview
 ## 🛠 Tech Stack
 
 ### Frontend
-- **Astro** (SSG + rebuild-on-webhook; ISR is a provider-dependent optimization — DA-3; zero JS by default)
+- **Astro 7** (SSG + rebuild-on-webhook; ISR is a provider-dependent optimization — DA-3; zero JS by default)
 - **React** (islands architecture, TypeScript strict)
-- **Tailwind CSS** (design tokens, responsive, WCAG 2.2 AA)
+- **Tailwind CSS v4** (CSS-first `@theme` tokens, responsive, WCAG 2.2 AA)
 - **Inter** (variable font, 1 file ~48kB)
 - **Lucide** (linear icons, 24×24, currentColor)
 
@@ -139,7 +139,7 @@ npm run preview
 
 ## 📁 Repository Structure
 
-> **Nota:** el árbol siguiente es la **estructura objetivo**. Ya presente y funcional: toda la **infraestructura** (`package.json`, `tsconfig.json`, `astro.config.ts`, `tailwind.config.ts`, `eslint.config.mjs`, `prettier.config.mjs`, `vitest.config.ts`, `playwright.config.ts`, `.env.example`, workflows de CI, `src/` base con layout/estilos/utils y una página placeholder, `tests/`). **Pendiente (F1):** el código de producto (componentes y páginas reales de `src/components`, `src/pages`, BFF de `src/lib`).
+> **Nota:** el árbol siguiente es la **estructura objetivo**. Ya presente y funcional: toda la **infraestructura** (`package.json`, `tsconfig.json`, `astro.config.ts`, design tokens en `src/styles/globals.css` `@theme` — Tailwind v4 es CSS-first, sin `tailwind.config.ts`, `eslint.config.mjs`, `prettier.config.mjs`, `vitest.config.ts`, `playwright.config.ts`, `commitlint.config.mjs`, hooks `.husky/`, `.env.example`, workflows de CI + Dependabot, `src/` base con layout/estilos/utils y una página placeholder, `tests/`). **Pendiente (F1):** el código de producto (componentes y páginas reales de `src/components`, `src/pages`, BFF de `src/lib`).
 
 ```
 engineering-web/
@@ -244,10 +244,11 @@ engineering-web/
 ├── .env.example                       # Environment variables template
 ├── .gitignore
 ├── .prettierrc
-├── .eslintrc.json
+├── eslint.config.mjs                  # ESLint flat config
+├── prettier.config.mjs
 ├── tsconfig.json                      # TypeScript strict mode
-├── astro.config.ts                    # Astro configuration
-├── tailwind.config.ts                 # Tailwind design tokens
+├── astro.config.ts                    # Astro 7 config (Tailwind v4 via Vite plugin)
+│                                      # design tokens: src/styles/globals.css (@theme)
 ├── package.json
 └── README.md                          # You are here
 ```
@@ -264,7 +265,7 @@ engineering-web/
 3. **[docs/DESIGN_SYSTEM.md](./docs/DESIGN_SYSTEM.md)** — Design tokens (§2-§5), components (§11), screens (§13), accessibility (§14)
 
 ### Reference
-- **docs/adr/** — Individual Architecture Decision Records (ADR-001 through ADR-010, optional)
+- **docs/adr/** — Individual Architecture Decision Records (ADR-001 through ADR-011, optional)
 - **docs/SECURITY.md** — Security policy & threat model (stub — pending content; complements Bible §17)
 - **docs/{ARCHITECTURE, DATABASE, API, UI_UX, ROADMAP, IMPLEMENTATION_PLAN, CODING_STANDARDS, TESTING}.md** — topic stubs (pending content; each complements its Bible section)
 - **CONTRIBUTING.md** — Contribution guidelines (not yet created)
@@ -336,9 +337,10 @@ See `astro.config.ts`:
 - Sitemap + robots.txt generation
 - TypeScript strict mode
 
-### Tailwind Configuration
+### Tailwind Configuration (v4, CSS-first — ADR-011)
 
-See `tailwind.config.ts`:
+Tailwind v4 has no JS config file. Design tokens live in the `@theme` block of
+`src/styles/globals.css`:
 - **3-tier design tokens:** Primitive (colors, spacing) → Semantic (text-primary, color-action) → Component
 - **All tokens from DESIGN_SYSTEM.md §2-§5** (colors, spacing, typography, breakpoints)
 - **WCAG 2.2 AA contrast verified** in semantic layer
@@ -437,6 +439,7 @@ All architectural decisions documented in **CLAUDE.md** (Decisions Status table)
 | ADR-008 | Lead persistence (email + CRM webhook → PostgreSQL) | ⏳ Pending DA-2 |
 | ADR-009 | i18n design-first (ES now, EN in F3) | ✅ Locked |
 | ADR-010 | Outbox pattern + scheduled retry worker (durable lead delivery) | ✅ Locked |
+| ADR-011 | Version baseline: Astro 7 + Tailwind v4 + Node ≥22.12 (security-driven) | ✅ Locked |
 
 **Closed Decision:**
 - ✅ DA-1: Stack — **Astro definitive** (WordPress discarded)

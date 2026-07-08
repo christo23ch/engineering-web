@@ -12,7 +12,7 @@
 This is a **professional engineering firm website** (Jamstack: Astro + React islands + headless CMS + PostgreSQL + RAG). 
 
 **Complete Documentation Status:**
-- ✅ PROJECT_BIBLE.md (v1.0.0 **oficial · SSOT**) — 50 sections covering vision, requirements (20 RF), architecture, IA policy, security, performance, accessibility, testing, deployment, risk taxonomy, **10 ADRs**, 11 hypotheses, **10 decisions (DA-1 closed: Astro; DA-2…DA-10 open)**, internal consistency audit.
+- ✅ PROJECT_BIBLE.md (v1.0.0 **oficial · SSOT**) — 50 sections covering vision, requirements (20 RF), architecture, IA policy, security, performance, accessibility, testing, deployment, risk taxonomy, **11 ADRs**, 11 hypotheses, **10 decisions (DA-1 closed: Astro; DA-2…DA-10 open)**, internal consistency audit.
 - ✅ DESIGN_SYSTEM.md (473 lines, v1.0.0) — 15 sections implementing all UX/UI/responsive/accessibility directives from PROJECT_BIBLE with full traceability (every decision references [Bible §n]).
 
 **Current Deliverables:** Documentation + analysis complete. **Zero product code written yet.**
@@ -38,7 +38,7 @@ This is a **professional engineering firm website** (Jamstack: Astro + React isl
 - **Model:** B2B with buying committees (H4), lead generation primary (H5).
 - **MVP Goal:** Professional website (lead capture, project portfolio, thought leadership, team credibility).
 
-### Architecture Locked In (ADR-001 through ADR-010)
+### Architecture Locked In (ADR-001 through ADR-011)
 1. **ADR-001:** Jamstack (SSG by default + rebuild-on-webhook; ISR is a provider-dependent optimization, not architecture — DA-3).
 2. **ADR-002:** Astro (server components, zero JS by default) + React islands (TypeScript strict) + headless CMS. **Astro is definitive (DA-1 closed);** frontend framework revisable only before F4 if the private-area scope changes significantly.
 3. **ADR-003:** Headless CMS (provider TBD in DA-7; candidates: Strapi, Sanity, Storyblok).
@@ -49,6 +49,7 @@ This is a **professional engineering firm website** (Jamstack: Astro + React isl
 8. **ADR-008:** Lead persistence: email + CRM webhook → PostgreSQL (CRM provider TBD in DA-2). Durable mechanism in ADR-010.
 9. **ADR-009:** i18n design-first: ES now, EN in F3.
 10. **ADR-010:** Outbox pattern + scheduled retry worker for durable lead delivery (in-memory retries don't survive serverless invocations).
+11. **ADR-011:** Version baseline **Astro 7 + Tailwind CSS v4 + Node ≥22.12** (security-driven: Astro ≤5/6 carried 5 HIGH XSS/SSRF advisories fixed only in Astro 7; @astrojs/tailwind doesn't support Astro 7 → Tailwind v4 `@tailwindcss/vite`, CSS-first `@theme`). Architecture unchanged; tokens preserved.
 
 ### Design System (DESIGN_SYSTEM.md §1-§14)
 - **8 Principles:** Clarity > creativity, data as aesthetic, single CTA per page, premium sobriety, performance-first, WCAG 2.2 AA by default, mobile-first, tokens-driven.
@@ -95,8 +96,8 @@ This is a **professional engineering firm website** (Jamstack: Astro + React isl
 
 ## Decisions Status (Bible §49 & §44)
 
-### Locked Decisions (ADR-001 to ADR-010)
-All 10 ADRs approved. Stack confirmed & definitive: Astro + React + headless CMS + PostgreSQL + pgvector + Claude RAG (DA-1 closed).
+### Locked Decisions (ADR-001 to ADR-011)
+All 11 ADRs approved. Stack confirmed & definitive: Astro 7 + React islands + Tailwind CSS v4 + headless CMS + PostgreSQL + pgvector + Claude RAG (DA-1 closed; version baseline in ADR-011, Node ≥22.12).
 
 ### Open Decisions (Blocking Development; Require Client/Direction Input)
 
@@ -374,7 +375,7 @@ Current issue: 403 Forbidden on `git push -u origin claude/repo-structure-setup-
 | PROJECT_BIBLE.md | SSOT: vision, requirements, architecture, policy | §1-§3 (vision), §8 (RF), §11-§14 (arch), §16 (IA), §28 (data model), §43 (ADRs), §44 (hypotheses), §46 (roadmap), §49 (decisions) |
 | DESIGN_SYSTEM.md | Visual implementation of Bible directives | §1 (principles), §2-§5 (tokens), §11 (components), §13 (screens), §14 (accessibility) |
 | CLAUDE.md | Session context + continuation guide | You are here |
-| (TBD) docs/adr/ | Individual ADR documents (optional) | ADR-001 through ADR-010 (reference Bible §43) |
+| (TBD) docs/adr/ | Individual ADR documents (optional) | ADR-001 through ADR-011 (reference Bible §43) |
 | (TBD) .env.example | Environment variables template | Reference Bible §38 |
 | (TBD) README.md | Developer onboarding | Project overview, stack, setup, CI/CD, contributing |
 
@@ -399,7 +400,7 @@ Current issue: 403 Forbidden on `git push -u origin claude/repo-structure-setup-
 
 **TL;DR:** Documentation is locked in. Zero code yet. Ready for Phase 0 scaffolding using provisional directives. Awaiting 20 decisions/validations from client/CTO before Phase 1 MVP starts.
 
-**Brand Gap (H10 = PROVISIONAL):** All color/type tokens marked ⚠️ PROVISIONAL. Once brand manual arrives, only re-define primitives + semantic mappings in Tailwind config; components unchanged.
+**Brand Gap (H10 = PROVISIONAL):** All color/type tokens marked ⚠️ PROVISIONAL. Once brand manual arrives, only re-define primitives + semantic mappings in the Tailwind v4 `@theme` block (`src/styles/globals.css`); components unchanged.
 
 **GitHub Push Issue:** Retry with SSH key verification; if 403 persists, ask admin to verify GitHub App + branch permissions for user.
 

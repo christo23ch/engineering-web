@@ -1,8 +1,92 @@
-/* Global styles — Tailwind layers + design-system base.
-   Tokens: tailwind.config.ts (docs/DESIGN_SYSTEM.md §2–§6). */
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* Global styles — Tailwind CSS v4 (ADR-011), CSS-first.
+   Design tokens (docs/DESIGN_SYSTEM.md §2–§6) live in the `@theme` block below,
+   replacing the former tailwind.config.ts. Three-tier tokens: primitives map to
+   semantic aliases so the PROVISIONAL brand palette (⚠️ H10) can be swapped for
+   the real brand manual by editing only these values — components unchanged. */
+@import 'tailwindcss';
+
+@theme {
+  /* ── Breakpoints — mobile-first (DESIGN_SYSTEM §6): 640/768/1024/1280.
+     Unset the default 1536px `2xl` (out of the design system's range). ── */
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: initial;
+
+  /* ── Color primitives (⚠️ PROVISIONAL H10) ── */
+  --color-blue-50: #eff6ff;
+  --color-blue-100: #dbeafe;
+  --color-blue-600: #2563eb;
+  --color-blue-700: #1d4ed8;
+  --color-blue-800: #1e40af;
+  --color-blue-900: #1e3a8a;
+  --color-green-50: #ecfdf5;
+  --color-green-600: #059669;
+  --color-green-700: #047857;
+  --color-gray-50: #f9fafb;
+  --color-gray-100: #f3f4f6;
+  --color-gray-300: #d1d5db;
+  --color-gray-500: #6b7280;
+  --color-gray-600: #4b5563;
+  --color-gray-900: #111827;
+  --color-amber-500: #f59e0b;
+  --color-red-600: #dc2626;
+
+  /* ── Semantic aliases (consumed by components) ── */
+  --color-text-primary: #111827; /* gray-900  (AA ~17.7:1 on white) */
+  --color-text-secondary: #4b5563; /* gray-600 (AA ~7.6:1) */
+  --color-text-muted: #6b7280; /* gray-500   (AA ~4.8:1) */
+  --color-text-inverse: #ffffff;
+  --color-surface: #ffffff;
+  --color-surface-subtle: #f9fafb;
+  --color-surface-muted: #f3f4f6;
+  --color-border: #d1d5db;
+  --color-action: #1d4ed8; /* blue-700 (AA ~6.3:1) */
+  --color-action-hover: #1e40af; /* blue-800 */
+  --color-success: #047857; /* green-700 (sustainability/success only) */
+  --color-danger: #dc2626;
+  --color-warning: #f59e0b;
+  --color-focus: #1d4ed8; /* blue-700 focus ring (DESIGN_SYSTEM §10) */
+
+  /* ── Typography (DESIGN_SYSTEM §4): Inter variable, single family ── */
+  --font-sans:
+    'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial,
+    sans-serif;
+
+  /* Fluid type scale via clamp() (DESIGN_SYSTEM §4.2). */
+  --text-overline: 0.75rem;
+  --text-overline--line-height: 1rem;
+  --text-overline--letter-spacing: 0.08em;
+  --text-body-sm: 0.875rem;
+  --text-body-sm--line-height: 1.4rem;
+  --text-body: 1rem;
+  --text-body--line-height: 1.6rem;
+  --text-body-lg: 1.125rem;
+  --text-body-lg--line-height: 1.75rem;
+  --text-h4: clamp(1.125rem, 1rem + 0.6vw, 1.375rem);
+  --text-h4--line-height: 1.3;
+  --text-h3: clamp(1.375rem, 1.2rem + 0.9vw, 1.75rem);
+  --text-h3--line-height: 1.25;
+  --text-h2: clamp(1.75rem, 1.4rem + 1.6vw, 2.5rem);
+  --text-h2--line-height: 1.2;
+  --text-h1: clamp(2.25rem, 1.8rem + 2.4vw, 3.5rem);
+  --text-h1--line-height: 1.1;
+  --text-display: clamp(2.75rem, 2rem + 3.6vw, 4.5rem);
+  --text-display--line-height: 1.05;
+
+  /* ── Layout (DESIGN_SYSTEM §5): container + prose max widths ── */
+  --container-content: 1200px; /* page max width */
+  --container-prose: 68ch; /* technical prose max (60–75ch) */
+
+  /* ── Radius + elevation (DESIGN_SYSTEM §8): minimal depth, premium sobriety ── */
+  --radius-sm: 0.25rem;
+  --radius: 0.5rem;
+  --radius-lg: 0.75rem;
+  --shadow-sm: 0 1px 2px 0 rgb(17 24 39 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(17 24 39 / 0.08);
+  --shadow-lg: 0 10px 20px -3px rgb(17 24 39 / 0.1);
+}
 
 @layer base {
   :root {
@@ -20,7 +104,7 @@
 
   /* Mandatory visible focus ring (docs/DESIGN_SYSTEM.md §10). */
   :where(a, button, input, select, textarea, [tabindex]):focus-visible {
-    outline: 2px solid theme('colors.focus');
+    outline: 2px solid var(--color-focus);
     outline-offset: 2px;
   }
 
