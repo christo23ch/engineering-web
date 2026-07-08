@@ -1,0 +1,116 @@
+---
+/**
+ * Modal — native <dialog> (DESIGN_SYSTEM §11.6, Bible §20). Focus trapping,
+ * Escape-to-close, top-layer and background inertness are provided by the
+ * platform (showModal()); NO custom FocusTrap. Restricted use (P1): confirmations
+ * and lead magnets.
+ *
+ * The trigger is the CONSUMER's element, marked `data-modal-open="<id>"` (e.g.
+ * <Button data-modal-open="demo">). This component only renders the dialog.
+ *
+ * JavaScript (scoped, vanilla, deduped by Astro across instances) is limited to:
+ * showModal(), close(), backdrop-close, storing the trigger, and returning focus
+ * on close. Everything else is native.
+ */
+import { cn } from '@/lib/utils/cn';
+
+interface Props {
+  /** Unique id; the trigger references it via data-modal-open="<id>". */
+  id: string;
+  /** Accessible name (rendered as the heading and linked via aria-labelledby). */
+  title: string;
+  class?: string;
+}
+const { id, title, class: className } = Astro.props;
+const titleId = `${id}-title`;
+---
+
+<dialog
+  id={id}
+  aria-labelledby={titleId}
+  class={cn(
+    'bg-surface m-auto w-[calc(100%-2rem)] max-w-md rounded-lg p-0 shadow-lg',
+    className,
+  )}
+>
+  <div class="flex items-start justify-between gap-4 p-6 pb-4">
+    <h2 id={titleId} class="text-h3 font-semibold text-text-primary">
+      {title}
+    </h2>
+    <button
+      type="button"
+      data-modal-close
+      aria-label="Cerrar"
+      class="-m-2 shrink-0 rounded p-2 text-text-muted hover:text-text-primary"
+    >
+      <svg
+        class="h-5 w-5"
+        viewBox="0 0 20 20"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.5"
+        stroke-linecap="round"
+        aria-hidden="true"
+      >
+        <path d="m6 6 8 8M14 6l-8 8"></path>
+      </svg>
+    </button>
+  </div>
+
+  <div class="px-6 pb-6 text-body text-text-secondary">
+    <slot />
+  </div>
+</dialog>
+
+<style>
+  /* Overlay per DESIGN_SYSTEM §11.6 (scoped to this component's dialog). */
+  dialog::backdrop {
+    background: rgb(0 0 0 / 0.5);
+  }
+</style>
+
+<script>
+  // Minimal native-<dialog> controller. Delegated + deduped: one listener set
+  // handles every Modal on the page. Scope is limited to the approved ops.
+  let lastTrigger: HTMLElement | null = null;
+
+  document.addEventListener('click', (event) => {
+    const target = event.target as HTMLElement;
+
+    // Open: a trigger marked data-modal-open="<dialog id>".
+    const opener = target.closest<HTMLElement>('[data-modal-open]');
+    if (opener) {
+      const dialogId = opener.getAttribute('data-modal-open');
+      const dialog = dialogId ? document.getElementById(dialogId) : null;
+      if (dialog instanceof HTMLDialogElement) {
+        lastTrigger = opener; // store the trigger for focus return
+        dialog.showModal();
+      }
+      return;
+    }
+
+    // Close: a control marked data-modal-close inside the dialog.
+    if (target.closest('[data-modal-close]')) {
+      target.closest('dialog')?.close();
+      return;
+    }
+
+    // Backdrop: a click whose target is the dialog element itself.
+    if (target instanceof HTMLDialogElement && target.open) {
+      target.close();
+    }
+  });
+
+  // Native Escape and any close() fire the dialog's `close` event (does not
+  // bubble → capture phase). Return focus explicitly to the trigger.
+  document.addEventListener(
+    'close',
+    (event) => {
+      if (event.target instanceof HTMLDialogElement && lastTrigger) {
+        lastTrigger.focus();
+        lastTrigger = null;
+      }
+    },
+    true,
+  );
+</script>
