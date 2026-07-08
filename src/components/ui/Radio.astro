@@ -1,0 +1,93 @@
+---
+/**
+ * Radio — native radio button (DESIGN_SYSTEM §11.3). 20px, blue-700 mark via
+ * accent-color, whole label clickable. A radio belongs to a group: pass the same
+ * `name` to sibling radios; the consuming <fieldset>/<legend> provides the group
+ * label and semantics (that grouping is the form organism's job, not this
+ * primitive). Help/error reuse FieldMessage. Zero JS.
+ */
+import type { HTMLAttributes } from 'astro/types';
+import FieldMessage from '@/components/ui/FieldMessage.astro';
+import { resolveFieldId, fieldParts, describedBy } from '@/lib/ui/field';
+import { cn } from '@/lib/utils/cn';
+
+type Props = {
+  /** Group name — shared by radios in the same set. */
+  name: string;
+  value: string;
+  id?: string;
+  checked?: boolean;
+  required?: boolean;
+  disabled?: boolean;
+  help?: string;
+  error?: string;
+  class?: string;
+} & Omit<
+  HTMLAttributes<'input'>,
+  | 'type'
+  | 'name'
+  | 'id'
+  | 'value'
+  | 'checked'
+  | 'required'
+  | 'disabled'
+  | 'class'
+>;
+
+const {
+  name,
+  value,
+  id,
+  checked = false,
+  required = false,
+  disabled = false,
+  help,
+  error,
+  class: className,
+  ...rest
+} = Astro.props;
+
+// Radios share `name`, so derive a unique id from name + value.
+const {
+  id: fieldId,
+  helpId,
+  errorId,
+} = fieldParts(resolveFieldId(id, `${name}-${value}`));
+const description = describedBy(help && helpId, error && errorId);
+---
+
+<div class={cn('flex flex-col gap-1', className)}>
+  <label
+    class="flex items-start gap-2 text-body text-text-primary"
+    class:list={[
+      disabled && 'cursor-not-allowed',
+      !disabled && 'cursor-pointer',
+    ]}
+  >
+    <input
+      type="radio"
+      id={fieldId}
+      name={name}
+      value={value}
+      checked={checked || undefined}
+      required={required || undefined}
+      disabled={disabled || undefined}
+      aria-describedby={description}
+      class="mt-0.5 size-5 shrink-0 accent-action"
+      {...rest}
+    />
+    {
+      /* aria-invalid is not valid on role="radio"; validity belongs on the
+        enclosing radiogroup (form organism), so it is intentionally omitted. */
+    }
+    <span><slot /></span>
+  </label>
+
+  <FieldMessage
+    helpId={helpId}
+    errorId={errorId}
+    help={help}
+    error={error}
+    class="pl-7"
+  />
+</div>
