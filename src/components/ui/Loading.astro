@@ -1,0 +1,41 @@
+---
+/**
+ * Loading — accessible loading REGION (DESIGN_SYSTEM §11.6 loaders, Bible §9/§20).
+ *
+ * Composition over duplication: Spinner and Skeleton are both decorative
+ * (aria-hidden), so on their own a screen reader is NOT told that content is
+ * loading. This thin wrapper supplies exactly the missing piece — a polite live
+ * region (role="status" + aria-busy) with a visually-hidden label — and slots
+ * the existing visuals (Skeleton blocks or, by default, a Spinner). No new
+ * loader is introduced. Zero JS: the load→content transition is the consumer's
+ * (or a future island's) job; this only standardises the accessible affordance.
+ */
+import Spinner from '@/components/ui/Spinner.astro';
+import { cn } from '@/lib/utils/cn';
+
+interface Props {
+  /** Announced to assistive tech while loading. */
+  label?: string;
+  /** inline: spinner beside text/controls · block: content-shaped region. */
+  variant?: 'inline' | 'block';
+  class?: string;
+}
+const {
+  label = 'Cargando…',
+  variant = 'block',
+  class: className,
+} = Astro.props;
+const hasContent = Astro.slots.has('default');
+---
+
+<div
+  role="status"
+  aria-busy="true"
+  class={cn(
+    variant === 'inline' && 'inline-flex items-center gap-2',
+    className,
+  )}
+>
+  <span class="sr-only">{label}</span>
+  {hasContent ? <slot /> : <Spinner class="text-text-muted" />}
+</div>
