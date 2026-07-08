@@ -1,0 +1,48 @@
+---
+/**
+ * Card — container primitive (DESIGN_SYSTEM §11.2). Renders a single accessible
+ * link (<a>) covering the whole card when `href` is set (§11.2: "toda la tarjeta
+ * clicable con un único enlace"), otherwise a plain container. Concrete cards
+ * (service/case/article/metric/person) compose this with their own content.
+ * Zero JS.
+ */
+import type { HTMLAttributes } from 'astro/types';
+import { cardVariants, type CardPadding } from '@/lib/ui/card-variants';
+
+type Props = {
+  href?: string;
+  /** Hover/focus affordance. Defaults to true when the card is a link. */
+  interactive?: boolean;
+  padding?: CardPadding;
+  class?: string;
+} & Omit<HTMLAttributes<'a'>, 'href' | 'class'> &
+  Omit<HTMLAttributes<'div'>, 'class'>;
+
+const {
+  href,
+  interactive,
+  padding = 'md',
+  class: className,
+  ...rest
+} = Astro.props;
+
+const isLink = href != null;
+const isInteractive = interactive ?? isLink;
+const classes = cardVariants({
+  interactive: isInteractive,
+  padding,
+  class: className,
+});
+---
+
+{
+  isLink ? (
+    <a href={href} class={classes} {...rest}>
+      <slot />
+    </a>
+  ) : (
+    <div class={classes} {...rest}>
+      <slot />
+    </div>
+  )
+}
