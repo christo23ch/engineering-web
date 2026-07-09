@@ -1,0 +1,280 @@
+---
+/**
+ * Service page template (`/servicios/{slug}`) ×6 — DESIGN_SYSTEM §13.2,
+ * Bible RF-02 / CU-01, template §6.2 (problema → enfoque → metodología →
+ * entregables → normativa → casos → FAQ → CTA).
+ *
+ * Composes APPROVED primitives only (Card, Button, Icon). Breadcrumbs, the
+ * methodology timeline and the FAQ accordion are page-level compositions of
+ * semantic HTML (nav/ol, ol, native <details> — zero JS), not new components.
+ *
+ * Faithful-to-SSOT content: hero/enfoque/metodología/entregables/FAQ carry
+ * generic, definitional PROVISIONAL copy (no fabricated figures). DEFERRED per
+ * "omite sin hueco vacío": the applicable-regulation table (fabricating
+ * standards would betray the rigor differentiator, Bible §3), related cases
+ * (no CMS data), and the FAQPage JSON-LD (SEO/RF-11 iteration). They return
+ * with the CMS/SEO work.
+ */
+import type { GetStaticPaths } from 'astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Button from '@/components/ui/Button.astro';
+import Card from '@/components/ui/Card.astro';
+import Icon from '@/components/ui/Icon.astro';
+import { services } from '@/lib/content/services';
+
+export const getStaticPaths = (() =>
+  services.map((service) => ({
+    params: { slug: service.slug },
+    props: { service },
+  }))) satisfies GetStaticPaths;
+
+const { service } = Astro.props;
+
+// Template-level PROVISIONAL copy (generic across services; CMS-authored later).
+const methodology = [
+  {
+    title: 'Diagnóstico',
+    text: 'Analizamos la situación de partida y los objetivos con datos.',
+  },
+  {
+    title: 'Propuesta',
+    text: 'Definimos alcance, enfoque técnico e indicadores de resultado.',
+  },
+  {
+    title: 'Ejecución',
+    text: 'Desarrollamos el proyecto con seguimiento técnico continuo.',
+  },
+  {
+    title: 'Verificación',
+    text: 'Medimos los resultados frente a los indicadores acordados.',
+  },
+];
+
+const deliverables = [
+  'Informe técnico con datos y recomendaciones.',
+  'Documentación y memoria del proyecto.',
+  'Plan de implementación por fases.',
+  'Verificación de resultados frente a indicadores.',
+];
+
+const faqs = [
+  {
+    q: '¿Cómo solicito una propuesta?',
+    a: 'A través del formulario de contacto; te responde un ingeniero del equipo, no un bot.',
+  },
+  {
+    q: '¿Qué necesitáis para empezar?',
+    a: 'Una descripción del alcance y los objetivos; en una primera conversación acotamos el enfoque.',
+  },
+  {
+    q: '¿Los resultados son medibles?',
+    a: 'Sí: cada proyecto define indicadores y se verifica su cumplimiento al cierre.',
+  },
+];
+---
+
+<BaseLayout
+  title={`${service.name} — Ingeniería que rinde`}
+  description={service.problem}
+>
+  <main>
+    <!-- 1 · Hero interior (§12): breadcrumbs + h1 + entradilla con el problema -->
+    <section aria-labelledby="service-title" class="bg-surface-subtle">
+      <div class="mx-auto w-full max-w-content px-4 py-16 sm:px-6 lg:px-8">
+        <nav aria-label="Migas de pan" class="text-body-sm text-text-muted">
+          <ol class="flex flex-wrap items-center gap-2">
+            <li><a href="/" class="text-action">Inicio</a></li>
+            <li aria-hidden="true">/</li>
+            <li>Servicios</li>
+            <li aria-hidden="true">/</li>
+            <li aria-current="page" class="text-text-secondary">
+              {service.name}
+            </li>
+          </ol>
+        </nav>
+
+        <div class="mt-6 flex items-start gap-4">
+          <Icon
+            name={service.icon}
+            size={32}
+            class="mt-1 shrink-0 text-action"
+          />
+          <div>
+            <h1 class="text-h1 font-semibold text-balance text-text-primary">
+              {service.name}
+            </h1>
+            <p class="mt-4 max-w-prose text-body-lg text-text-secondary">
+              {service.problem}
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2 · Nuestro enfoque (§12 contenido + aside sticky 8+4) -->
+    <section aria-labelledby="approach-title">
+      <div
+        class="mx-auto grid w-full max-w-content gap-10 px-4 py-16 sm:px-6 lg:grid-cols-3 lg:gap-16 lg:px-8 lg:py-24"
+      >
+        <div class="lg:col-span-2">
+          <h2 id="approach-title" class="text-h2 font-bold text-text-primary">
+            Nuestro enfoque
+          </h2>
+          <div class="mt-6 max-w-prose space-y-4 text-body text-text-secondary">
+            <p>
+              Trabajamos orientados a datos y resultados comparables: cada
+              decisión técnica se justifica y cada proyecto se mide frente a
+              indicadores acordados.
+            </p>
+            <p>
+              El objetivo no es entregar un documento, sino resolver el problema
+              con criterios de eficiencia, sostenibilidad y cumplimiento de la
+              normativa aplicable.
+            </p>
+          </div>
+        </div>
+
+        <aside class="lg:sticky lg:top-8 lg:h-max">
+          <Card>
+            <h3 class="text-h4 font-semibold text-text-primary">Datos clave</h3>
+            <dl class="mt-4 space-y-3 text-body-sm">
+              <div class="flex justify-between gap-4">
+                <dt class="text-text-muted">Enfoque</dt>
+                <dd class="text-text-primary">Resultados medibles</dd>
+              </div>
+              <div class="flex justify-between gap-4">
+                <dt class="text-text-muted">Normativa</dt>
+                <dd class="text-text-primary">Aplicable al proyecto</dd>
+              </div>
+            </dl>
+            <Button href="/contacto" variant="secondary" class="mt-6 w-full">
+              Solicitar propuesta
+            </Button>
+          </Card>
+        </aside>
+      </div>
+    </section>
+
+    <!-- 3 · Timeline de metodología (§11.5) -->
+    <section aria-labelledby="method-title" class="bg-surface-subtle">
+      <div
+        class="mx-auto w-full max-w-content px-4 py-16 sm:px-6 lg:px-8 lg:py-24"
+      >
+        <h2 id="method-title" class="text-h2 font-bold text-text-primary">
+          Metodología
+        </h2>
+        <ol class="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          {
+            methodology.map((step, i) => (
+              <li>
+                <Card class="h-full">
+                  <span class="text-h2 font-bold text-action tabular-nums">
+                    {String(i + 1).padStart(2, '0')}
+                  </span>
+                  <h3 class="mt-2 text-h4 font-semibold text-text-primary">
+                    {step.title}
+                  </h3>
+                  <p class="mt-2 text-body-sm text-text-secondary">
+                    {step.text}
+                  </p>
+                </Card>
+              </li>
+            ))
+          }
+        </ol>
+      </div>
+    </section>
+
+    <!-- 4 · Entregables (lista con iconos check) -->
+    <section aria-labelledby="deliverables-title">
+      <div
+        class="mx-auto w-full max-w-content px-4 py-16 sm:px-6 lg:px-8 lg:py-24"
+      >
+        <h2 id="deliverables-title" class="text-h2 font-bold text-text-primary">
+          Entregables
+        </h2>
+        <ul class="mt-8 grid max-w-prose gap-4 sm:grid-cols-2">
+          {
+            deliverables.map((item) => (
+              <li class="flex items-start gap-3">
+                <Icon
+                  name="check-circle"
+                  size={24}
+                  class="mt-0.5 shrink-0 text-success"
+                />
+                <span class="text-body text-text-primary">{item}</span>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </section>
+
+    <!-- 7 · FAQ (acordeón nativo <details>, zero JS; schema → RF-11) -->
+    <section aria-labelledby="faq-title" class="bg-surface-subtle">
+      <div
+        class="mx-auto w-full max-w-prose px-4 py-16 sm:px-6 lg:px-8 lg:py-24"
+      >
+        <h2 id="faq-title" class="text-h2 font-bold text-text-primary">
+          Preguntas frecuentes
+        </h2>
+        <div class="mt-8 divide-y divide-border border-y border-border">
+          {
+            faqs.map((faq) => (
+              <details class="faq group">
+                <summary class="flex cursor-pointer items-center justify-between gap-4 py-4">
+                  <h3 class="text-h4 font-semibold text-text-primary">
+                    {faq.q}
+                  </h3>
+                  <Icon
+                    name="chevron-down"
+                    size={20}
+                    class="chevron shrink-0 text-text-muted"
+                  />
+                </summary>
+                <p class="pb-4 text-body text-text-secondary">{faq.a}</p>
+              </details>
+            ))
+          }
+        </div>
+      </div>
+    </section>
+
+    <!-- 8 · Banda CTA final específica del servicio (§11.5) -->
+    <section
+      aria-labelledby="cta-title"
+      data-surface="dark"
+      class="bg-blue-900"
+    >
+      <div
+        class="mx-auto flex w-full max-w-content flex-col items-start gap-6 px-4 py-16 sm:px-6 lg:px-8 lg:py-24"
+      >
+        <h2 id="cta-title" class="text-h2 font-bold text-balance text-on-dark">
+          ¿Un proyecto de {service.name.toLowerCase()}? Hablemos.
+        </h2>
+        <p class="max-w-prose text-body-lg text-blue-100">
+          Cuéntanos tu reto y te responde un ingeniero, no un bot.
+        </p>
+        <Button href="/contacto" variant="inverted">Solicitar propuesta</Button>
+      </div>
+    </section>
+  </main>
+</BaseLayout>
+
+<style>
+  /* FAQ accordion affordance — CSS only (no JS): hide the native marker and
+     rotate the chevron when open. Rotation is neutralised under reduced-motion
+     by the global rule (src/styles/globals.css). */
+  .faq > summary {
+    list-style: none;
+  }
+  .faq > summary::-webkit-details-marker {
+    display: none;
+  }
+  .faq .chevron {
+    transition: rotate 150ms ease;
+  }
+  .faq[open] .chevron {
+    rotate: 180deg;
+  }
+</style>
