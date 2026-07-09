@@ -22,6 +22,17 @@ describe('buttonVariants', () => {
     );
   });
 
+  it('renders the inverted variant (white fill + blue-800 text) for dark CTAs', () => {
+    const c = buttonVariants({ variant: 'inverted' });
+    expect(c).toContain('bg-white');
+    expect(c).toContain('text-blue-800');
+    // It is a solid chip, not the primary action fill nor a bordered button.
+    expect(c).not.toContain('bg-action');
+    expect(c).not.toContain('border-action');
+    // Shares the base disabled affordances (no duplication / override needed).
+    expect(c).toContain('disabled:bg-gray-300');
+  });
+
   it('maps sizes to the DS touch scale (36/44/52)', () => {
     expect(buttonVariants({ size: 'sm' })).toContain('h-9');
     expect(buttonVariants({ size: 'md' })).toContain('h-11');

@@ -291,6 +291,7 @@ Inventario alineado con el previsto en el Bible `[Bible §22: botones, tarjetas 
 **Botón primario** — Fondo `color-action`, texto `text-on-action`, `radius-md`, padding 12×24, `label`/16 px 600. **Uno por vista** (P3). Uso: «Solicitar propuesta» `[Bible §21: CTAs orientados a valor]`.
 **Botón secundario** — Borde 1,5 px `color-action`, texto `color-action`, fondo transparente. Uso: acción alternativa («Ver casos de éxito»).
 **Botón terciario/ghost** — Solo texto `color-action` + icono flecha; para acciones de baja jerarquía («Ver todos»).
+**Botón invertido** — Fondo `white`, texto `blue-800` (8,6:1 ✅). Es el primario para superficies oscuras `blue-900` (banda CTA, §11.5); el foco se remapea vía `data-surface="dark"` (§10).
 **Enlace en prosa** — `color-action` + **subrayado siempre** (el color no puede ser el único indicador, §3.3).
 Tamaños: `sm` 36 px alto · `md` 44 px · `lg` 52 px (hero). Altura mínima táctil §6.
 

@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils/cn';
  * Pattern inspired by class-variance-authority / shadcn's variant approach;
  * written from scratch, no copied code.
  */
-export type ButtonVariant = 'primary' | 'secondary' | 'tertiary';
+export type ButtonVariant = 'primary' | 'secondary' | 'tertiary' | 'inverted';
 export type ButtonSize = 'sm' | 'md' | 'lg';
 
 // Base — shared by every button. The focus ring is applied globally to all
@@ -32,6 +32,12 @@ const byVariant: Record<ButtonVariant, string> = {
     'border-[1.5px] border-action bg-transparent text-action hover:bg-blue-50 active:bg-blue-100',
   // Tertiary / ghost — text only, low hierarchy.
   tertiary: 'bg-transparent text-action hover:bg-blue-50 active:bg-blue-100',
+  // Inverted primary — white fill + blue-800 text for the final CTA band on
+  // dark (blue-900) surfaces (§11.5). Primitives are intentional: the chip must
+  // stay white/blue regardless of theme (unlike `surface`, which would flip).
+  // The focus ring is remapped for dark surfaces via [data-surface="dark"]
+  // (§10), so no per-variant focus is needed.
+  inverted: 'bg-white text-blue-800 hover:bg-blue-50 active:bg-blue-100',
 };
 
 // Heights map to the DS touch scale: sm 36px · md 44px · lg 52px (§11.1, §6).
