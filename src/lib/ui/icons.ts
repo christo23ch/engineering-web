@@ -17,7 +17,16 @@ export type IconName =
   | 'alert-triangle'
   | 'info'
   | 'check-circle'
-  | 'x-circle';
+  | 'x-circle'
+  // Service-line glyphs (DESIGN_SYSTEM §7 metaphors ↔ Bible §24 taxonomy) +
+  | 'factory'
+  | 'zap'
+  | 'sun'
+  | 'layers'
+  | 'clipboard-check'
+  | 'box'
+  // …and a directional affordance for "Ver servicio" links.
+  | 'arrow-right';
 
 export type IconNode =
   | { tag: 'path'; d: string; fill?: string; stroke?: string }
@@ -71,4 +80,42 @@ export const icons: Record<IconName, IconNode[]> = {
     { tag: 'circle', cx: '12', cy: '12', r: '9' },
     { tag: 'path', d: 'm9 9 6 6M15 9l-6 6' },
   ],
+  // industria → nave con dientes de sierra + chimenea.
+  factory: [
+    { tag: 'path', d: 'M3 21h18' },
+    { tag: 'path', d: 'M4 21V11l5 3v-3l5 3V8l4 2v11' },
+    { tag: 'path', d: 'M9 21v-3h3v3' },
+  ],
+  // energía / eficiencia → rayo.
+  zap: [{ tag: 'path', d: 'M13 2 5 13h5l-1 9 8-11h-5l1-9Z' }],
+  // renovables → sol con rayos.
+  sun: [
+    { tag: 'circle', cx: '12', cy: '12', r: '4' },
+    {
+      tag: 'path',
+      d: 'M12 2v3M12 19v3M5 5l2 2M17 17l2 2M2 12h3M19 12h3M5 19l2-2M17 7l2-2',
+    },
+  ],
+  // MEP / instalaciones → capas.
+  layers: [
+    { tag: 'path', d: 'M12 3 3 8l9 5 9-5-9-5Z' },
+    { tag: 'path', d: 'm3 12 9 5 9-5' },
+    { tag: 'path', d: 'm3 16 9 5 9-5' },
+  ],
+  // consultoría → portapapeles con check.
+  'clipboard-check': [
+    {
+      tag: 'path',
+      d: 'M9 4H7a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-2',
+    },
+    { tag: 'path', d: 'M9 3h6v3H9Z' },
+    { tag: 'path', d: 'm9 14 2 2 4-4' },
+  ],
+  // BIM / digitalización → cubo isométrico.
+  box: [
+    { tag: 'path', d: 'M12 2 21 7v10l-9 5-9-5V7l9-5Z' },
+    { tag: 'path', d: 'm3 7 9 5 9-5' },
+    { tag: 'path', d: 'M12 12v10' },
+  ],
+  'arrow-right': [{ tag: 'path', d: 'M5 12h14M13 6l6 6-6 6' }],
 };
