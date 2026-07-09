@@ -41,8 +41,13 @@
   --color-text-primary: #111827; /* gray-900  (AA ~17.7:1 on white) */
   --color-text-secondary: #4b5563; /* gray-600 (AA ~7.6:1) */
   --color-text-muted: #6b7280; /* gray-500   (AA ~4.8:1) */
-  --color-text-on-action: #ffffff; /* white on blue-700 (AA 6.3:1) */
-  --color-text-on-dark: #ffffff; /* white on blue-900 (AA 14.9:1) */
+  /* Foreground-on-surface tokens (role: content ON a coloured surface). Named
+     without the `text-` prefix (idiomatic `on-*`) so the Tailwind v4 utility is
+     `text-on-action` / `text-on-dark`, matching DESIGN_SYSTEM §3.3 verbatim.
+     (A `--color-text-on-action` var would compile to `text-text-on-action`, so
+     the component class `text-on-action` would silently generate NO CSS.) */
+  --color-on-action: #ffffff; /* white on blue-700 (AA 6.3:1) */
+  --color-on-dark: #ffffff; /* white on blue-900 (AA 14.9:1) */
   --color-surface: #ffffff;
   --color-surface-subtle: #f9fafb;
   --color-surface-muted: #f3f4f6;
