@@ -1,0 +1,85 @@
+---
+/**
+ * Legal pages template (`/legal/{slug}`) — DESIGN_SYSTEM §13.9, Bible RF-08/§42.
+ *
+ * Composes APPROVED primitives only (Icon) + semantic breadcrumbs. Zero JS.
+ * Prose 68ch, body type, visible last-updated date, NO commercial CTA (the
+ * documented single exception to P3).
+ *
+ * The binding legal text is authored by legal counsel and is never fabricated:
+ * the template shows a "pending legal review" notice until the CMS delivers the
+ * real content. The side index (§13.9) returns with the real section headings.
+ */
+import type { GetStaticPaths } from 'astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Icon from '@/components/ui/Icon.astro';
+import { legalPages } from '@/lib/content/legal';
+
+export const getStaticPaths = (() =>
+  legalPages.map((page) => ({
+    params: { slug: page.slug },
+    props: { page },
+  }))) satisfies GetStaticPaths;
+
+const { page } = Astro.props;
+const updatedLabel = new Date(page.updated).toLocaleDateString('es-ES', {
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+});
+---
+
+<BaseLayout
+  title={`${page.title} — Ingeniería que rinde`}
+  description={page.title}
+>
+  <main>
+    <section aria-labelledby="legal-title" class="bg-surface-subtle">
+      <div class="mx-auto w-full max-w-content px-4 py-16 sm:px-6 lg:px-8">
+        <nav aria-label="Migas de pan" class="text-body-sm text-text-muted">
+          <ol class="flex flex-wrap items-center gap-2">
+            <li><a href="/" class="text-action">Inicio</a></li>
+            <li aria-hidden="true">/</li>
+            <li aria-current="page" class="text-text-secondary">
+              {page.title}
+            </li>
+          </ol>
+        </nav>
+        <h1
+          id="legal-title"
+          class="mt-6 text-h1 font-semibold text-balance text-text-primary"
+        >
+          {page.title}
+        </h1>
+        <p class="mt-3 text-body-sm text-text-muted">
+          Última actualización:
+          <time datetime={page.updated}>{updatedLabel}</time>
+        </p>
+      </div>
+    </section>
+
+    <section aria-labelledby="legal-body-title">
+      <div
+        class="mx-auto w-full max-w-content px-4 py-16 sm:px-6 lg:px-8 lg:py-24"
+      >
+        <h2 id="legal-body-title" class="sr-only">Contenido</h2>
+        <div class="mx-auto max-w-prose text-body text-text-secondary">
+          <div
+            class="flex items-start gap-3 rounded-md border-l-4 border-warning bg-amber-50 p-4"
+          >
+            <Icon
+              name="info"
+              size={20}
+              class="mt-0.5 shrink-0 text-warning"
+              label="Aviso"
+            />
+            <p class="text-body-sm text-text-primary">
+              El texto legal definitivo está pendiente de revisión por asesoría
+              legal. Esta página es la plantilla de presentación.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</BaseLayout>

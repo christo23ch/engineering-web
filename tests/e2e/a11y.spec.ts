@@ -11,6 +11,7 @@ const pages = [
   '/recursos',
   '/empleo',
   '/contacto',
+  '/legal/privacidad',
 ];
 
 for (const path of pages) {
