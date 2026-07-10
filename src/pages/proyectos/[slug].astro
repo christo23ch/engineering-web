@@ -1,0 +1,268 @@
+---
+/**
+ * Case-detail template (`/proyectos/{slug}`) — DESIGN_SYSTEM §13.4,
+ * Bible RF-04 / CU-02, §6.3 (the unit of proof of the value proposition).
+ *
+ * Composes APPROVED primitives only (Badge, Card, Button, Icon); breadcrumbs,
+ * the metrics band, gallery and testimonial are page-level compositions of
+ * semantic HTML. Zero JS.
+ *
+ * NO FABRICATED CONTENT: cases come from lib/content/cases.ts, which is empty
+ * until the CMS (DA-7) — the Bible differentiator is real, verifiable data
+ * (§1/§3). getStaticPaths therefore yields zero pages today; the template is
+ * validated with a test fixture and renders real cases once data lands.
+ */
+import type { GetStaticPaths } from 'astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Badge from '@/components/ui/Badge.astro';
+import Button from '@/components/ui/Button.astro';
+import Card from '@/components/ui/Card.astro';
+import Icon from '@/components/ui/Icon.astro';
+import { cases, relatedCases } from '@/lib/content/cases';
+import { getService } from '@/lib/content/services';
+
+export const getStaticPaths = (() =>
+  cases.map((caseStudy) => ({
+    params: { slug: caseStudy.slug },
+    props: { caseStudy },
+  }))) satisfies GetStaticPaths;
+
+const { caseStudy } = Astro.props;
+const related = relatedCases(caseStudy);
+const appliedServices = caseStudy.services
+  .map((slug) => getService(slug))
+  .filter((service) => service !== undefined);
+---
+
+<BaseLayout
+  title={`${caseStudy.title} — Casos de éxito`}
+  description={caseStudy.summary}
+>
+  <main>
+    <!-- 1 · Hero interior con chips sector/servicio + cliente -->
+    <section aria-labelledby="case-title" class="bg-surface-subtle">
+      <div class="mx-auto w-full max-w-content px-4 py-16 sm:px-6 lg:px-8">
+        <nav aria-label="Migas de pan" class="text-body-sm text-text-muted">
+          <ol class="flex flex-wrap items-center gap-2">
+            <li><a href="/" class="text-action">Inicio</a></li>
+            <li aria-hidden="true">/</li>
+            <li><a href="/proyectos" class="text-action">Proyectos</a></li>
+            <li aria-hidden="true">/</li>
+            <li aria-current="page" class="text-text-secondary">
+              {caseStudy.title}
+            </li>
+          </ol>
+        </nav>
+
+        <div class="mt-6 flex flex-wrap items-center gap-2">
+          <Badge variant="sector">{caseStudy.sector}</Badge>
+          {
+            appliedServices.map((service) => (
+              <Badge variant="service">{service.name}</Badge>
+            ))
+          }
+        </div>
+
+        <h1 class="mt-4 text-h1 font-semibold text-balance text-text-primary">
+          {caseStudy.title}
+        </h1>
+        {
+          caseStudy.client && (
+            <p class="mt-2 text-body-sm text-text-muted">
+              Cliente: {caseStudy.client}
+            </p>
+          )
+        }
+        <p class="mt-4 max-w-prose text-body-lg text-text-secondary">
+          {caseStudy.summary}
+        </p>
+      </div>
+    </section>
+
+    <!-- 2 · Banda de métricas del proyecto: el dato antes que el relato -->
+    <section aria-labelledby="metrics-title" class="bg-green-50">
+      <h2 id="metrics-title" class="sr-only">Resultados del proyecto</h2>
+      <dl
+        class="mx-auto grid w-full max-w-content gap-8 px-4 py-16 sm:grid-cols-2 sm:px-6 lg:grid-cols-4 lg:px-8"
+      >
+        {
+          caseStudy.metrics.map((metric) => (
+            <div>
+              <dd class="text-metric text-text-primary tabular-nums">
+                {metric.value}
+                {metric.unit && (
+                  <span class="text-h3 font-bold text-success">
+                    {' '}
+                    {metric.unit}
+                  </span>
+                )}
+              </dd>
+              <dt class="mt-1 text-body-sm text-text-secondary">
+                {metric.label}
+              </dt>
+            </div>
+          ))
+        }
+      </dl>
+    </section>
+
+    <!-- 3 · Contenido 8+4: reto → solución → resultados + aside sticky -->
+    <section aria-labelledby="story-title">
+      <div
+        class="mx-auto grid w-full max-w-content gap-10 px-4 py-16 sm:px-6 lg:grid-cols-3 lg:gap-16 lg:px-8 lg:py-24"
+      >
+        <div class="lg:col-span-2">
+          <h2 id="story-title" class="sr-only">Reto, solución y resultados</h2>
+          <div class="max-w-prose space-y-8">
+            <div>
+              <h3 class="text-h3 font-semibold text-text-primary">El reto</h3>
+              <p class="mt-3 text-body text-text-secondary">
+                {caseStudy.challenge}
+              </p>
+            </div>
+            <div>
+              <h3 class="text-h3 font-semibold text-text-primary">
+                La solución
+              </h3>
+              <p class="mt-3 text-body text-text-secondary">
+                {caseStudy.solution}
+              </p>
+            </div>
+            <div>
+              <h3 class="text-h3 font-semibold text-text-primary">
+                Los resultados
+              </h3>
+              <p class="mt-3 text-body text-text-secondary">
+                {caseStudy.results}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <aside class="lg:sticky lg:top-8 lg:h-max">
+          <Card>
+            <h3 class="text-h4 font-semibold text-text-primary">
+              Servicios aplicados
+            </h3>
+            <ul class="mt-3 space-y-2">
+              {
+                appliedServices.map((service) => (
+                  <li>
+                    <a
+                      href={`/servicios/${service.slug}`}
+                      class="inline-flex items-center gap-2 text-body-sm text-action"
+                    >
+                      <Icon name={service.icon} size={16} />
+                      {service.name}
+                    </a>
+                  </li>
+                ))
+              }
+            </ul>
+            <Button href="/contacto" variant="secondary" class="mt-6 w-full">
+              Solicitar propuesta
+            </Button>
+          </Card>
+        </aside>
+      </div>
+    </section>
+
+    <!-- 4 · Galería de imágenes reales (lazy, dimensiones reservadas) -->
+    {
+      caseStudy.gallery.length > 0 && (
+        <section aria-labelledby="gallery-title" class="bg-surface-subtle">
+          <div class="mx-auto w-full max-w-content px-4 py-16 sm:px-6 lg:px-8">
+            <h2 id="gallery-title" class="sr-only">
+              Galería del proyecto
+            </h2>
+            <ul class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {caseStudy.gallery.map((image) => (
+                <li>
+                  <img
+                    src={image.src}
+                    alt={image.alt}
+                    width={image.width}
+                    height={image.height}
+                    loading="lazy"
+                    decoding="async"
+                    class="h-auto w-full rounded-lg border border-border"
+                  />
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+      )
+    }
+
+    <!-- 5 · Testimonio del cliente -->
+    {
+      caseStudy.testimonial && (
+        <section aria-labelledby="quote-title">
+          <div class="mx-auto w-full max-w-prose px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
+            <h2 id="quote-title" class="sr-only">
+              Testimonio del cliente
+            </h2>
+            <figure>
+              <blockquote class="text-h4 font-medium text-balance text-text-primary">
+                «{caseStudy.testimonial.quote}»
+              </blockquote>
+              <figcaption class="mt-4 text-body-sm text-text-secondary">
+                {caseStudy.testimonial.author}
+                {caseStudy.testimonial.role &&
+                  ` · ${caseStudy.testimonial.role}`}
+              </figcaption>
+            </figure>
+          </div>
+        </section>
+      )
+    }
+
+    <!-- 6 · Casos relacionados (mismo sector) -->
+    {
+      related.length > 0 && (
+        <section aria-labelledby="related-title" class="bg-surface-subtle">
+          <div class="mx-auto w-full max-w-content px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
+            <h2 id="related-title" class="text-h2 font-bold text-text-primary">
+              Casos relacionados
+            </h2>
+            <ul class="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {related.map((item) => (
+                <li>
+                  <Card href={`/proyectos/${item.slug}`} class="h-full">
+                    <Icon name={item.icon} size={32} class="text-action" />
+                    <h3 class="mt-4 text-h3 font-semibold text-text-primary">
+                      {item.title}
+                    </h3>
+                    <p class="mt-2 text-body text-text-secondary">
+                      {item.summary}
+                    </p>
+                  </Card>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+      )
+    }
+
+    <!-- 7 · Banda CTA final -->
+    <section
+      aria-labelledby="cta-title"
+      data-surface="dark"
+      class="bg-blue-900"
+    >
+      <div
+        class="mx-auto flex w-full max-w-content flex-col items-start gap-6 px-4 py-16 sm:px-6 lg:px-8 lg:py-24"
+      >
+        <h2 id="cta-title" class="text-h2 font-bold text-balance text-on-dark">
+          ¿Un reto similar? Hablemos.
+        </h2>
+        <p class="max-w-prose text-body-lg text-blue-100">
+          Cuéntanos tu proyecto y te responde un ingeniero, no un bot.
+        </p>
+        <Button href="/contacto" variant="inverted">Solicitar propuesta</Button>
+      </div>
+    </section>
+  </main>
+</BaseLayout>
