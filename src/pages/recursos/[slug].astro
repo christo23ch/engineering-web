@@ -1,0 +1,193 @@
+---
+/**
+ * Article detail template (`/recursos/{slug}`) — DESIGN_SYSTEM §13.6,
+ * Bible RF-12. Composes APPROVED primitives only (Badge, Card, Icon) + the
+ * LeadMagnet block; breadcrumbs, prose, ToC and author are page-level
+ * compositions of semantic HTML. Zero JS.
+ *
+ * NO FABRICATED CONTENT: articles come from lib/content/articles.ts, which is
+ * empty until the CMS (DA-7). getStaticPaths yields zero pages today; the
+ * template is validated with a test fixture and renders real articles once data
+ * lands.
+ */
+import type { GetStaticPaths } from 'astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Badge from '@/components/ui/Badge.astro';
+import Card from '@/components/ui/Card.astro';
+import Icon from '@/components/ui/Icon.astro';
+import LeadMagnet from '@/components/content/LeadMagnet.astro';
+import { articles, relatedArticles, sectionId } from '@/lib/content/articles';
+
+export const getStaticPaths = (() =>
+  articles.map((article) => ({
+    params: { slug: article.slug },
+    props: { article },
+  }))) satisfies GetStaticPaths;
+
+const { article } = Astro.props;
+const related = relatedArticles(article);
+const updatedLabel = new Date(article.updated).toLocaleDateString('es-ES', {
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+});
+---
+
+<BaseLayout title={`${article.title} — Recursos`} description={article.excerpt}>
+  <main>
+    <!-- Hero interior: breadcrumbs + categoría + h1 + entradilla + autor -->
+    <section aria-labelledby="article-title" class="bg-surface-subtle">
+      <div class="mx-auto w-full max-w-content px-4 py-16 sm:px-6 lg:px-8">
+        <nav aria-label="Migas de pan" class="text-body-sm text-text-muted">
+          <ol class="flex flex-wrap items-center gap-2">
+            <li><a href="/" class="text-action">Inicio</a></li>
+            <li aria-hidden="true">/</li>
+            <li><a href="/recursos" class="text-action">Recursos</a></li>
+            <li aria-hidden="true">/</li>
+            <li aria-current="page" class="text-text-secondary">
+              {article.title}
+            </li>
+          </ol>
+        </nav>
+        <div class="mt-6">
+          <Badge variant="service">{article.category}</Badge>
+        </div>
+        <h1
+          id="article-title"
+          class="mt-3 text-h1 font-semibold text-balance text-text-primary"
+        >
+          {article.title}
+        </h1>
+        <p class="mt-4 max-w-prose text-body-lg text-text-secondary">
+          {article.excerpt}
+        </p>
+        <p class="mt-4 text-body-sm text-text-muted">
+          Por {article.author.name}
+          {article.author.role && ` · ${article.author.role}`} ·
+          <time datetime={article.updated}>{updatedLabel}</time>
+        </p>
+      </div>
+    </section>
+
+    <!-- Contenido 8+4: prosa 68ch + aside sticky (índice + CTA) -->
+    <section aria-labelledby="body-title">
+      <div
+        class="mx-auto grid w-full max-w-content gap-10 px-4 py-16 sm:px-6 lg:grid-cols-3 lg:gap-16 lg:px-8 lg:py-24"
+      >
+        <div class="lg:col-span-2">
+          <h2 id="body-title" class="sr-only">Contenido del artículo</h2>
+          <div class="max-w-prose space-y-8">
+            {
+              article.sections.map((section) => (
+                <div>
+                  <h3
+                    id={sectionId(section.heading)}
+                    class="text-h3 font-semibold text-text-primary"
+                  >
+                    {section.heading}
+                  </h3>
+                  {section.body.map((paragraph) => (
+                    <p class="mt-3 text-body text-text-secondary">
+                      {paragraph}
+                    </p>
+                  ))}
+                </div>
+              ))
+            }
+          </div>
+
+          <div class="mt-12 max-w-prose">
+            <LeadMagnet title="¿Te ha resultado útil? Recibe más guías" />
+          </div>
+        </div>
+
+        <aside class="lg:sticky lg:top-8 lg:h-max">
+          <nav aria-labelledby="toc-title">
+            <h2
+              id="toc-title"
+              class="text-body-sm font-semibold text-text-primary"
+            >
+              En esta página
+            </h2>
+            <ul class="mt-3 space-y-2 text-body-sm">
+              {
+                article.sections.map((section) => (
+                  <li>
+                    <a
+                      href={`#${sectionId(section.heading)}`}
+                      class="text-action hover:underline"
+                    >
+                      {section.heading}
+                    </a>
+                  </li>
+                ))
+              }
+            </ul>
+          </nav>
+        </aside>
+      </div>
+    </section>
+
+    <!-- Autor (E-E-A-T) -->
+    {
+      article.author.bio && (
+        <section aria-labelledby="author-title" class="bg-surface-subtle">
+          <div class="mx-auto w-full max-w-content px-4 py-16 sm:px-6 lg:px-8">
+            <div class="mx-auto max-w-prose">
+              <h2
+                id="author-title"
+                class="text-h4 font-semibold text-text-primary"
+              >
+                Sobre el autor
+              </h2>
+              <p class="mt-2 text-body font-medium text-text-primary">
+                {article.author.name}
+                {article.author.role && (
+                  <span class="font-normal text-text-secondary">
+                    {' '}
+                    · {article.author.role}
+                  </span>
+                )}
+              </p>
+              <p class="mt-2 text-body text-text-secondary">
+                {article.author.bio}
+              </p>
+            </div>
+          </div>
+        </section>
+      )
+    }
+
+    <!-- Artículos relacionados (misma categoría) -->
+    {
+      related.length > 0 && (
+        <section aria-labelledby="related-title">
+          <div class="mx-auto w-full max-w-content px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
+            <h2 id="related-title" class="text-h2 font-bold text-text-primary">
+              Artículos relacionados
+            </h2>
+            <ul class="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {related.map((item) => (
+                <li>
+                  <Card href={`/recursos/${item.slug}`} class="h-full">
+                    <Icon
+                      name="clipboard-check"
+                      size={32}
+                      class="text-action"
+                    />
+                    <h3 class="mt-4 text-h3 font-semibold text-text-primary">
+                      {item.title}
+                    </h3>
+                    <p class="mt-2 text-body text-text-secondary">
+                      {item.excerpt}
+                    </p>
+                  </Card>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+      )
+    }
+  </main>
+</BaseLayout>
