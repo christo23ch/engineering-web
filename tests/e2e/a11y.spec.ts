@@ -9,6 +9,7 @@ const pages = [
   '/proyectos',
   '/sobre-nosotros',
   '/recursos',
+  '/empleo',
 ];
 
 for (const path of pages) {

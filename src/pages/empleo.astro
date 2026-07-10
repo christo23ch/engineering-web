@@ -1,0 +1,140 @@
+---
+/**
+ * Empleo (`/empleo`) — DESIGN_SYSTEM §13.7, Bible RF-14 / CU-06.
+ *
+ * Composes APPROVED primitives only (Button, Icon) + semantic breadcrumbs.
+ * Zero JS.
+ *
+ * Faithful-to-SSOT content: culture/values are drawn from Bible §1/§3
+ * (provisional). With no open positions and no ATS/CMS, the screen renders
+ * §13.7's specified no-offers state (spontaneous application, "no página
+ * vacía"). DEFERRED, never faked: the job-offer list (ATS/CMS data) and the
+ * candidature form (§11.3 needs server-side validation + CV upload via the BFF,
+ * blocked on DA-3; and a file input is not in the approved library) — a working
+ * path routes to /contacto until then.
+ */
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Button from '@/components/ui/Button.astro';
+import Icon from '@/components/ui/Icon.astro';
+
+const culture = [
+  'Proyectos con impacto medible en energía, industria e instalaciones.',
+  'Foco en eficiencia energética y sostenibilidad rentable.',
+  'Un equipo técnico que trabaja con datos y rigor, no con adjetivos.',
+];
+---
+
+<BaseLayout
+  title="Empleo — Trabaja con nosotros"
+  description="Únete a una ingeniería orientada a datos, eficiencia y sostenibilidad, con proyectos de impacto medible."
+>
+  <main>
+    <!-- Hero interior (§12, split 6+6): cultura + valores + foto (placeholder) -->
+    <section aria-labelledby="jobs-title" class="bg-surface-subtle">
+      <div
+        class="mx-auto grid w-full max-w-content gap-10 px-4 py-16 sm:px-6 lg:grid-cols-2 lg:items-center lg:gap-16 lg:px-8 lg:py-24"
+      >
+        <div>
+          <nav aria-label="Migas de pan" class="text-body-sm text-text-muted">
+            <ol class="flex flex-wrap items-center gap-2">
+              <li><a href="/" class="text-action">Inicio</a></li>
+              <li aria-hidden="true">/</li>
+              <li aria-current="page" class="text-text-secondary">Empleo</li>
+            </ol>
+          </nav>
+
+          <p class="mt-6 text-overline text-text-muted uppercase">Empleo</p>
+          <h1
+            id="jobs-title"
+            class="mt-2 text-h1 font-semibold text-balance text-text-primary"
+          >
+            Trabaja en ingeniería que rinde
+          </h1>
+          <p class="mt-4 max-w-prose text-body-lg text-text-secondary">
+            Buscamos perfiles técnicos que quieran resolver problemas reales con
+            criterio, datos y foco en sostenibilidad.
+          </p>
+        </div>
+
+        <!-- Fotografía real del equipo/cultura pendiente (contenido/H10). -->
+        <div
+          aria-hidden="true"
+          class="flex aspect-[4/3] items-center justify-center rounded-lg border border-border bg-surface-muted"
+        >
+          <Icon name="factory" size={32} class="text-text-muted" />
+        </div>
+      </div>
+    </section>
+
+    <!-- Por qué trabajar con nosotros (valores) -->
+    <section aria-labelledby="culture-title">
+      <div
+        class="mx-auto w-full max-w-content px-4 py-16 sm:px-6 lg:px-8 lg:py-24"
+      >
+        <h2 id="culture-title" class="text-h2 font-bold text-text-primary">
+          Por qué trabajar con nosotros
+        </h2>
+        <ul class="mt-8 grid max-w-prose gap-4 sm:grid-cols-1">
+          {
+            culture.map((item) => (
+              <li class="flex items-start gap-3">
+                <Icon
+                  name="check-circle"
+                  size={24}
+                  class="mt-0.5 shrink-0 text-success"
+                />
+                <span class="text-body text-text-primary">{item}</span>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </section>
+
+    <!-- Ofertas — estado sin ofertas (§13.7): candidatura espontánea, no página
+         vacía. La lista de ofertas y el formulario de candidatura (CV + BFF)
+         llegan con el ATS/CMS y el backend. -->
+    <section aria-labelledby="offers-title" class="bg-surface-subtle">
+      <div
+        class="mx-auto flex w-full max-w-prose flex-col items-center px-4 py-20 text-center sm:px-6 lg:px-8 lg:py-28"
+      >
+        <span
+          class="flex size-16 items-center justify-center rounded-full bg-surface-muted"
+        >
+          <Icon name="clipboard-check" size={32} class="text-text-muted" />
+        </span>
+        <h2
+          id="offers-title"
+          class="mt-6 text-h3 font-semibold text-text-primary"
+        >
+          No hay ofertas abiertas ahora mismo
+        </h2>
+        <p class="mt-3 text-body text-text-secondary">
+          Seguimos creciendo. Si quieres formar parte del equipo, envíanos tu
+          candidatura espontánea y cuéntanos en qué te gustaría aportar.
+        </p>
+      </div>
+    </section>
+
+    <!-- Banda CTA final: único CTA primario de la vista (P3) -->
+    <section
+      aria-labelledby="cta-title"
+      data-surface="dark"
+      class="bg-blue-900"
+    >
+      <div
+        class="mx-auto flex w-full max-w-content flex-col items-start gap-6 px-4 py-16 sm:px-6 lg:px-8 lg:py-24"
+      >
+        <h2 id="cta-title" class="text-h2 font-bold text-balance text-on-dark">
+          ¿Quieres formar parte del equipo?
+        </h2>
+        <p class="max-w-prose text-body-lg text-blue-100">
+          Escríbenos y cuéntanos tu perfil; te responde una persona del equipo.
+        </p>
+        <Button href="/contacto" variant="inverted">
+          Enviar candidatura espontánea
+        </Button>
+      </div>
+    </section>
+  </main>
+</BaseLayout>
