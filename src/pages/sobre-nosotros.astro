@@ -1,0 +1,150 @@
+---
+/**
+ * Sobre nosotros (`/sobre-nosotros`) — DESIGN_SYSTEM §13.5, Bible RF-05.
+ * Trust & solvency for the compliance buyer (Persona B) and talent (Persona E).
+ *
+ * Composes APPROVED primitives only (Button, Icon); breadcrumbs and the split
+ * rows are page-level compositions of semantic HTML. Zero JS.
+ *
+ * Faithful-to-SSOT content: the values/approach narrative is drawn from Bible
+ * §1/§3 (provisional). DEFERRED, never fabricated: the company-metrics band
+ * (H1 "30–80" is an unvalidated range, no verified figures), the team grid
+ * (TeamMember data via CMS/DA-7) and the ISO-certification logo grid (H6 is an
+ * UNVALIDATED hypothesis — asserting specific certifications is a compliance
+ * claim that must not be invented). A neutral, honest statement about applicable
+ * standards stands in until H6 is validated with real credentials.
+ */
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Button from '@/components/ui/Button.astro';
+import Icon from '@/components/ui/Icon.astro';
+
+const values = [
+  'Datos antes que adjetivos: cada afirmación se respalda con resultados medibles.',
+  'Sostenibilidad rentable: eficiencia energética con retorno justificado.',
+  'Cumplimiento de la normativa y los estándares de calidad aplicables.',
+];
+---
+
+<BaseLayout
+  title="Sobre nosotros — Ingeniería que rinde"
+  description="Ingeniería orientada a datos, eficiencia y sostenibilidad rentable, con resultados verificables."
+>
+  <main>
+    <!-- Hero interior (§12): breadcrumbs + overline + h1 + entradilla -->
+    <section aria-labelledby="about-title" class="bg-surface-subtle">
+      <div class="mx-auto w-full max-w-content px-4 py-16 sm:px-6 lg:px-8">
+        <nav aria-label="Migas de pan" class="text-body-sm text-text-muted">
+          <ol class="flex flex-wrap items-center gap-2">
+            <li><a href="/" class="text-action">Inicio</a></li>
+            <li aria-hidden="true">/</li>
+            <li aria-current="page" class="text-text-secondary">
+              Sobre nosotros
+            </li>
+          </ol>
+        </nav>
+
+        <p class="mt-6 text-overline text-text-muted uppercase">
+          Quiénes somos
+        </p>
+        <h1
+          id="about-title"
+          class="mt-2 text-h1 font-semibold text-balance text-text-primary"
+        >
+          Ingeniería orientada a resultados
+        </h1>
+        <p class="mt-4 max-w-prose text-body-lg text-text-secondary">
+          No somos un folleto: somos la infraestructura de credibilidad y
+          conversión de una ingeniería que mide lo que promete.
+        </p>
+      </div>
+    </section>
+
+    <!-- Split alternado (§12): historia/valores + fotografía real (placeholder) -->
+    <section aria-labelledby="story-title">
+      <div
+        class="mx-auto grid w-full max-w-content gap-10 px-4 py-16 sm:px-6 lg:grid-cols-2 lg:items-center lg:gap-16 lg:px-8 lg:py-24"
+      >
+        <div>
+          <h2 id="story-title" class="text-h2 font-bold text-text-primary">
+            Una ingeniería moderna y medible
+          </h2>
+          <div class="mt-5 max-w-prose space-y-4 text-body text-text-secondary">
+            <p>
+              Trabajamos en ingeniería industrial, energética, instalaciones y
+              renovables, con un foco diferencial en eficiencia energética y
+              sostenibilidad rentable.
+            </p>
+            <p>
+              Nuestro objetivo no es entregar documentos, sino resolver
+              problemas técnicos con criterios de dato, rigor y cumplimiento
+              normativo.
+            </p>
+          </div>
+        </div>
+        <!-- Fotografía real del equipo pendiente (contenido/H10). -->
+        <div
+          aria-hidden="true"
+          class="flex aspect-[4/3] items-center justify-center rounded-lg border border-border bg-surface-muted"
+        >
+          <Icon name="factory" size={32} class="text-text-muted" />
+        </div>
+      </div>
+    </section>
+
+    <!-- Split alternado (fila invertida): cómo trabajamos + valores -->
+    <section aria-labelledby="values-title" class="bg-surface-subtle">
+      <div
+        class="mx-auto grid w-full max-w-content gap-10 px-4 py-16 sm:px-6 lg:grid-cols-2 lg:items-center lg:gap-16 lg:px-8 lg:py-24"
+      >
+        <!-- Placeholder a la izquierda para alternar el ritmo visual. -->
+        <div
+          aria-hidden="true"
+          class="flex aspect-[4/3] items-center justify-center rounded-lg border border-border bg-surface-muted lg:order-1"
+        >
+          <Icon name="clipboard-check" size={32} class="text-text-muted" />
+        </div>
+        <div class="lg:order-2">
+          <h2 id="values-title" class="text-h2 font-bold text-text-primary">
+            Cómo trabajamos
+          </h2>
+          <ul class="mt-6 flex flex-col gap-4">
+            {
+              values.map((value) => (
+                <li class="flex items-start gap-3">
+                  <Icon
+                    name="check-circle"
+                    size={24}
+                    class="mt-0.5 shrink-0 text-success"
+                  />
+                  <span class="text-body text-text-primary">{value}</span>
+                </li>
+              ))
+            }
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Banda CTA final + enlace a Empleo (§13.5) -->
+    <section
+      aria-labelledby="cta-title"
+      data-surface="dark"
+      class="bg-blue-900"
+    >
+      <div
+        class="mx-auto flex w-full max-w-content flex-col items-start gap-6 px-4 py-16 sm:px-6 lg:px-8 lg:py-24"
+      >
+        <h2 id="cta-title" class="text-h2 font-bold text-balance text-on-dark">
+          Hablemos de tu proyecto
+        </h2>
+        <p class="max-w-prose text-body-lg text-blue-100">
+          Cuéntanos tu reto y te responde un ingeniero, no un bot.
+        </p>
+        <Button href="/contacto" variant="inverted">Solicitar propuesta</Button>
+        <a href="/empleo" class="text-body-sm text-blue-100 underline">
+          ¿Quieres trabajar con nosotros? Ver empleo
+        </a>
+      </div>
+    </section>
+  </main>
+</BaseLayout>

@@ -3,7 +3,12 @@ import AxeBuilder from '@axe-core/playwright';
 
 // Accessibility gate (WCAG 2.2 AA — docs/PROJECT_BIBLE.md §20, blocking in CI).
 // Scans built pages with axe-core. Extend `pages` as product routes are added.
-const pages = ['/', '/servicios/ingenieria-industrial', '/proyectos'];
+const pages = [
+  '/',
+  '/servicios/ingenieria-industrial',
+  '/proyectos',
+  '/sobre-nosotros',
+];
 
 for (const path of pages) {
   test(`a11y: ${path} has no WCAG 2.x A/AA violations`, async ({ page }) => {
