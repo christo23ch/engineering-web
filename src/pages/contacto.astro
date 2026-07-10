@@ -1,0 +1,131 @@
+---
+/**
+ * Contacto (`/contacto`) — DESIGN_SYSTEM §13.8, Bible RF-06/07 / CU-03.
+ * The most conversion-critical screen; unblocks every CTA on the site.
+ *
+ * INTERFACE ONLY (per instruction): the proposal form is composed from the
+ * APPROVED §11.3 form primitives (Input, Select, Textarea, Checkbox, Button).
+ * The BFF submit endpoint + server-side validation + CRM/email delivery are
+ * DEFERRED (blocked on DA-3/hosting, Bible §17/ADR-008/010); no fake endpoint is
+ * wired and the success screen (§13.8) ships with that backend. NAP data, map,
+ * phone and schedule are provisional placeholders — no fabricated contact
+ * details. Zero JS.
+ */
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Input from '@/components/ui/Input.astro';
+import Select from '@/components/ui/Select.astro';
+import Textarea from '@/components/ui/Textarea.astro';
+import Checkbox from '@/components/ui/Checkbox.astro';
+import Button from '@/components/ui/Button.astro';
+import Icon from '@/components/ui/Icon.astro';
+import { services } from '@/lib/content/services';
+---
+
+<BaseLayout
+  title="Contacto — Solicita tu propuesta"
+  description="Cuéntanos tu proyecto de ingeniería. Te responde un ingeniero, no un bot."
+>
+  <main>
+    <section aria-labelledby="contact-title" class="bg-surface-subtle">
+      <div class="mx-auto w-full max-w-content px-4 py-16 sm:px-6 lg:px-8">
+        <nav aria-label="Migas de pan" class="text-body-sm text-text-muted">
+          <ol class="flex flex-wrap items-center gap-2">
+            <li><a href="/" class="text-action">Inicio</a></li>
+            <li aria-hidden="true">/</li>
+            <li aria-current="page" class="text-text-secondary">Contacto</li>
+          </ol>
+        </nav>
+        <p class="mt-6 text-overline text-text-muted uppercase">Contacto</p>
+        <h1
+          id="contact-title"
+          class="mt-2 text-h1 font-semibold text-balance text-text-primary"
+        >
+          Solicita tu propuesta
+        </h1>
+        <p class="mt-4 max-w-prose text-body-lg text-text-secondary">
+          Cuéntanos tu proyecto y te responde un ingeniero, no un bot.
+        </p>
+      </div>
+    </section>
+
+    <!-- Layout 6+6: formulario (§11.3) + datos de contacto (§13.8) -->
+    <section aria-labelledby="form-title">
+      <div
+        class="mx-auto grid w-full max-w-content gap-10 px-4 py-16 sm:px-6 lg:grid-cols-2 lg:gap-16 lg:px-8 lg:py-24"
+      >
+        <!-- Formulario de propuesta. Envío server-side pendiente (BFF/DA-3). -->
+        <div>
+          <h2 id="form-title" class="text-h3 font-semibold text-text-primary">
+            Formulario de propuesta
+          </h2>
+          <form class="mt-6 flex flex-col gap-5" novalidate>
+            <Input label="Nombre y apellidos" name="nombre" required />
+            <Input label="Email" name="email" type="email" required />
+            <Input label="Empresa" name="empresa" />
+            <Select label="Servicio de interés" name="servicio">
+              <option value="">Selecciona una opción</option>
+              {
+                services.map((service) => (
+                  <option value={service.slug}>{service.name}</option>
+                ))
+              }
+            </Select>
+            <Textarea
+              label="Cuéntanos tu proyecto"
+              name="mensaje"
+              rows={5}
+              required
+            />
+            <Checkbox name="consentimiento" required>
+              He leído y acepto la
+              <a href="/legal/privacidad" class="text-action underline">
+                política de privacidad
+              </a>.
+            </Checkbox>
+            <div>
+              <Button type="submit">Solicitar propuesta</Button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Datos de contacto (NAP provisional) + expectativa de respuesta -->
+        <aside class="flex flex-col gap-6">
+          <div>
+            <h2 class="text-h3 font-semibold text-text-primary">
+              Datos de contacto
+            </h2>
+            <ul class="mt-4 space-y-3 text-body text-text-secondary">
+              <li class="flex items-start gap-3">
+                <Icon name="factory" size={20} class="mt-0.5 text-text-muted" />
+                <span>Dirección disponible próximamente</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <Icon
+                  name="clipboard-check"
+                  size={20}
+                  class="mt-0.5 text-text-muted"
+                />
+                <span>Lunes a viernes, horario de oficina</span>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Mapa estático (imagen ligera, no iframe): pendiente de contenido. -->
+          <div
+            aria-hidden="true"
+            class="flex aspect-[16/9] items-center justify-center rounded-lg border border-border bg-surface-muted"
+          >
+            <Icon name="layers" size={32} class="text-text-muted" />
+          </div>
+
+          <p class="text-body text-text-secondary">
+            <strong class="font-semibold text-text-primary">
+              Te contesta un ingeniero, no un bot.
+            </strong>
+            Revisamos cada solicitud y respondemos con una primera valoración.
+          </p>
+        </aside>
+      </div>
+    </section>
+  </main>
+</BaseLayout>

@@ -10,6 +10,7 @@ const pages = [
   '/sobre-nosotros',
   '/recursos',
   '/empleo',
+  '/contacto',
 ];
 
 for (const path of pages) {
