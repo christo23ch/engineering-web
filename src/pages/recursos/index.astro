@@ -14,8 +14,8 @@
  * (§13.3) approach.
  */
 import BaseLayout from '@/layouts/BaseLayout.astro';
-import Button from '@/components/ui/Button.astro';
 import Icon from '@/components/ui/Icon.astro';
+import LeadMagnet from '@/components/content/LeadMagnet.astro';
 ---
 
 <BaseLayout
@@ -73,22 +73,12 @@ import Icon from '@/components/ui/Icon.astro';
       </div>
     </section>
 
-    <!-- Banda CTA final (§11.5): único CTA primario de la vista (P3) -->
-    <section
-      aria-labelledby="cta-title"
-      data-surface="dark"
-      class="bg-blue-900"
-    >
-      <div
-        class="mx-auto flex w-full max-w-content flex-col items-start gap-6 px-4 py-16 sm:px-6 lg:px-8 lg:py-24"
-      >
-        <h2 id="cta-title" class="text-h2 font-bold text-balance text-on-dark">
-          ¿Tienes un reto técnico entre manos? Hablemos.
-        </h2>
-        <p class="max-w-prose text-body-lg text-blue-100">
-          Cuéntanos tu proyecto y te responde un ingeniero, no un bot.
-        </p>
-        <Button href="/contacto" variant="inverted">Solicitar propuesta</Button>
+    <!-- Lead magnet (§13.6, RF-13): captación email + consentimiento. Es el
+         único CTA primario de la vista (P3); el contacto vive en el footer. -->
+    <section aria-labelledby="lead-title" class="bg-surface-subtle">
+      <div class="mx-auto w-full max-w-content px-4 py-16 sm:px-6 lg:px-8">
+        <h2 id="lead-title" class="sr-only">Suscríbete a nuestros recursos</h2>
+        <LeadMagnet />
       </div>
     </section>
   </main>

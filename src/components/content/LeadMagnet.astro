@@ -1,0 +1,55 @@
+---
+/**
+ * LeadMagnet — DESIGN_SYSTEM §13.6, Bible RF-13 / §42 L1. A minimal email +
+ * consent capture block, interspersed in the resources context. Composes
+ * APPROVED §11.3 primitives (Input, Checkbox, Button). Zero JS.
+ *
+ * INTERFACE ONLY: the submit endpoint (persist + double opt-in + CRM/email) is
+ * DEFERRED (BFF, blocked on DA-3; Bible §17/ADR-010) — no fake endpoint is
+ * wired. Honest copy: it captures a subscription for future resources, it does
+ * not promise a specific guide that does not exist yet.
+ */
+import Input from '@/components/ui/Input.astro';
+import Checkbox from '@/components/ui/Checkbox.astro';
+import Button from '@/components/ui/Button.astro';
+import Icon from '@/components/ui/Icon.astro';
+
+interface Props {
+  title?: string;
+  class?: string;
+}
+const { title = 'Recibe nuestras guías técnicas', class: className } =
+  Astro.props;
+---
+
+<div
+  class:list={[
+    'rounded-lg border border-blue-100 bg-blue-50 p-6 sm:p-8',
+    className,
+  ]}
+>
+  <div class="flex items-start gap-3">
+    <Icon name="clipboard-check" size={24} class="mt-1 shrink-0 text-action" />
+    <div>
+      <p class="text-h3 font-semibold text-text-primary">{title}</p>
+      <p class="mt-2 max-w-prose text-body text-text-secondary">
+        Déjanos tu email y te avisamos cuando publiquemos guías y artículos
+        técnicos. Sin spam.
+      </p>
+    </div>
+  </div>
+
+  <!-- Envío server-side pendiente (BFF/DA-3). -->
+  <form class="mt-6 flex flex-col gap-4" novalidate>
+    <Input label="Email" name="email" type="email" required />
+    <Checkbox name="consentimiento" required>
+      Acepto recibir comunicaciones y he leído la
+      <a href="/legal/privacidad" class="text-action underline">
+        política de privacidad
+      </a>.
+    </Checkbox>
+    <div>
+      <Button type="submit">Suscribirme</Button>
+    </div>
+  </form>
+</div>

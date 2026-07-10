@@ -23,10 +23,14 @@ describe('Recursos listing (recursos/index.astro)', () => {
     expect(html).toContain('Recursos en preparación');
   });
 
-  it('closes with the single primary CTA in a dark band (P3)', async () => {
+  it('closes with the lead-magnet capture as the single primary CTA (§13.6, P3)', async () => {
     const html = await render();
-    expect(html).toContain('data-surface="dark"');
-    expect(html).toContain('bg-white'); // inverted button
-    expect((html.match(/Solicitar propuesta/g) ?? []).length).toBe(1);
+    const main = html.match(/<main[\s\S]*<\/main>/)?.[0] ?? '';
+    // Lead magnet email-capture form (the view's single primary action).
+    expect(main).toContain('name="email"');
+    expect(main).toContain('name="consentimiento"');
+    expect((main.match(/type="submit"/g) ?? []).length).toBe(1);
+    // No generic dark CTA band on this view (contact lives in the footer).
+    expect(main).not.toContain('data-surface="dark"');
   });
 });
