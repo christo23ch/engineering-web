@@ -1,0 +1,46 @@
+---
+/**
+ * IA assistant widget — DESIGN_SYSTEM §11.7 / §13.11, Bible RF-15.
+ * Global on public pages (not legal). INTERFACE ONLY — NO IA logic: the RAG +
+ * Claude pipeline (ADR-005), mandatory source citation and the chat transport
+ * are DEFERRED. The panel shows a "coming soon" state with no functional input
+ * and no fabricated answers/sources.
+ *
+ * Open/close is native <details> (Zero custom JS), matching the DS "lazy island"
+ * intent without shipping the island yet. The floating trigger is 56px (§11.7):
+ * icon + "Pregúntanos" on ≥sm, icon-only (with an accessible name) on mobile.
+ */
+import Icon from '@/components/ui/Icon.astro';
+---
+
+<details class="ia-widget fixed right-4 bottom-4 z-50">
+  <summary
+    class="flex h-14 cursor-pointer items-center gap-2 rounded-full bg-action px-4 text-on-action shadow-lg"
+  >
+    <Icon name="message" size={24} />
+    <span class="sr-only text-label sm:not-sr-only">Pregúntanos</span>
+  </summary>
+
+  <div
+    class="absolute right-0 bottom-[calc(100%+0.75rem)] w-[min(20rem,calc(100vw-2rem))] rounded-lg border border-border bg-surface p-5 shadow-lg"
+  >
+    <p class="text-h4 font-semibold text-text-primary">Asistente</p>
+    <p class="mt-2 text-body-sm text-text-secondary">
+      Pregúntame sobre nuestros servicios, proyectos y recursos.
+    </p>
+    <p class="mt-3 text-body-sm text-text-muted">
+      El asistente estará disponible próximamente. Cada respuesta citará sus
+      fuentes.
+    </p>
+  </div>
+</details>
+
+<style>
+  /* Hide the native disclosure marker; the pill is the affordance. */
+  .ia-widget > summary {
+    list-style: none;
+  }
+  .ia-widget > summary::-webkit-details-marker {
+    display: none;
+  }
+</style>

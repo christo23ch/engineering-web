@@ -26,7 +26,10 @@ export type IconName =
   | 'clipboard-check'
   | 'box'
   // …and a directional affordance for "Ver servicio" links.
-  | 'arrow-right';
+  | 'arrow-right'
+  // Chat glyph for the IA assistant trigger (§11.7) + search (§13.10).
+  | 'message'
+  | 'search';
 
 export type IconNode =
   | { tag: 'path'; d: string; fill?: string; stroke?: string }
@@ -118,4 +121,11 @@ export const icons: Record<IconName, IconNode[]> = {
     { tag: 'path', d: 'M12 12v10' },
   ],
   'arrow-right': [{ tag: 'path', d: 'M5 12h14M13 6l6 6-6 6' }],
+  // chat → burbuja con cola.
+  message: [{ tag: 'path', d: 'M4 5h16v12H9l-4 4v-4H4V5Z' }],
+  // búsqueda → lupa.
+  search: [
+    { tag: 'circle', cx: '11', cy: '11', r: '7' },
+    { tag: 'path', d: 'm20 20-3.5-3.5' },
+  ],
 };

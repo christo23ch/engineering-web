@@ -4,13 +4,16 @@
 // iteration (docs/PROJECT_BIBLE.md §46).
 import '../styles/globals.css';
 import Footer from '@/components/layout/Footer.astro';
+import IaAssistant from '@/components/ia/IaAssistant.astro';
 
 interface Props {
   title: string;
   description?: string;
+  /** IA assistant widget — global on public pages, off on legal (§13.11). */
+  assistant?: boolean;
 }
 
-const { title, description = '' } = Astro.props;
+const { title, description = '', assistant = true } = Astro.props;
 ---
 
 <!doctype html>
@@ -26,5 +29,6 @@ const { title, description = '' } = Astro.props;
   <body>
     <slot />
     <Footer />
+    {assistant && <IaAssistant />}
   </body>
 </html>

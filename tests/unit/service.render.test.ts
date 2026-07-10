@@ -39,7 +39,9 @@ describe('Service page ([slug].astro)', () => {
 
   it('renders the FAQ as native zero-JS <details> disclosures', async () => {
     const html = await render('consultoria-tecnica');
-    expect((html.match(/<\/details>/g) ?? []).length).toBe(3);
+    // Scope to <main>: the global IA assistant widget is also a <details>.
+    const main = html.match(/<main[\s\S]*<\/main>/)?.[0] ?? '';
+    expect((main.match(/<\/details>/g) ?? []).length).toBe(3);
     expect(html).not.toContain('<script'); // no client JS on the page
   });
 
