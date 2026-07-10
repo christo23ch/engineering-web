@@ -8,6 +8,7 @@ const pages = [
   '/servicios/ingenieria-industrial',
   '/proyectos',
   '/sobre-nosotros',
+  '/recursos',
 ];
 
 for (const path of pages) {

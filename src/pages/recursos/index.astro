@@ -1,0 +1,95 @@
+---
+/**
+ * Recursos — listing (`/recursos`) — DESIGN_SYSTEM §13.6, Bible RF-12 / CU-04.
+ *
+ * Composes APPROVED primitives only (Button, Icon) + semantic breadcrumbs.
+ * Zero JS.
+ *
+ * Faithful-to-SSOT content: with no articles yet (Article entity §28 via
+ * CMS/DA-7) this listing renders a graceful EMPTY STATE ("nunca página en
+ * blanco") instead of fabricating editorial content. DEFERRED until article
+ * data exists: the article-card grid, the category filter (needs a URL-state
+ * island) and the highlighted lead-magnet cards. The article detail
+ * (`/recursos/{slug}`, §13.6) is a separate iteration. Mirrors the Portfolio
+ * (§13.3) approach.
+ */
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Button from '@/components/ui/Button.astro';
+import Icon from '@/components/ui/Icon.astro';
+---
+
+<BaseLayout
+  title="Recursos — Ingeniería que rinde"
+  description="Guías y artículos técnicos sobre eficiencia energética, industria, instalaciones y renovables."
+>
+  <main>
+    <!-- Hero interior (§12): breadcrumbs + overline + h1 + entradilla -->
+    <section aria-labelledby="resources-title" class="bg-surface-subtle">
+      <div class="mx-auto w-full max-w-content px-4 py-16 sm:px-6 lg:px-8">
+        <nav aria-label="Migas de pan" class="text-body-sm text-text-muted">
+          <ol class="flex flex-wrap items-center gap-2">
+            <li><a href="/" class="text-action">Inicio</a></li>
+            <li aria-hidden="true">/</li>
+            <li aria-current="page" class="text-text-secondary">Recursos</li>
+          </ol>
+        </nav>
+
+        <p class="mt-6 text-overline text-text-muted uppercase">Recursos</p>
+        <h1
+          id="resources-title"
+          class="mt-2 text-h1 font-semibold text-balance text-text-primary"
+        >
+          Conocimiento técnico aplicado
+        </h1>
+        <p class="mt-4 max-w-prose text-body-lg text-text-secondary">
+          Guías y artículos con criterio de ingeniería: el dato y el método por
+          delante del titular.
+        </p>
+      </div>
+    </section>
+
+    <!-- Estado vacío (§13.6): aún sin artículos publicados, nunca página en
+         blanco. El grid, el filtro por categoría y las tarjetas lead-magnet
+         llegan con el CMS. -->
+    <section aria-labelledby="empty-title">
+      <div
+        class="mx-auto flex w-full max-w-prose flex-col items-center px-4 py-20 text-center sm:px-6 lg:px-8 lg:py-28"
+      >
+        <span
+          class="flex size-16 items-center justify-center rounded-full bg-surface-muted"
+        >
+          <Icon name="clipboard-check" size={32} class="text-text-muted" />
+        </span>
+        <h2
+          id="empty-title"
+          class="mt-6 text-h3 font-semibold text-text-primary"
+        >
+          Recursos en preparación
+        </h2>
+        <p class="mt-3 text-body text-text-secondary">
+          Estamos preparando guías y artículos técnicos. Muy pronto podrás
+          explorarlos por categoría.
+        </p>
+      </div>
+    </section>
+
+    <!-- Banda CTA final (§11.5): único CTA primario de la vista (P3) -->
+    <section
+      aria-labelledby="cta-title"
+      data-surface="dark"
+      class="bg-blue-900"
+    >
+      <div
+        class="mx-auto flex w-full max-w-content flex-col items-start gap-6 px-4 py-16 sm:px-6 lg:px-8 lg:py-24"
+      >
+        <h2 id="cta-title" class="text-h2 font-bold text-balance text-on-dark">
+          ¿Tienes un reto técnico entre manos? Hablemos.
+        </h2>
+        <p class="max-w-prose text-body-lg text-blue-100">
+          Cuéntanos tu proyecto y te responde un ingeniero, no un bot.
+        </p>
+        <Button href="/contacto" variant="inverted">Solicitar propuesta</Button>
+      </div>
+    </section>
+  </main>
+</BaseLayout>
