@@ -21,9 +21,11 @@ describe('Home (index.astro)', () => {
 
   it('keeps a semantic heading order (one h1, three section h2s)', async () => {
     const html = await render();
-    expect((html.match(/<h2[\s>]/g) ?? []).length).toBe(3);
+    // Scope to <main> so the shared Footer's column headings are not counted.
+    const main = html.match(/<main[\s\S]*<\/main>/)?.[0] ?? '';
+    expect((main.match(/<h2[\s>]/g) ?? []).length).toBe(3);
     // Service names render as h3 (subsection/card titles, §4).
-    expect((html.match(/<h3[\s>]/g) ?? []).length).toBe(6);
+    expect((main.match(/<h3[\s>]/g) ?? []).length).toBe(6);
   });
 
   it('renders the six service lines linking to their routes (Bible §24)', async () => {

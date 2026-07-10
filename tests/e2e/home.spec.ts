@@ -18,6 +18,7 @@ test('home renders the value proposition and primary CTA', async ({ page }) => {
 
 test('home lists the six service lines (Bible §24)', async ({ page }) => {
   await page.goto('/');
-  const services = page.locator('a[href^="/servicios/"]');
+  // Scope to <main> so the footer's site-map service links are not counted.
+  const services = page.locator('main a[href^="/servicios/"]');
   await expect(services).toHaveCount(6);
 });

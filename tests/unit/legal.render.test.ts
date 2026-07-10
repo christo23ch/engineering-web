@@ -21,9 +21,11 @@ describe('Legal pages ([slug].astro)', () => {
     expect(html).toContain('Política de privacidad');
     expect(html).toContain('Última actualización');
     expect(html).toContain('<time');
-    // §13.9: the single documented exception to P3 — no commercial CTA / dark band.
-    expect(html).not.toContain('data-surface="dark"');
-    expect(html).not.toContain('Solicitar propuesta');
+    // §13.9: the single documented exception to P3 — no commercial CTA / dark
+    // band. Scope to <main> (the shared Footer is a dark surface by design).
+    const main = html.match(/<main[\s\S]*<\/main>/)?.[0] ?? '';
+    expect(main).not.toContain('data-surface="dark"');
+    expect(main).not.toContain('Solicitar propuesta');
   });
 
   it('does not fabricate binding legal text', async () => {
