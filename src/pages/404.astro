@@ -1,0 +1,37 @@
+---
+/**
+ * 404 — DESIGN_SYSTEM §13.10 / §11.6, Bible §35 (clear error messaging).
+ * System page: friendly explanation + a single primary way back. Astro serves
+ * this for unmatched routes. Composes APPROVED primitives only (Button, Icon).
+ * Zero JS.
+ */
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Button from '@/components/ui/Button.astro';
+import Icon from '@/components/ui/Icon.astro';
+---
+
+<BaseLayout
+  title="Página no encontrada (404)"
+  description="La página que buscas no existe o se ha movido."
+>
+  <main
+    class="mx-auto flex min-h-[60vh] w-full max-w-prose flex-col items-center justify-center px-4 py-20 text-center sm:px-6 lg:px-8"
+  >
+    <span
+      class="flex size-16 items-center justify-center rounded-full bg-surface-muted"
+    >
+      <Icon name="alert-triangle" size={32} class="text-text-muted" />
+    </span>
+    <p class="mt-6 text-overline text-text-muted uppercase">Error 404</p>
+    <h1 class="mt-2 text-h1 font-semibold text-balance text-text-primary">
+      Página no encontrada
+    </h1>
+    <p class="mt-4 text-body-lg text-text-secondary">
+      La página que buscas no existe o se ha movido. Vuelve al inicio para
+      seguir explorando.
+    </p>
+    <div class="mt-8">
+      <Button href="/">Volver al inicio</Button>
+    </div>
+  </main>
+</BaseLayout>
