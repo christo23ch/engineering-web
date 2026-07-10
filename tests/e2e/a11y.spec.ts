@@ -14,6 +14,8 @@ const pages = [
   '/legal/privacidad',
   '/500',
   '/esta-ruta-no-existe',
+  '/buscar',
+  '/contacto/gracias',
 ];
 
 for (const path of pages) {

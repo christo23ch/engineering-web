@@ -1,0 +1,78 @@
+---
+/**
+ * Búsqueda (`/buscar`) — DESIGN_SYSTEM §13.10, Bible RF-16 (F2). Auxiliary,
+ * INTERFACE ONLY — no search logic. Accessible standalone search page (the
+ * header overlay + grouped results + the index are F2). Composes APPROVED
+ * primitives only (Input, Button, Icon). Zero JS.
+ */
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Input from '@/components/ui/Input.astro';
+import Button from '@/components/ui/Button.astro';
+import Icon from '@/components/ui/Icon.astro';
+---
+
+<BaseLayout
+  title="Buscar — Ingeniería que rinde"
+  description="Busca servicios, proyectos y recursos."
+>
+  <main>
+    <section aria-labelledby="search-title" class="bg-surface-subtle">
+      <div class="mx-auto w-full max-w-content px-4 py-16 sm:px-6 lg:px-8">
+        <nav aria-label="Migas de pan" class="text-body-sm text-text-muted">
+          <ol class="flex flex-wrap items-center gap-2">
+            <li><a href="/" class="text-action">Inicio</a></li>
+            <li aria-hidden="true">/</li>
+            <li aria-current="page" class="text-text-secondary">Buscar</li>
+          </ol>
+        </nav>
+        <h1
+          id="search-title"
+          class="mt-6 text-h1 font-semibold text-balance text-text-primary"
+        >
+          Buscar
+        </h1>
+
+        <!-- Search logic (index + grouped results) is F2. -->
+        <form
+          role="search"
+          class="mt-6 flex max-w-prose items-end gap-3"
+          novalidate
+        >
+          <div class="flex-1">
+            <Input
+              label="Buscar servicios, proyectos y recursos"
+              name="q"
+              type="search"
+            />
+          </div>
+          <Button type="submit">Buscar</Button>
+        </form>
+      </div>
+    </section>
+
+    <section aria-labelledby="results-title">
+      <div
+        class="mx-auto flex w-full max-w-prose flex-col items-center px-4 py-20 text-center sm:px-6 lg:px-8 lg:py-28"
+      >
+        <h2 id="results-title" class="sr-only">Resultados</h2>
+        <span
+          class="flex size-16 items-center justify-center rounded-full bg-surface-muted"
+        >
+          <Icon name="search" size={32} class="text-text-muted" />
+        </span>
+        <p class="mt-6 text-body text-text-secondary">
+          La búsqueda estará disponible próximamente. Mientras tanto, explora
+          los
+          <a
+            href="/servicios/ingenieria-industrial"
+            class="text-action underline"
+          >
+            servicios
+          </a>
+          o los
+          <a href="/proyectos" class="text-action underline">proyectos</a>.
+        </p>
+      </div>
+    </section>
+  </main>
+</BaseLayout>

@@ -1,0 +1,37 @@
+---
+/**
+ * Contacto — success (`/contacto/gracias`) — DESIGN_SYSTEM §13.8. Auxiliary,
+ * INTERFACE ONLY — static success screen shown after a submitted proposal (the
+ * submit flow itself is deferred with the BFF). Keeps the journey: next steps +
+ * links back into the site. Composes APPROVED primitives only (Button, Icon).
+ * Zero JS.
+ */
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Button from '@/components/ui/Button.astro';
+import Icon from '@/components/ui/Icon.astro';
+---
+
+<BaseLayout
+  title="Gracias — Solicitud recibida"
+  description="Hemos recibido tu solicitud. Te responderá un ingeniero."
+>
+  <main
+    class="mx-auto flex min-h-[60vh] w-full max-w-prose flex-col items-center justify-center px-4 py-20 text-center sm:px-6 lg:px-8"
+  >
+    <span
+      class="flex size-16 items-center justify-center rounded-full bg-green-50"
+    >
+      <Icon name="check-circle" size={32} class="text-success" />
+    </span>
+    <h1 class="mt-6 text-h1 font-semibold text-balance text-text-primary">
+      Solicitud recibida
+    </h1>
+    <p class="mt-4 text-body-lg text-text-secondary">
+      Gracias por escribirnos. Revisaremos tu solicitud y te responderá un
+      ingeniero, no un bot.
+    </p>
+    <div class="mt-8">
+      <Button href="/proyectos">Ver casos de éxito</Button>
+    </div>
+  </main>
+</BaseLayout>
