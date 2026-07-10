@@ -29,7 +29,9 @@ export type IconName =
   | 'arrow-right'
   // Chat glyph for the IA assistant trigger (§11.7) + search (§13.10).
   | 'message'
-  | 'search';
+  | 'search'
+  // Hamburger for the mobile header (§11.4).
+  | 'menu';
 
 export type IconNode =
   | { tag: 'path'; d: string; fill?: string; stroke?: string }
@@ -128,4 +130,6 @@ export const icons: Record<IconName, IconNode[]> = {
     { tag: 'circle', cx: '11', cy: '11', r: '7' },
     { tag: 'path', d: 'm20 20-3.5-3.5' },
   ],
+  // hamburguesa.
+  menu: [{ tag: 'path', d: 'M4 6h16M4 12h16M4 18h16' }],
 };

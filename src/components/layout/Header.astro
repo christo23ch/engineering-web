@@ -1,0 +1,223 @@
+---
+/**
+ * Header — DESIGN_SYSTEM §11.4 / §24. Shared site chrome rendered by BaseLayout
+ * on every page. Sticky bar (72px desktop / 64px mobile), white, gray-300 bottom
+ * border, logo left, desktop nav + search + always-visible primary CTA, mobile
+ * hamburger → full-screen panel with an accordion and a CTA at the foot.
+ *
+ * ZERO JS: the Servicios dropdown and the mobile menu (+ nested accordion) are
+ * native <details>, matching the Modal/FAQ/IA-widget precedent — the Header adds
+ * no client script. The active page is resolved server-side (aria-current). The
+ * on-scroll shadow (§11.4) is a progressive enhancement deferred to keep the
+ * site's zero-JS property; the permanent bottom border is the separator.
+ *
+ * NOTE (governance): §11.4 mandates an always-visible header CTA while P3 asks
+ * for a single primary CTA per view and every page also ends with a CTA band.
+ * The header CTA is persistent chrome, rendered smaller (size sm) to preserve
+ * the in-content hierarchy. Flagged for DS reconciliation; the DS is unchanged.
+ */
+import Button from '@/components/ui/Button.astro';
+import Icon from '@/components/ui/Icon.astro';
+import { services } from '@/lib/content/services';
+
+const pathname = Astro.url.pathname.replace(/\/$/, '') || '/';
+const isActive = (href: string) =>
+  pathname === href || pathname.startsWith(`${href}/`);
+
+const links = [
+  { href: '/proyectos', label: 'Proyectos' },
+  { href: '/sobre-nosotros', label: 'Sobre nosotros' },
+  { href: '/recursos', label: 'Recursos' },
+  { href: '/contacto', label: 'Contacto' },
+];
+const servicesActive = pathname.startsWith('/servicios');
+
+const linkBase =
+  'rounded-md px-3 py-2 text-body-sm font-medium transition-colors';
+const linkOn = 'text-action';
+const linkOff = 'text-text-primary hover:text-action hover:bg-surface-subtle';
+---
+
+<header class="sticky top-0 z-40 border-b border-border bg-surface">
+  <div
+    class="mx-auto flex h-16 w-full max-w-content items-center justify-between gap-4 px-4 sm:px-6 lg:h-[4.5rem] lg:px-8"
+  >
+    <a
+      href="/"
+      class="text-body-lg font-semibold text-text-primary"
+      aria-label="Ingeniería que rinde — Inicio"
+    >
+      Ingeniería que rinde
+    </a>
+
+    <!-- Desktop navigation -->
+    <nav aria-label="Principal" class="hidden items-center gap-1 lg:flex">
+      <details class="header-dropdown relative">
+        <summary
+          class:list={[
+            linkBase,
+            'flex items-center gap-1',
+            servicesActive ? linkOn : linkOff,
+          ]}
+          aria-current={servicesActive ? 'true' : undefined}
+        >
+          Servicios
+          <Icon name="chevron-down" size={16} class="chevron" />
+        </summary>
+        <ul
+          class="absolute top-full left-0 mt-1 w-64 rounded-md border border-border bg-surface p-2 shadow-md"
+        >
+          {
+            services.map((service) => (
+              <li>
+                <a
+                  href={`/servicios/${service.slug}`}
+                  class="flex items-center gap-2 rounded-md px-3 py-2 text-body-sm text-text-primary hover:bg-surface-subtle hover:text-action"
+                  aria-current={
+                    isActive(`/servicios/${service.slug}`) ? 'page' : undefined
+                  }
+                >
+                  <Icon name={service.icon} size={16} />
+                  {service.name}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </details>
+
+      {
+        links.map((link) => (
+          <a
+            href={link.href}
+            class:list={[linkBase, isActive(link.href) ? linkOn : linkOff]}
+            aria-current={isActive(link.href) ? 'page' : undefined}
+          >
+            {link.label}
+          </a>
+        ))
+      }
+
+      <a
+        href="/buscar"
+        class:list={[linkBase, isActive('/buscar') ? linkOn : linkOff]}
+        aria-label="Buscar"
+        aria-current={isActive('/buscar') ? 'page' : undefined}
+      >
+        <Icon name="search" size={20} />
+      </a>
+
+      <div class="ml-2">
+        <Button href="/contacto" size="sm">Solicitar propuesta</Button>
+      </div>
+    </nav>
+
+    <!-- Mobile hamburger → full-screen panel (native <details>) -->
+    <details class="header-mobile lg:hidden">
+      <summary
+        class="flex size-11 items-center justify-center rounded-md text-text-primary hover:bg-surface-subtle"
+        aria-label="Abrir menú"
+      >
+        <Icon name="menu" size={24} class="menu-open" />
+        <Icon name="x" size={24} class="menu-close" />
+      </summary>
+
+      <div
+        class="fixed inset-x-0 top-16 bottom-0 z-40 overflow-y-auto border-t border-border bg-surface p-4"
+      >
+        <nav aria-label="Principal (móvil)" class="flex flex-col gap-1">
+          <details class="header-accordion">
+            <summary
+              class:list={[
+                'flex items-center justify-between rounded-md px-3 py-3 text-body font-medium',
+                servicesActive ? linkOn : 'text-text-primary',
+              ]}
+            >
+              Servicios
+              <Icon name="chevron-down" size={20} class="chevron" />
+            </summary>
+            <ul class="mt-1 flex flex-col gap-1 pl-3">
+              {
+                services.map((service) => (
+                  <li>
+                    <a
+                      href={`/servicios/${service.slug}`}
+                      class="block rounded-md px-3 py-2 text-body-sm text-text-secondary hover:bg-surface-subtle hover:text-action"
+                      aria-current={
+                        isActive(`/servicios/${service.slug}`)
+                          ? 'page'
+                          : undefined
+                      }
+                    >
+                      {service.name}
+                    </a>
+                  </li>
+                ))
+              }
+            </ul>
+          </details>
+
+          {
+            links.map((link) => (
+              <a
+                href={link.href}
+                class:list={[
+                  'rounded-md px-3 py-3 text-body font-medium',
+                  isActive(link.href)
+                    ? linkOn
+                    : 'text-text-primary hover:bg-surface-subtle hover:text-action',
+                ]}
+                aria-current={isActive(link.href) ? 'page' : undefined}
+              >
+                {link.label}
+              </a>
+            ))
+          }
+
+          <a
+            href="/buscar"
+            class="rounded-md px-3 py-3 text-body font-medium text-text-primary hover:bg-surface-subtle hover:text-action"
+            aria-current={isActive('/buscar') ? 'page' : undefined}
+          >
+            Buscar
+          </a>
+        </nav>
+
+        <div class="mt-6">
+          <Button href="/contacto" class="w-full">Solicitar propuesta</Button>
+        </div>
+      </div>
+    </details>
+  </div>
+</header>
+
+<style>
+  /* Native <details> affordances — CSS only (no JS). */
+  .header-dropdown > summary,
+  .header-mobile > summary,
+  .header-accordion > summary {
+    list-style: none;
+    cursor: pointer;
+  }
+  .header-dropdown > summary::-webkit-details-marker,
+  .header-mobile > summary::-webkit-details-marker,
+  .header-accordion > summary::-webkit-details-marker {
+    display: none;
+  }
+  .chevron {
+    transition: rotate 150ms ease;
+  }
+  details[open] > summary .chevron {
+    rotate: 180deg;
+  }
+  /* Hamburger ⇄ close icon swap. */
+  .header-mobile > summary .menu-close {
+    display: none;
+  }
+  .header-mobile[open] > summary .menu-open {
+    display: none;
+  }
+  .header-mobile[open] > summary .menu-close {
+    display: block;
+  }
+</style>

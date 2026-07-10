@@ -27,9 +27,11 @@ describe('Sobre nosotros (sobre-nosotros.astro)', () => {
 
   it('closes with the CTA band, single primary CTA, and Empleo link', async () => {
     const html = await render();
-    expect(html).toContain('data-surface="dark"');
-    expect(html).toContain('bg-white'); // inverted button
-    expect((html.match(/Solicitar propuesta/g) ?? []).length).toBe(1);
-    expect(html).toContain('href="/empleo"');
+    // Scope to <main>: the shared Header also carries a "Solicitar propuesta" CTA.
+    const main = html.match(/<main[\s\S]*<\/main>/)?.[0] ?? '';
+    expect(main).toContain('data-surface="dark"');
+    expect(main).toContain('bg-white'); // inverted button
+    expect((main.match(/Solicitar propuesta/g) ?? []).length).toBe(1);
+    expect(main).toContain('href="/empleo"');
   });
 });
