@@ -15,6 +15,11 @@ interface Props {
 }
 
 const { title, description = '', assistant = true } = Astro.props;
+
+// Canonical URL (nav/SEO): absolute, built from the configured `site`
+// (astro.config) so every page declares its canonical route. Falls back to the
+// request origin when `site` is unset (e.g. the test container).
+const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url);
 ---
 
 <!doctype html>
@@ -25,6 +30,7 @@ const { title, description = '', assistant = true } = Astro.props;
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
     {description && <meta name="description" content={description} />}
+    <link rel="canonical" href={canonical} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   </head>
   <body>
