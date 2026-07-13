@@ -118,6 +118,11 @@
   html {
     -webkit-text-size-adjust: 100%;
     scroll-behavior: smooth;
+    /* Offset in-page anchor/focus scrolling by the sticky header height (§11.4:
+       72px desktop / 64px mobile) + a small buffer, so a target (skip link →
+       #main-content, article ToC) is never hidden under the header (WCAG 2.4.11
+       "focus not obscured", required by DESIGN_SYSTEM §10/§276). */
+    scroll-padding-top: 5rem;
   }
 
   body {
