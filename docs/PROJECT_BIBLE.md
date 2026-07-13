@@ -1095,6 +1095,8 @@ CI ejecuta lint + unit + integración + build + axe + Lighthouse antes de permit
 | `CMP_SITE_ID` | Gestor de consentimiento. | No |
 | `SITE_URL` / `NODE_ENV` / `ENVIRONMENT` | Entorno y URL base. | No |
 | `RATE_LIMIT_*` | Límites antiabuso de formularios/IA. | No |
+| `OUTBOX_WORKER_SECRET` | Autenticación (Bearer) del endpoint interno que procesa el outbox de leads ([§43](#43-decisiones-de-arquitectura-adr) ADR-010). En Vercel (DA-3) se duplica el mismo valor en `CRON_SECRET` para la inyección automática del cron. | Sí |
+| `EMAIL_TO_INTERNAL` | Buzón interno que recibe las notificaciones de nuevos leads y candidaturas (ADR-008). | No |
 
 **Justificación.** Un contrato explícito de configuración evita fallos de despliegue y clarifica dependencias.
 
