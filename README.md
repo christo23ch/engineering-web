@@ -1,7 +1,8 @@
 # Engineering Web — Professional Website Platform
 
-![Status](https://img.shields.io/badge/status-Phase%200-yellow)
-![Stack](https://img.shields.io/badge/stack-Astro%20%2B%20React%20%2B%20PostgreSQL-blue)
+![Status](https://img.shields.io/badge/frontend-APPROVED-brightgreen)
+![Phase](https://img.shields.io/badge/phase%200-closed-blue)
+![Stack](https://img.shields.io/badge/stack-Astro%207%20%2B%20React%20%2B%20Tailwind%20v4-blue)
 ![License](https://img.shields.io/badge/license-Proprietary-red)
 
 A premium, performance-first website platform for a Spanish engineering firm specializing in industrial, energetic, MEP, and renewable energy projects. Built with **Jamstack** architecture (Astro + React islands + headless CMS + PostgreSQL + RAG-powered AI).
@@ -24,7 +25,11 @@ A premium, performance-first website platform for a Spanish engineering firm spe
 
 ## 🚀 Quick Start
 
-> ✅ **Estado real (2026-07-08):** el **scaffolding técnico está completo y verificado** — `package.json` (Astro 7 + Tailwind v4, ADR-011), TypeScript strict, `astro.config.ts`, design tokens en `src/styles/globals.css` (`@theme`, CSS-first), ESLint + Prettier, Vitest, Playwright + axe, workflows de CI y `.env.example` existen y funcionan (`npm install` → `npm run dev`/`build`/`lint`/`test` ✓, `npm audit` = 0 vulnerabilidades). Lo que **aún no existe es el código de producto** (componentes y páginas reales): se desarrolla en **F1** (Bible §46). La `src/pages/index.astro` actual es un *placeholder* de scaffolding, no producto.
+> ✅ **Estado real (2026-07-13):** la **capa de interfaz está construida y auditada** (*LIBRARY APPROVED* + *FRONTEND APPROVED*). Existen y funcionan: la biblioteca de UI (16 primitivas/composiciones en `src/components/ui/` con barrels de API pública), **todas las pantallas del §13** (14 route files: Home, plantilla de servicio ×6, portfolio + ficha de caso, sobre nosotros, recursos + artículo, empleo, contacto + gracias, legal ×3, buscar, 404/500), Header + Footer, el **widget de asistente IA (solo interfaz, sin backend)** y la capa SEO (JSON-LD/OG/Twitter/canonical/robots/sitemap). Batería completa en verde: `typecheck` · `lint` · `format:check` · `test` (139 tests unitarios) · `build` · `npm audit --omit=dev` (0 vulnerabilidades) · `test:e2e` (8 specs Playwright + axe); Lighthouse perf/a11y/best-practices 100.
+>
+> 🔶 **Honestidad de contenido:** las plantillas son fieles pero las fuentes de contenido (`cases.ts`, `articles.ts`) están **vacías a propósito** y los textos legales son marcadores — **no se inventan** métricas, clientes, testimonios, certificaciones ni texto legal. El contenido real llega en F2.
+>
+> ⏳ **Pendiente:** backend/BFF (formularios→CRM, email, persistencia), integración de CMS, PostgreSQL + pgvector, lógica de IA/RAG, contenido real y despliegue. Todo ello gobernado por las decisiones de **Bible §49** (ratificadas por el comité, **pendientes de ratificación única del cliente**).
 
 ### Prerequisites
 - **Node.js** 22.12+ (required by Astro 7 — ADR-011)
@@ -69,26 +74,25 @@ npm run preview
 
 ## 📊 Project Status
 
-**Phase 0: Discovery & Technical Scaffolding** 🔶
+**Phase 0: Discovery & Technical Scaffolding** ✅ **Closed**
 
-- ✅ Complete documentation: PROJECT_BIBLE.md (1,455 lines) + DESIGN_SYSTEM.md (473 lines)
-- ✅ Repository structure initialized
+- ✅ Complete documentation: PROJECT_BIBLE.md (v1.1, SSOT) + DESIGN_SYSTEM.md
+- ✅ Full technical scaffolding + CI/CD + design tokens
 - ✅ Session context preserved (CLAUDE.md)
-- ⏳ **Pending:** Resolve 11 hypotheses + 9 open decisions (see CLAUDE.md for details)
-- ⏳ **Next:** Initialize Astro scaffolding, CI/CD, design tokens
+- 🟡 11 hypotheses **triaged** (none validated — require client) + 9 decisions **ratified by committee** (pending single client ratification) — see Bible §44/§49
 
-**Phase 1: MVP** (6 weeks, pending Phase 0 completion)
-- Component library implementation (~30 components)
-- Page development (Home, 6 Service pages, Portfolio, Case detail, About/Team, Contact, Legal)
-- BFF serverless functions (forms, CRM webhook, email, persistence)
-- PostgreSQL + pgvector integration
-- Headless CMS integration
+**Phase 1: MVP** (interface layer ✅ done; backend ⏳ pending)
+- ✅ Component library (16 UI primitives/compositions) — **LIBRARY APPROVED**
+- ✅ All §13 screens + Header/Footer + SEO layer — **FRONTEND APPROVED**
+- ⏳ BFF serverless functions (forms, CRM webhook, email, persistence)
+- ⏳ PostgreSQL + pgvector integration
+- ⏳ Headless CMS integration (Sanity — ratified, pending client)
 
 **Phase 2: Content & IA** (2 months)
-- IA assistant widget with RAG (Claude Anthropic)
-- Content loading: Services, Case studies, Articles, Team
-- Vector index training (pgvector)
-- Monitoring setup (Core Web Vitals, error tracking)
+- 🔶 IA assistant widget **UI built** — RAG backend pending
+- ⏳ Content loading: Services, Case studies, Articles, Team (sources currently empty — no fabricated data)
+- ⏳ Vector index training (pgvector)
+- ⏳ Monitoring setup (Core Web Vitals, error tracking)
 
 **Phase 3: Automation & i18n** (2 months)
 - i18n infrastructure (ES → EN routing)
@@ -144,8 +148,8 @@ npm run preview
 ```
 engineering-web/
 ├── docs/                              # Documentation (Bible = SSOT)
-│   ├── PROJECT_BIBLE.md               # Vision, requirements, architecture, policy (1,455 lines)
-│   ├── DESIGN_SYSTEM.md               # Design tokens, components, screens (473 lines)
+│   ├── PROJECT_BIBLE.md               # Vision, requirements, architecture, policy (SSOT, v1.1)
+│   ├── DESIGN_SYSTEM.md               # Design tokens, components, screens (v1.0)
 │   ├── adr/                           # Architecture Decision Records (optional)
 │   └── .gitkeep
 │
@@ -257,15 +261,15 @@ engineering-web/
 
 ## 📚 Key Documentation
 
-> **Documentary policy (official):** **`docs/PROJECT_BIBLE.md` is the single source of truth (v1.0 official).** Every other document complements it and must never contradict it; new decisions land in the Bible first (§43/§49) and then propagate here. On any discrepancy, **the Bible wins.**
+> **Documentary policy (official):** **`docs/PROJECT_BIBLE.md` is the single source of truth (v1.1 official).** Every other document complements it and must never contradict it; new decisions land in the Bible first (§43/§49) and then propagate here. On any discrepancy, **the Bible wins.**
 
 ### Must Read
-1. **[docs/PROJECT_BIBLE.md](./docs/PROJECT_BIBLE.md)** — **SSOT (v1.0 official):** vision (§1-§3), requirements (§8), architecture (§11-§14), IA policy (§16), data model (§28), env vars (§38), ADRs (§43), hypotheses (§44), roadmap (§46), decisions §49 (DA-1…DA-9)
+1. **[docs/PROJECT_BIBLE.md](./docs/PROJECT_BIBLE.md)** — **SSOT (v1.1 official):** vision (§1-§3), requirements (§8), architecture (§11-§14), IA policy (§16), data model (§28), env vars (§38), ADRs (§43), hypotheses §44 (triaged), roadmap (§46), decisions §49 (DA-1…DA-10, governance-closed)
 2. **[CLAUDE.md](./CLAUDE.md)** — Session context, roadmap, open decisions, how to resume work
 3. **[docs/DESIGN_SYSTEM.md](./docs/DESIGN_SYSTEM.md)** — Design tokens (§2-§5), components (§11), screens (§13), accessibility (§14)
 
 ### Reference
-- **docs/adr/** — Individual Architecture Decision Records (ADR-001 through ADR-011, optional)
+- **docs/adr/** — reserved (empty): ADR-001…011 live inline in Bible §43; governance vendor selections are logged in §49, not as new ADRs
 - **docs/SECURITY.md** — Security policy & threat model (stub — pending content; complements Bible §17)
 - **docs/{ARCHITECTURE, DATABASE, API, UI_UX, ROADMAP, IMPLEMENTATION_PLAN, CODING_STANDARDS, TESTING}.md** — topic stubs (pending content; each complements its Bible section)
 - **CONTRIBUTING.md** — Contribution guidelines (not yet created)
@@ -431,31 +435,29 @@ All architectural decisions documented in **CLAUDE.md** (Decisions Status table)
 |-----|----------|--------|
 | ADR-001 | Jamstack (SSG + rebuild-on-webhook; ISR = provider-dependent optimization) | ✅ Locked |
 | ADR-002 | Astro + React islands + TypeScript strict (Astro definitive; revisable only pre-F4) | ✅ Locked |
-| ADR-003 | Headless CMS (provider TBD) | ⏳ Pending DA-7 |
-| ADR-004 | PostgreSQL + pgvector (EU-hosted) | ⏳ Pending DA-5 |
+| ADR-003 | Headless CMS (Sanity) | 🟡 Provider ratified (DA-7, pending client) |
+| ADR-004 | PostgreSQL + pgvector (Supabase EU) | 🟡 Provider ratified (DA-5, pending client) |
 | ADR-005 | RAG + Claude via BFF proxy only (prompt-injection guardrails; embeddings via DA-10) | ✅ Locked |
 | ADR-006 | RBAC: public/authenticated/admin | ✅ Locked |
 | ADR-007 | CI/CD via GitHub Actions | ✅ Locked |
-| ADR-008 | Lead persistence (email + CRM webhook → PostgreSQL) | ⏳ Pending DA-2 |
+| ADR-008 | Lead persistence (email + CRM webhook → PostgreSQL; CRM = Brevo) | 🟡 Provider ratified (DA-2, pending client) |
 | ADR-009 | i18n design-first (ES now, EN in F3) | ✅ Locked |
 | ADR-010 | Outbox pattern + scheduled retry worker (durable lead delivery) | ✅ Locked |
 | ADR-011 | Version baseline: Astro 7 + Tailwind v4 + Node ≥22.12 (security-driven) | ✅ Locked |
 
-**Closed Decision:**
+**Decisions (governance-closed — ratified by committee proposal, pending single client ratification):**
 - ✅ DA-1: Stack — **Astro definitive** (WordPress discarded)
+- 🟡 DA-2: CRM — **Brevo**
+- 🟡 DA-3: Hosting — **Vercel** (cron for retry worker; ties to domain/H11)
+- 🟡 DA-4: Editorial workflow — **approval gate (2-level)**
+- 🟡 DA-5: PostgreSQL — **Supabase (EU)**, paid tier
+- 🔴 DA-6: IA scope/budget — **requires client ratification** (elevated with H7)
+- 🟡 DA-7: CMS — **Sanity**
+- 🟡 DA-8: Email transactional — **Brevo**
+- 🟡 DA-9: Analytics — **Plausible**
+- 🟡 DA-10: Embeddings — **Voyage AI** (voyage-3-lite)
 
-**Open Decisions Blocking Development:**
-- DA-2: CRM provider (HubSpot/Brevo/Pipedrive/custom)
-- DA-3: Hosting (Vercel/Netlify/Cloudflare Pages) — **must close before BFF**
-- DA-4: Editorial workflow (direct publish vs approval gate)
-- DA-5: PostgreSQL provider (Supabase/Neon/AWS RDS) — serverless pooler required
-- DA-6: IA scope in F2 (features + max monthly budget + hard-stop cutoff)
-- DA-7: CMS provider (Strapi/Sanity/Storyblok/Contentful) — evaluate cost per seat
-- DA-8: Email transactional provider (SendGrid/Brevo/Resend/other)
-- DA-9: Analytics tool (Plausible/GA4/PostHog)
-- DA-10: Embeddings provider — **Voyage AI recommended** (vs OpenAI/Cohere) — must close before RAG
-
-Canonical definitions in **Bible §49 (SSOT)**; see **CLAUDE.md** for tracking context and validation criteria.
+Canonical resolutions + reservations/plan-B in **Bible §49 (SSOT)**; see **CLAUDE.md** for the tracking table. These proposals fill the "provider TBD" holes in the existing ADRs (§43); they do **not** create new ADRs and become effective on a single client ratification.
 
 ---
 
@@ -605,7 +607,7 @@ See **CONTRIBUTING.md** (TBD) for:
 - Performance budget enforcement
 
 ### Hypotheses & Decisions
-11 hypotheses + 9 open decisions documented in **CLAUDE.md**. Cannot proceed past Phase 0 without validation/closure.
+11 hypotheses (triaged, none validated) + 10 decisions (governance-closed, pending single client ratification) documented in **Bible §44/§49** and tracked in **CLAUDE.md**. Backend/CMS/IA (F1/F2) is gated on client ratification.
 
 ---
 
@@ -624,8 +626,8 @@ Proprietary. All rights reserved. Contact repo owner for licensing inquiries.
 
 ---
 
-**Last Updated:** 2026-07-08  
-**Phase:** 0 (Discovery & Scaffolding)  
-**Status:** 🟡 Awaiting decisions/hypotheses validation  
+**Last Updated:** 2026-07-13  
+**Phase:** 0 closed · interface layer complete (FRONTEND APPROVED)  
+**Status:** 🟢 Frontend built & audited · backend/CMS/IA pending client ratification of Bible §49  
 
-For full project context, see **[CLAUDE.md](./CLAUDE.md)** and **[docs/PROJECT_BIBLE.md](./docs/PROJECT_BIBLE.md)**.
+For full project context, see **[CLAUDE.md](./CLAUDE.md)**, **[CHANGELOG.md](./CHANGELOG.md)** and **[docs/PROJECT_BIBLE.md](./docs/PROJECT_BIBLE.md)**.

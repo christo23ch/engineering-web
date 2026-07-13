@@ -8,9 +8,9 @@
 | Metadato | Valor |
 |---|---|
 | **Documento** | `docs/PROJECT_BIBLE.md` |
-| **Versión** | 1.0.0 (oficial) |
-| **Estado** | 🟢 Aprobado — versión **oficial 1.0** y **SSOT** del proyecto. Las hipótesis ([§44](#44-hipótesis)) y las decisiones abiertas ([§49](#49-anexo-de-decisiones-abiertas)) permanecen **en seguimiento** para la Fase 0; su cierre producirá actualizaciones de contenido (v1.1) pero **no condiciona** la oficialidad de esta versión. |
-| **Fecha** | 2026-07-08 |
+| **Versión** | 1.1.0 (oficial) |
+| **Estado** | 🟢 Aprobado — versión **oficial 1.1** y **SSOT** del proyecto. **v1.1 (2026-07-13):** incorpora el cierre de la Fase 0 documentado en el *Informe Final de Gobernanza* — las decisiones abiertas DA-2…DA-10 quedan **ratificadas por el comité (propuesta), pendientes de ratificación única del cliente** ([§49](#49-anexo-de-decisiones-abiertas)), y las hipótesis ([§44](#44-hipótesis)) quedan **triadas** (bloqueantes / confirmación documental / diferibles) — **ninguna se da por validada**. La **capa de interfaz** de F1–F2 está construida y auditada (*LIBRARY APPROVED* + *FRONTEND APPROVED*); el backend/CMS/IA y el contenido real siguen pendientes. Ni el cierre de decisiones ni el estado de las hipótesis condicionan la oficialidad del SSOT. |
+| **Fecha** | 2026-07-13 (v1.1) · 2026-07-08 (v1.0) |
 | **Propietario (owner)** | Dirección / Cliente *(por confirmar)* |
 | **Redactado por** | Equipo multidisciplinar: Software Architect · Product Owner · CTO · Lead Backend · Lead Frontend · Database Architect · UX/UI Lead · AI Engineer · QA Lead · DevOps · Security Engineer · Technical Writer |
 | **Ámbito** | Plataforma web corporativa y de captación de leads B2B |
@@ -1287,7 +1287,15 @@ CI ejecuta lint + unit + integración + build + axe + Lighthouse antes de permit
 
 **Dependencias.** Sesión de descubrimiento con el cliente.
 
-**Decisiones tomadas.** Ninguna hipótesis se da por cierta sin confirmación documental del cliente.
+**Triaje de gobernanza (v1.1, Informe Final de Gobernanza — solo operativo; ninguna hipótesis se valida aquí):**
+
+| Clase | Hipótesis | Motivo |
+|---|---|---|
+| 🔴 **Bloquean el lanzamiento** | **H6, H7, H8, H11** | H6 = afirmación de compliance (certificaciones); H7 = presupuesto que activa los proveedores ratificados; H8 = sin responsable de contenido no se cumple el *gate* de lanzamiento (6–8 casos con métricas verificadas); H11 = el nombre impregna dominio/`SITE_URL`, legales, `Organization` schema y marca. |
+| 🟡 **Solo confirmación documental** | **H2, H3, H4, H9, H10** | Un documento del cliente las cierra; deben llegar antes del lanzamiento pero no exigen producción. H2 (taxonomía §24 ya publicada) es la de mayor impacto si resultara falsa. |
+| 🟢 **Diferibles a post-lanzamiento** | **H1, H5** | Nada publicado depende de ellas (H1: ninguna cifra de plantilla publicada; H5: objetivos numéricos necesarios para el cuadro de KPIs, no para publicar). |
+
+**Decisiones tomadas.** Ninguna hipótesis se da por cierta sin confirmación documental del cliente. El triaje anterior **no altera** esa regla: solo ordena el trabajo de cierre. La disciplina *«nada no validado se publica»* está protegida por la batería de tests del frontend.
 
 **Alternativas descartadas.** Inventar datos para «rellenar» — descartado por instrucción explícita y por riesgo.
 
@@ -1327,8 +1335,8 @@ CI ejecuta lint + unit + integración + build + axe + Lighthouse antes de permit
 | Fase | Contenido | Hito |
 |---|---|---|
 | **F0 — Descubrimiento** (sem. 1–2) | Validar hipótesis ([§44](#44-hipótesis)); manual de marca; keyword research; inventario de casos; cerrar decisiones abiertas ([§49](#49-anexo-de-decisiones-abiertas)). **DA-3 (hosting) y DA-10 (embeddings) deben cerrarse en F0, antes del BFF/RAG de F1–F2.** **Estructura de repo ✅ hecha. Bible 🟢 v1.0 oficial ✅.** | Hipótesis validadas y decisiones cerradas → **actualización de contenido v1.1** del SSOT. |
-| **F1 — MVP** (sem. 3–8) | RF-01…RF-11: Home, servicios, portfolio, sobre nosotros, contacto, legal; CMS; formularios→CRM; SEO técnico; analítica; RGPD. | Lanzamiento del Sitio. |
-| **F2 — Contenido + IA mínima** (mes 3–4) | RF-12…RF-16: blog/recursos, lead magnets, empleo, **asistente IA/búsqueda semántica (mín.)**, búsqueda interna; datos estructurados completos; CWV afinados. | IA en producción; motor de contenido. |
+| **F1 — MVP** (sem. 3–8) | RF-01…RF-11: Home, servicios, portfolio, sobre nosotros, contacto, legal; CMS; formularios→CRM; SEO técnico; analítica; RGPD. **Capa de interfaz ✅ construida y auditada** (biblioteca de UI *LIBRARY APPROVED* + todas las pantallas del [§13 DESIGN_SYSTEM] + Header/Footer + SEO técnico → *FRONTEND APPROVED*, con contenido honesto: plantillas fieles y fuentes tipadas vacías, sin datos inventados). **Pendiente:** CMS, BFF (formularios→CRM, email, persistencia), base de datos y despliegue. | Lanzamiento del Sitio. |
+| **F2 — Contenido + IA mínima** (mes 3–4) | RF-12…RF-16: blog/recursos, lead magnets, empleo, **asistente IA/búsqueda semántica (mín.)**, búsqueda interna; datos estructurados completos; CWV afinados. **Interfaz del asistente IA y de recursos/empleo/lead-magnet ✅ construida** (widget sin lógica de backend); **pendiente:** RAG, embeddings, contenido real y presupuesto/hard-stop de IA (DA-6, pendiente de ratificación del cliente). | IA en producción; motor de contenido. |
 | **F3 — Automatización + i18n** (mes 5–6) | RF-17 y RF-20: multi-idioma ES/EN, automatización de marketing (lead scoring), A/B testing de conversión. | Crecimiento y multi-idioma. |
 | **F4 — Área privada + avanzado** (6 m+) | RF-18 (calculadora de ahorro) y RF-19 (área privada); IA avanzada. | Autoservicio de cliente. |
 
@@ -1406,7 +1414,24 @@ CI ejecuta lint + unit + integración + build + axe + Lighthouse antes de permit
 
 ## 49. Anexo de decisiones abiertas
 
-> Decisiones que **no** pueden cerrarse con la información disponible. Para cada una se documenta la incertidumbre y se propone la mejor alternativa con ventajas e inconvenientes. **No se cierran aquí; se resuelven en la Fase 0.**
+> Decisiones que **no** pudieron cerrarse con la información disponible durante la redacción v1.0. Para cada una se documenta la incertidumbre y se propone la mejor alternativa con ventajas e inconvenientes.
+>
+> **Actualización v1.1 (2026-07-13) — cierre de Fase 0 por gobernanza.** El *Informe Final de Gobernanza* ratifica DA-2…DA-10 **por propuesta del comité, pendientes de una ratificación única del cliente** (DA-6 se eleva al cliente junto con H7). Las descripciones de cada DA se conservan íntegras abajo; la resolución ratificada y sus **reservas** (condiciones de cierre) se consolidan en la tabla siguiente. Verificado por el comité: ninguna resolución contradice otra DA, ningún ADR ([§43](#43-decisiones-de-arquitectura-adr)), ni el catálogo §38, ni aumenta deuda técnica.
+
+| DA | Resolución ratificada (propuesta) | Estado | Reserva / condición de cierre | Plan B |
+|---|---|---|---|---|
+| DA-1 | Astro (definitiva) | ✅ CERRADA (v1.0) | — | — |
+| DA-2 | **Brevo** (CRM) | APROBADA CON RESERVAS | DPA UE; revisión a 2 trimestres contra H4/H5 | HubSpot Starter |
+| DA-3 | **Vercel** (funciones región UE) | APROBADA CON RESERVAS | Plan con cron suficiente para el worker (ADR-010); dominio depende de H11 | Netlify |
+| DA-4 | **Aprobación 2 niveles** (Casos/Certif./Legal), directa para Artículos | APROBADA | Si el tier del CMS no soporta workflow: convención editorial documentada | — |
+| DA-5 | **Supabase UE** (pgvector + pooler) | APROBADA CON RESERVAS | **Tier de pago desde A1** (el gratuito pausa proyectos); región UE-Frankfurt | Neon |
+| DA-6 | Asistente con cita obligatoria + búsqueda semántica (ES); 150 €/mes, corte duro 100% | **REQUIERE RATIFICACIÓN DEL CLIENTE** | El importe es compromiso de gasto (H7); mecanismo de control aprobado | Recorte a solo-búsqueda |
+| DA-7 | **Sanity** (CMS) | APROBADA CON RESERVAS | Regla vinculante: **cero datos personales en el CMS**; workflow DA-4 según tier | Storyblok |
+| DA-8 | **Brevo** (email, consolidado con DA-2) | APROBADA | KPI de entregabilidad en A1 | Resend |
+| DA-9 | **Plausible** (UE, sin cookies) | APROBADA | Reevaluar GA4 solo si la inversión en Ads lo exige | GA4 con consentimiento |
+| DA-10 | **Voyage AI** `voyage-3-lite` (ratifica §38) | APROBADA CON RESERVAS | Permanencia condicionada a evaluación de recuperación sobre corpus ES (C1) | OpenAI / Cohere |
+
+> **Efecto sobre el lanzamiento:** ocho decisiones quedan cerradas por el comité; DA-6 (importe) queda a firma del cliente. Ninguna reserva altera arquitectura, ADRs ni la nomenclatura §38 → **el cierre no genera refactorización**. La actualización a estado definitivo de cada DA se producirá al recibir la ratificación del cliente.
 
 ### DA-1 · Perfil de stack — ✅ **CERRADA: Astro (definitiva)**
 - **Decisión (cerrada):** el stack **definitivo** del proyecto es **Astro + CMS headless + BFF serverless** (ver [ADR-001](#43-decisiones-de-arquitectura-adr)/[ADR-002](#43-decisiones-de-arquitectura-adr)). **WordPress queda descartado** como plataforma; no es una alternativa viva.

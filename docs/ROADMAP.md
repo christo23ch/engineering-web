@@ -4,6 +4,14 @@
 > **Propósito:** Hoja de ruta por fases (F0–F4), hitos, criterios de aceptación y dependencias.
 > **SSOT:** Ver `docs/PROJECT_BIBLE.md` §46 (roadmap oficial). Este documento derivará y trazará a esa sección; **no** la sustituye ni la altera.
 
+> **Progreso a 2026-07-13 (derivado de Bible §46, v1.1):**
+> - **F0 — Descubrimiento/Scaffolding:** ✅ **cerrada.** Scaffolding técnico completo; decisiones DA-2…DA-10 **ratificadas por el comité, pendientes de ratificación única del cliente** (§49); hipótesis H1–H11 **triadas** (ninguna validada, §44).
+> - **F1 — MVP:** 🔶 **capa de interfaz ✅ construida y auditada** (biblioteca UI *LIBRARY APPROVED* + todas las pantallas del §13 DESIGN_SYSTEM + Header/Footer + SEO → *FRONTEND APPROVED*, con contenido honesto: fuentes tipadas vacías, sin datos inventados). **Pendiente:** CMS, BFF (formularios→CRM, email, persistencia), base de datos y despliegue.
+> - **F2 — Contenido + IA:** ⏳ interfaz del asistente IA construida (sin backend); pendiente RAG, embeddings y contenido real.
+> - **F3 / F4:** ⏳ sin iniciar.
+>
+> Cualquier detalle prevalece según **Bible §46**.
+
 > ⚠️ **Revisión obligatoria antes de la Fase de Desarrollo.** El documento de trabajo
 > [`PRODUCT_DISCOVERY_REPORT.md`](./PRODUCT_DISCOVERY_REPORT.md) (validación comercial, no
 > normativo) **deberá revisarse antes del inicio de la Fase de Desarrollo (F1)**. Sus
