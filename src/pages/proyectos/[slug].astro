@@ -37,6 +37,11 @@ const appliedServices = caseStudy.services
 <BaseLayout
   title={`${caseStudy.title} — Casos de éxito`}
   description={caseStudy.summary}
+  breadcrumbs={[
+    { name: 'Inicio', href: '/' },
+    { name: 'Proyectos', href: '/proyectos' },
+    { name: caseStudy.title, href: `/proyectos/${caseStudy.slug}` },
+  ]}
 >
   <main>
     <!-- 1 · Hero interior con chips sector/servicio + cliente -->

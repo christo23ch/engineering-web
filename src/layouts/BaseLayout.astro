@@ -6,15 +6,42 @@ import '../styles/globals.css';
 import Header from '@/components/layout/Header.astro';
 import Footer from '@/components/layout/Footer.astro';
 import IaAssistant from '@/components/ia/IaAssistant.astro';
+import SocialMeta from '@/components/seo/SocialMeta.astro';
+import StructuredData from '@/components/seo/StructuredData.astro';
+import {
+  organizationSchema,
+  breadcrumbSchema,
+  faqSchema,
+  type BreadcrumbItem,
+  type Faq,
+} from '@/lib/seo/schema';
 
 interface Props {
   title: string;
   description?: string;
   /** IA assistant widget — global on public pages, off on legal (§13.11). */
   assistant?: boolean;
+  /** Open Graph type (RF-11); 'article' for content pages (recursos). */
+  ogType?: 'website' | 'article';
+  /** Breadcrumb trail (name + href), same data the page renders visibly —
+   * emits BreadcrumbList JSON-LD (§11.4). Omitted on level-1 pages (Home). */
+  breadcrumbs?: BreadcrumbItem[];
+  /** The page's own FAQ items, same data rendered in its accordion — emits
+   * FAQPage JSON-LD (§11.5, DS §326). Only pages with a REAL FAQ pass this. */
+  faqs?: Faq[];
+  /** Excludes the page from indexing (thank-you/search/error screens). */
+  noindex?: boolean;
 }
 
-const { title, description = '', assistant = true } = Astro.props;
+const {
+  title,
+  description = '',
+  assistant = true,
+  ogType = 'website',
+  breadcrumbs,
+  faqs,
+  noindex = false,
+} = Astro.props;
 
 // Canonical URL (nav/SEO): absolute, built from the configured `site`
 // (astro.config) so every page declares its canonical route. Falls back to the
@@ -28,6 +55,14 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url);
 // the site's zero-JS property. Skipped on /contacto itself (nothing to prefetch).
 const path = Astro.url.pathname.replace(/\/$/, '') || '/';
 const prefetchContact = path !== '/contacto';
+
+// Structured data (RF-11): Organization is global; BreadcrumbList/FAQPage only
+// when the page supplies its own real trail/questions (see Props above).
+const organization = organizationSchema(Astro.site ?? Astro.url);
+const breadcrumbList = breadcrumbs?.length
+  ? breadcrumbSchema(Astro.site ?? Astro.url, breadcrumbs)
+  : null;
+const faqList = faqs?.length ? faqSchema(faqs) : null;
 ---
 
 <!doctype html>
@@ -38,9 +73,19 @@ const prefetchContact = path !== '/contacto';
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
     {description && <meta name="description" content={description} />}
+    {noindex && <meta name="robots" content="noindex,follow" />}
     <link rel="canonical" href={canonical} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     {prefetchContact && <link rel="prefetch" href="/contacto" />}
+    <SocialMeta
+      title={title}
+      description={description}
+      url={canonical}
+      type={ogType}
+    />
+    <StructuredData data={organization} />
+    {breadcrumbList && <StructuredData data={breadcrumbList} />}
+    {faqList && <StructuredData data={faqList} />}
   </head>
   <body>
     <a

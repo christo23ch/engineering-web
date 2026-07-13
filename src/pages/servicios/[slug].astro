@@ -76,6 +76,12 @@ const faqs = [
 <BaseLayout
   title={`${service.name} — Ingeniería que rinde`}
   description={service.problem}
+  breadcrumbs={[
+    { name: 'Inicio', href: '/' },
+    { name: 'Servicios' },
+    { name: service.name, href: `/servicios/${service.slug}` },
+  ]}
+  faqs={faqs}
 >
   <main>
     <!-- 1 · Hero interior (§12): breadcrumbs + h1 + entradilla con el problema -->

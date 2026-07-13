@@ -1,0 +1,16 @@
+---
+/**
+ * StructuredData — renders one JSON-LD <script> block (RF-11). Takes an already
+ *-built schema.org object (see lib/seo/schema.ts); does not invent data.
+ * `<` is escaped so the serialized JSON can never prematurely close the
+ * surrounding <script> tag (defensive; matches the project's no-set:html-of-
+ * untrusted-input discipline even though the inputs here are trusted SSOT).
+ */
+interface Props {
+  data: Record<string, unknown>;
+}
+const { data } = Astro.props as Props;
+const json = JSON.stringify(data).replace(/</g, '\\u003c');
+---
+
+<script type="application/ld+json" set:html={json} is:inline />

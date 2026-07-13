@@ -33,7 +33,8 @@ describe('Header (layout/Header.astro)', () => {
   it('is zero-JS (native <details>, no client script)', async () => {
     const html = await renderAt('/');
     expect(html).toContain('<details');
-    expect(html).not.toContain('<script');
+    // JSON-LD (RF-11) is data, not executable script; only it is allowed.
+    expect(html).not.toMatch(/<script(?!\s+type="application\/ld\+json")/);
   });
 
   it('marks the active page with aria-current (section + sub-routes)', async () => {

@@ -33,6 +33,10 @@ const updatedLabel = new Date(page.updated).toLocaleDateString('es-ES', {
   title={`${page.title} — Ingeniería que rinde`}
   description={page.title}
   assistant={false}
+  breadcrumbs={[
+    { name: 'Inicio', href: '/' },
+    { name: page.title, href: `/legal/${page.slug}` },
+  ]}
 >
   <main>
     <section aria-labelledby="legal-title" class="bg-surface-subtle">

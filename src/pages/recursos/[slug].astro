@@ -33,7 +33,16 @@ const updatedLabel = new Date(article.updated).toLocaleDateString('es-ES', {
 });
 ---
 
-<BaseLayout title={`${article.title} — Recursos`} description={article.excerpt}>
+<BaseLayout
+  title={`${article.title} — Recursos`}
+  description={article.excerpt}
+  ogType="article"
+  breadcrumbs={[
+    { name: 'Inicio', href: '/' },
+    { name: 'Recursos', href: '/recursos' },
+    { name: article.title, href: `/recursos/${article.slug}` },
+  ]}
+>
   <main>
     <!-- Hero interior: breadcrumbs + categoría + h1 + entradilla + autor -->
     <section aria-labelledby="article-title" class="bg-surface-subtle">

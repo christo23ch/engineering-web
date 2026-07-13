@@ -12,7 +12,15 @@ export default defineConfig({
   // Host-agnostic base URL (hosting is DA-3, undecided). Override via SITE_URL.
   site: process.env.SITE_URL ?? 'https://example.com',
   output: 'static',
-  integrations: [react(), sitemap()],
+  integrations: [
+    react(),
+    sitemap({
+      // Keep the sitemap aligned with each page's own noindex meta (RF-11):
+      // exclude the search screen (no functional results yet, §13.10) and the
+      // post-submit success screen (not a landing page, §13.8).
+      filter: (page) => !/\/(buscar|contacto\/gracias)\/?$/.test(page),
+    }),
+  ],
   vite: {
     plugins: [tailwindcss()],
   },

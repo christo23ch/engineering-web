@@ -14,6 +14,11 @@ import Icon from '@/components/ui/Icon.astro';
 <BaseLayout
   title="Buscar — Ingeniería que rinde"
   description="Busca servicios, proyectos y recursos."
+  breadcrumbs={[
+    { name: 'Inicio', href: '/' },
+    { name: 'Buscar', href: '/buscar' },
+  ]}
+  noindex
 >
   <main>
     <section aria-labelledby="search-title" class="bg-surface-subtle">

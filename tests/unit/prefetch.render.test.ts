@@ -29,6 +29,7 @@ describe('Prefetch hint (BaseLayout)', () => {
 
   it('is a plain <link> hint, not client-side JS', async () => {
     const html = await render(Home);
-    expect(html).not.toContain('<script');
+    // JSON-LD (RF-11) is data, not executable script; only it is allowed.
+    expect(html).not.toMatch(/<script(?!\s+type="application\/ld\+json")/);
   });
 });

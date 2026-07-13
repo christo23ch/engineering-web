@@ -23,7 +23,8 @@ describe('IA assistant (ia/IaAssistant.astro)', () => {
     expect(html).toContain('próximamente');
     // No chat input / form is wired yet.
     expect(html).not.toContain('<form');
-    expect(html).not.toContain('<script');
+    // JSON-LD (RF-11) is data, not executable script; only it is allowed.
+    expect(html).not.toMatch(/<script(?!\s+type="application\/ld\+json")/);
   });
 
   it('is omitted on legal pages (§13.11)', async () => {

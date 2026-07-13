@@ -1,0 +1,29 @@
+---
+/**
+ * SocialMeta — Open Graph + Twitter Card metadata. Reuses the page's own
+ * title/description/canonical (already-approved SSOT copy); nothing invented.
+ *
+ * No og:image / twitter:image: no real image asset exists yet (hero visuals
+ * are decorative placeholders, H10 brand manual pending) — claiming a rich
+ * image card would be fabricated content, so twitter:card is "summary" (valid
+ * without an image) rather than "summary_large_image".
+ */
+interface Props {
+  title: string;
+  description: string;
+  url: string | URL;
+  type?: 'website' | 'article';
+}
+const { title, description, url, type = 'website' } = Astro.props;
+const siteName = 'Ingeniería que rinde';
+---
+
+<meta property="og:type" content={type} />
+<meta property="og:site_name" content={siteName} />
+<meta property="og:title" content={title} />
+{description && <meta property="og:description" content={description} />}
+<meta property="og:url" content={String(url)} />
+<meta property="og:locale" content="es_ES" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content={title} />
+{description && <meta name="twitter:description" content={description} />}

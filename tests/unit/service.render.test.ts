@@ -42,7 +42,8 @@ describe('Service page ([slug].astro)', () => {
     // Scope to <main>: the global IA assistant widget is also a <details>.
     const main = html.match(/<main[\s\S]*<\/main>/)?.[0] ?? '';
     expect((main.match(/<\/details>/g) ?? []).length).toBe(3);
-    expect(html).not.toContain('<script'); // no client JS on the page
+    // JSON-LD (RF-11) is data, not executable script; only it is allowed.
+    expect(html).not.toMatch(/<script(?!\s+type="application\/ld\+json")/);
   });
 
   it('closes with a service-specific dark CTA band (inverted button)', async () => {
