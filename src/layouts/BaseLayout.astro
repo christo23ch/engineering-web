@@ -20,6 +20,14 @@ const { title, description = '', assistant = true } = Astro.props;
 // (astro.config) so every page declares its canonical route. Falls back to the
 // request origin when `site` is unset (e.g. the test container).
 const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url);
+
+// Prefetch hint (performance, Hardening 3): P3 guarantees a single primary CTA
+// per view, and it routes to /contacto on nearly every screen — the most likely
+// next navigation. A static <link rel="prefetch"> is a browser-native hint (no
+// JavaScript, unlike Astro's client-side prefetch integration), so it preserves
+// the site's zero-JS property. Skipped on /contacto itself (nothing to prefetch).
+const path = Astro.url.pathname.replace(/\/$/, '') || '/';
+const prefetchContact = path !== '/contacto';
 ---
 
 <!doctype html>
@@ -32,6 +40,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url);
     {description && <meta name="description" content={description} />}
     <link rel="canonical" href={canonical} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    {prefetchContact && <link rel="prefetch" href="/contacto" />}
   </head>
   <body>
     <a
