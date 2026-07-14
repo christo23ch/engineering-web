@@ -21,10 +21,11 @@ This is a **professional engineering firm website** (Jamstack: Astro 7 + React i
 - ✅ **All §13 screens + global chrome + SEO layer built (FRONTEND APPROVED)** — 14 route files (Home, service template ×6, portfolio index + case detail template, sobre-nosotros, recursos index + article detail, empleo, contacto + gracias, legal template ×3, buscar, 404, 500), Header + Footer, IA assistant widget UI, JSON-LD/OG/Twitter/canonical/robots/sitemap. Lighthouse perf/a11y/best-practices 100.
 - ✅ **Governance closed (Phase 0)** — DA-2…DA-10 ratified by committee (pending client), H1-H11 triaged.
 - ✅ **Backend/BFF built and tested (2026-07-14)** — `src/server/` kernel (§38 config contract, structured logging with PII redaction, AppError taxonomy), PostgreSQL layer (migrations + repositories, Supabase-pooler-ready, DA-5), Spanish zod validation on the approved form field names, durable Postgres rate limiting (§17), **transactional outbox + retry worker (ADR-010)**, **Brevo** CRM/email integration (DA-2/DA-8), **Sanity** read layer with honest local fallback (DA-7), endpoints `/api/leads` · `/api/candidatures` · `/api/health` · `/api/internal/outbox/process` (Bearer + Vercel cron, DA-3). Pages stay 100 % SSG (Node adapter; only `/api/*` is on-demand). Operational as soon as vendor credentials exist.
+- ✅ **Sanity CMS integration complete (2026-07-14)** — Studio as its own workspace (`cms/`: schemas for the six §28 entities with honesty-encoding validation, DA-4 two-level workflow with publish gated on approval + review queue + badges, role model incl. custom `redactor`, "Open preview" route resolution), §13 templates wired to the CMS loaders (byte-identical build without CMS — honest fallback), signed publish webhook → deploy hook → SSG rebuild (ADR-001; ISR documented as a DA-3 optimization, not architecture), drafts perspective ready for F2 preview. Runbook: `docs/CMS.md`. Awaits only a real Sanity project (client ratification of DA-7).
 - 🔶 **Content honesty:** templates are faithful but content sources (`cases.ts`, `articles.ts`) are intentionally EMPTY — no fabricated metrics/clients/testimonials/certifications. Real content lands in F2.
 - ⏳ **Pending:** vendor sign-ups/credentials (client ratification of §49), wiring the approved zero-JS forms to `/api` (success-screen navigation), analytics/CMP, IA/RAG logic + pgvector (F2, gated on DA-6), real content, deployment.
 
-**Validation battery (all green):** `npm run typecheck` · `lint` · `format:check` · `test` (242 unit + integration tests, incl. real-SQL PGlite suites) · `build` · `npm audit --omit=dev` (0 vulns) · `test:e2e` (9 Playwright specs / 50 tests, incl. API smoke).
+**Validation battery (all green):** `npm run typecheck` · `lint` · `format:check` · `test` (264 unit + integration tests, incl. real-SQL PGlite suites + CMS contract tests) · `build` · `npm audit --omit=dev` (0 vulns) · `test:e2e` (9 Playwright specs / 51 tests, incl. API smoke). Studio workspace: `cms/` `typecheck` + `schema:check:local` green.
 
 **Immediate Next Step:** wire the approved forms → `/api` endpoints + staging deploy, once the client ratifies §49 and vendor credentials exist (esp. DA-6 IA budget + DA-3 hosting/domain via H11). Backend code is ready and waiting on configuration only.
 
@@ -154,9 +155,14 @@ Governance triage (operational only — does not mark any hypothesis as true):
 
 ```
 engineering-web/
+├── cms/                           Sanity Studio workspace ✅ (DA-7; own deps)
+│   ├── schemas/                   6 §28 documents + objects (root-testable)
+│   ├── workflow/ · desk/          DA-4 actions/badges · review queue
+│   └── sanity.config.ts · preview.ts · README.md
 ├── docs/
 │   ├── PROJECT_BIBLE.md           (v1.1.0, SSOT) ✅
 │   ├── DESIGN_SYSTEM.md           (v1.0.0) ✅
+│   ├── CMS.md                     Sanity runbook (setup/roles/webhooks/ISR) ✅
 │   ├── ROADMAP.md                 (derived, defers to Bible §46)
 │   ├── PRODUCT_DISCOVERY_REPORT.md (non-normative, review before F1)
 │   ├── {ARCHITECTURE,DATABASE,API,UI_UX,IMPLEMENTATION_PLAN,
@@ -243,7 +249,7 @@ engineering-web/
 - ✅ SEO fundamentals (sitemap, robots, canonical, JSON-LD/OG/Twitter via Schema.org)
 - ✅ BFF endpoints (validation, durable rate limiting, honeypot, GDPR consent) + PostgreSQL persistence + transactional outbox/retry (ADR-008/010)
 - ✅ Brevo CRM + transactional email delivery (DA-2/DA-8, via outbox)
-- 🔶 Headless CMS: Sanity read layer + GROQ contract built (DA-7) — needs a real Sanity project + content, then wiring `getStaticPaths` to the loaders
+- ✅ Headless CMS: full Sanity integration (DA-7) — Studio workspace (`cms/`, DA-4 workflow, roles, preview), templates wired to loaders (honest fallback), publish webhook → rebuild (ADR-001). Needs only a real Sanity project + content (`docs/CMS.md`)
 - ⏳ Wire the approved zero-JS forms to `/api` (action + success screen)
 - ⏳ Deploy to staging environment (Vercel per DA-3: swap adapter one line; cron in vercel.json; run `npm run db:migrate`)
 
@@ -388,8 +394,9 @@ The CODE for all of these now exists (`src/server/`); what remains blocked is
 **configuration** (vendor sign-ups + §38 credentials, on client ratification
 of §49) — except the last two, which are still unbuilt:
 
-- **CMS integration** (DA-7) — ✅ read layer + GROQ contract built; awaits a
-  Sanity project + CMS_API_URL/TOKEN, then wire `getStaticPaths` to loaders
+- **CMS integration** (DA-7) — ✅ COMPLETE: Studio (`cms/`), DA-4 workflow,
+  templates wired to loaders, publish webhook → rebuild; awaits only a real
+  Sanity project + §38 credentials (runbook: `docs/CMS.md`)
 - **PostgreSQL schema** (DA-5) — ✅ migrations + repositories built; awaits a
   Supabase project + DATABASE_URL (`npm run db:migrate`); pgvector is F2
 - **CRM delivery** (DA-2) — ✅ Brevo upsert via outbox built; awaits CRM_API_KEY

@@ -10,6 +10,47 @@ never overrides it.
 
 ## [Unreleased]
 
+### CMS — Sanity integration complete (2026-07-14)
+
+#### Added
+- **Sanity Studio workspace** (`cms/`, DA-7 — self-contained deps): schemas
+  for the six §28 entities (service, sector, caseStudy, article, teamMember,
+  certification) + composition objects, honesty encoded as validation (§13.4
+  metric budget 1–4, optional client for anonymised cases, mandatory image
+  alt text per WCAG §20, icons restricted to the §7 registry, H6 warning on
+  certifications). Schemas use local typed identity helpers so the ROOT test
+  suite verifies them without the Studio installed (20 contract tests:
+  schema ⇄ GROQ ⇄ zod); the workspace additionally typechecks them against
+  real sanity v4 types and compiles them with @sanity/schema
+  (`schema:check:local`).
+- **DA-4 editorial workflow**: read-only `estadoEditorial`
+  (borrador → en_revision → aprobado) driven by document actions; Sanity's
+  Publish disabled until aprobado; state badges; live "Pendientes de
+  revisión" desk queue. Role model: administrator/editor review+publish,
+  custom `redactor` authors without Publish (Growth-plan reservation
+  documented).
+- **Preview**: "Open preview" resolves the §24 public route against
+  `SANITY_STUDIO_PREVIEW_URL`; drafts perspective supported by the BFF
+  client for the F2 protected preview deployment.
+- **Publish webhook → rebuild (ADR-001 revalidation)**:
+  `POST /api/internal/cms/webhook` verifies Sanity's HMAC signature
+  (constant-time, ±5 min replay window) and POSTs the DA-3
+  `DEPLOY_HOOK_URL`; 502 on hook failure hands retries back to Sanity. ISR
+  documented as a provider-dependent optimization in docs/CMS.md — never a
+  replacement for the rebuild.
+- **Templates wired to CMS loaders** (frontmatter-only): servicios/[slug],
+  index, contacto, proyectos/[slug], recursos/[slug] now load through
+  loadServices/loadCases/loadArticles with the honest local fallback —
+  byte-identical build without CMS. CASES_QUERY dereferences
+  sector/services references (controlled vocabulary for the F2 filter bar).
+- **docs/CMS.md**: full runbook — project setup, schemas, workflow, roles,
+  preview, webhooks, revalidation/ISR, testing map, §38 variables.
+- Bible §38 gained `CMS_WEBHOOK_SECRET` and `DEPLOY_HOOK_URL` (SSOT-first).
+
+#### Fixed
+- Outbox integration suite: injected clock re-anchored relative to the
+  future (fixed calendar anchor failed once the wall clock passed it).
+
 ### Backend / BFF — built and tested (2026-07-14)
 
 #### Added

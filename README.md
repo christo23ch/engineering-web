@@ -88,7 +88,7 @@ npm run preview
 - ✅ All §13 screens + Header/Footer + SEO layer — **FRONTEND APPROVED**
 - ✅ BFF (forms validation, rate limiting, persistence, outbox→CRM/email retry — ADR-008/010)
 - ✅ Brevo CRM + transactional email delivery (DA-2/DA-8)
-- 🔶 Headless CMS (Sanity, DA-7): read layer + GROQ contract built; awaits a real project + content
+- ✅ Headless CMS (Sanity, DA-7): Studio workspace (`cms/`, DA-4 workflow + roles + preview), templates wired to loaders (honest fallback), publish webhook → rebuild (ADR-001). Awaits a real project + content — runbook in [docs/CMS.md](./docs/CMS.md)
 - ⏳ Wire approved forms → `/api`; staging deploy (Vercel per DA-3 + `npm run db:migrate`); pgvector is F2
 
 **Phase 2: Content & IA** (2 months)
@@ -648,6 +648,6 @@ Proprietary. All rights reserved. Contact repo owner for licensing inquiries.
 
 **Last Updated:** 2026-07-14  
 **Phase:** 0 closed · interface layer complete (FRONTEND APPROVED)  
-**Status:** 🟢 Frontend built & audited · backend/BFF built & tested · credentials/wiring/deploy + IA (F2) pending client ratification of Bible §49  
+**Status:** 🟢 Frontend built & audited · backend/BFF built & tested · Sanity CMS integration complete · credentials/form-wiring/deploy + IA (F2) pending client ratification of Bible §49  
 
 For full project context, see **[CLAUDE.md](./CLAUDE.md)**, **[CHANGELOG.md](./CHANGELOG.md)** and **[docs/PROJECT_BIBLE.md](./docs/PROJECT_BIBLE.md)**.
