@@ -23,6 +23,8 @@ test('GET /api/health reports degraded capabilities without values', async ({
     crm: 'unconfigured',
     email: 'unconfigured',
     cms: 'unconfigured',
+    ai: 'unconfigured',
+    embeddings: 'unconfigured',
   });
 });
 
@@ -89,4 +91,28 @@ test('cms publish webhook is closed without its secret (ADR-001)', async ({
   expect(response.status()).toBe(503);
   const body = (await response.json()) as { error: { code: string } };
   expect(body.error.code).toBe('not_configured');
+});
+
+test('IA assistant degrades to an honest fallback when unconfigured (§16)', async ({
+  request,
+}) => {
+  const response = await request.post('/api/ia/consulta', {
+    data: { pregunta: '¿Qué servicios de ingeniería ofrecéis?' },
+  });
+  // No AI/embeddings keys here → 200 with an honest fallback, never a
+  // fabricated answer and never a 5xx (the widget stays usable).
+  expect(response.status()).toBe(200);
+  const body = (await response.json()) as {
+    data: { outcome: string; respuesta: string; enlaces: { url: string }[] };
+  };
+  expect(body.data.outcome).toBe('fallback');
+  expect(body.data.respuesta).toContain('formulario de contacto');
+  // The fallback points the user to search + contact (zero fabrication).
+  expect(body.data.enlaces.map((e) => e.url)).toContain('/contacto');
+});
+
+test('IA assistant rejects non-POST with 405', async ({ request }) => {
+  const response = await request.get('/api/ia/consulta');
+  expect(response.status()).toBe(405);
+  expect(response.headers()['allow']).toBe('POST');
 });
