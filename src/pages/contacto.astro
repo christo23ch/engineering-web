@@ -18,7 +18,13 @@ import Textarea from '@/components/ui/Textarea.astro';
 import Checkbox from '@/components/ui/Checkbox.astro';
 import Button from '@/components/ui/Button.astro';
 import Icon from '@/components/ui/Icon.astro';
-import { services } from '@/lib/content/services';
+import {
+  cmsDepsFromEnv,
+  loadServices,
+} from '@/server/integrations/sanity/content';
+
+// CMS-wired (DA-7) with honest local fallback — identical build without CMS.
+const services = await loadServices(cmsDepsFromEnv());
 ---
 
 <BaseLayout

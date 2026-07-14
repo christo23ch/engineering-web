@@ -15,7 +15,7 @@ import { articles, type Article } from '@/lib/content/articles';
 import { cases, type CaseStudy } from '@/lib/content/cases';
 import { services, type Service } from '@/lib/content/services';
 import { icons, type IconName } from '@/lib/ui/icons';
-import type { CmsConfig } from '@/server/config';
+import { loadServerConfig, type CmsConfig } from '@/server/config';
 import { IntegrationError } from '@/server/http/errors';
 import { createSanityClient } from '@/server/integrations/sanity/client';
 import {
@@ -121,6 +121,16 @@ function compact<T extends Record<string, unknown>>(row: T): T {
 export interface CmsDeps {
   cms?: CmsConfig;
   fetchImpl?: typeof fetch;
+}
+
+/**
+ * Build-time deps from the §38 environment. The SSG pages call the loaders
+ * with this: without CMS_API_URL the site builds exactly as before (local
+ * sources); with it, content flows from Sanity — no template change either
+ * way.
+ */
+export function cmsDepsFromEnv(): CmsDeps {
+  return { cms: loadServerConfig().cms };
 }
 
 export async function loadServices(deps: CmsDeps = {}): Promise<Service[]> {

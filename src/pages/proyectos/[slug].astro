@@ -18,19 +18,34 @@ import Badge from '@/components/ui/Badge.astro';
 import Button from '@/components/ui/Button.astro';
 import Card from '@/components/ui/Card.astro';
 import Icon from '@/components/ui/Icon.astro';
-import { cases, relatedCases } from '@/lib/content/cases';
-import { getService } from '@/lib/content/services';
+import { relatedCases } from '@/lib/content/cases';
+import { services as localServices } from '@/lib/content/services';
+import {
+  cmsDepsFromEnv,
+  loadCases,
+  loadServices,
+} from '@/server/integrations/sanity/content';
 
-export const getStaticPaths = (() =>
-  cases.map((caseStudy) => ({
+// CMS-wired (DA-7): routes and the related/service pools come from Sanity
+// when configured; the honest local fallback (EMPTY cases) keeps zero pages
+// otherwise — identical to before. Template unchanged.
+export const getStaticPaths = (async () => {
+  const deps = cmsDepsFromEnv();
+  const [allCases, allServices] = await Promise.all([
+    loadCases(deps),
+    loadServices(deps),
+  ]);
+  return allCases.map((caseStudy) => ({
     params: { slug: caseStudy.slug },
-    props: { caseStudy },
-  }))) satisfies GetStaticPaths;
+    props: { caseStudy, pool: allCases, allServices },
+  }));
+}) satisfies GetStaticPaths;
 
-const { caseStudy } = Astro.props;
-const related = relatedCases(caseStudy);
+// Defaults keep the template fixture-testable with a lone `caseStudy` prop.
+const { caseStudy, pool = [], allServices = localServices } = Astro.props;
+const related = relatedCases(caseStudy, 3, pool);
 const appliedServices = caseStudy.services
-  .map((slug) => getService(slug))
+  .map((slug) => allServices.find((service) => service.slug === slug))
   .filter((service) => service !== undefined);
 ---
 

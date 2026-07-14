@@ -57,9 +57,16 @@ export function getCase(slug: string): CaseStudy | undefined {
   return cases.find((c) => c.slug === slug);
 }
 
-/** Related cases share the sector and exclude the current one (§13.4 item 6). */
-export function relatedCases(current: CaseStudy, limit = 3): CaseStudy[] {
-  return cases
+/**
+ * Related cases share the sector and exclude the current one (§13.4 item 6).
+ * `pool` defaults to the local source; CMS-wired pages pass the loaded list.
+ */
+export function relatedCases(
+  current: CaseStudy,
+  limit = 3,
+  pool: CaseStudy[] = cases,
+): CaseStudy[] {
+  return pool
     .filter((c) => c.slug !== current.slug && c.sector === current.sector)
     .slice(0, limit);
 }

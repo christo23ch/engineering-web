@@ -16,16 +16,26 @@ import Badge from '@/components/ui/Badge.astro';
 import Card from '@/components/ui/Card.astro';
 import Icon from '@/components/ui/Icon.astro';
 import LeadMagnet from '@/components/content/LeadMagnet.astro';
-import { articles, relatedArticles, sectionId } from '@/lib/content/articles';
+import { relatedArticles, sectionId } from '@/lib/content/articles';
+import {
+  cmsDepsFromEnv,
+  loadArticles,
+} from '@/server/integrations/sanity/content';
 
-export const getStaticPaths = (() =>
-  articles.map((article) => ({
+// CMS-wired (DA-7): article routes come from Sanity when configured; the
+// honest local fallback (EMPTY articles) keeps zero pages otherwise —
+// identical to before. Template unchanged.
+export const getStaticPaths = (async () => {
+  const allArticles = await loadArticles(cmsDepsFromEnv());
+  return allArticles.map((article) => ({
     params: { slug: article.slug },
-    props: { article },
-  }))) satisfies GetStaticPaths;
+    props: { article, pool: allArticles },
+  }));
+}) satisfies GetStaticPaths;
 
-const { article } = Astro.props;
-const related = relatedArticles(article);
+// Default keeps the template fixture-testable with a lone `article` prop.
+const { article, pool = [] } = Astro.props;
+const related = relatedArticles(article, 3, pool);
 const updatedLabel = new Date(article.updated).toLocaleDateString('es-ES', {
   day: 'numeric',
   month: 'long',

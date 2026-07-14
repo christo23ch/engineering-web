@@ -19,7 +19,13 @@ import BaseLayout from '@/layouts/BaseLayout.astro';
 import Button from '@/components/ui/Button.astro';
 import Card from '@/components/ui/Card.astro';
 import Icon from '@/components/ui/Icon.astro';
-import { services } from '@/lib/content/services';
+import {
+  cmsDepsFromEnv,
+  loadServices,
+} from '@/server/integrations/sanity/content';
+
+// CMS-wired (DA-7) with honest local fallback — identical build without CMS.
+const services = await loadServices(cmsDepsFromEnv());
 
 // Differentiator pillars — drawn from Bible §1/§3 (data over adjectives,
 // measurable results, applicable regulation). No fabricated figures.

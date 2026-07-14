@@ -32,9 +32,16 @@ export function getArticle(slug: string): Article | undefined {
   return articles.find((article) => article.slug === slug);
 }
 
-/** Related articles share the category and exclude the current one (§13.6). */
-export function relatedArticles(current: Article, limit = 3): Article[] {
-  return articles
+/**
+ * Related articles share the category and exclude the current one (§13.6).
+ * `pool` defaults to the local source; CMS-wired pages pass the loaded list.
+ */
+export function relatedArticles(
+  current: Article,
+  limit = 3,
+  pool: Article[] = articles,
+): Article[] {
+  return pool
     .filter((a) => a.slug !== current.slug && a.category === current.category)
     .slice(0, limit);
 }

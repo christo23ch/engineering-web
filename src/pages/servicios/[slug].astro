@@ -20,10 +20,16 @@ import BaseLayout from '@/layouts/BaseLayout.astro';
 import Button from '@/components/ui/Button.astro';
 import Card from '@/components/ui/Card.astro';
 import Icon from '@/components/ui/Icon.astro';
-import { services } from '@/lib/content/services';
+import {
+  cmsDepsFromEnv,
+  loadServices,
+} from '@/server/integrations/sanity/content';
 
-export const getStaticPaths = (() =>
-  services.map((service) => ({
+// CMS-wired (DA-7): with CMS_API_URL the routes come from Sanity; without
+// it, the loader falls back to the same local source as before (identical
+// build). The template below is unchanged either way.
+export const getStaticPaths = (async () =>
+  (await loadServices(cmsDepsFromEnv())).map((service) => ({
     params: { slug: service.slug },
     props: { service },
   }))) satisfies GetStaticPaths;

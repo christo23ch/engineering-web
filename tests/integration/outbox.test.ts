@@ -15,7 +15,10 @@ import { createLogger } from '@/server/logging/logger';
 
 let harness: TestDb;
 const silentLog = createLogger({ write: () => undefined });
-const T0 = new Date('2026-07-14T12:00:00Z');
+// Anchored one hour in the FUTURE: rows are enqueued with the database's
+// real now() default, so the injected clock must sit after it — a fixed
+// calendar date here becomes a time bomb the moment the wall clock passes it.
+const T0 = new Date(Date.now() + 3600_000);
 const at = (offsetSeconds: number) => () =>
   new Date(T0.getTime() + offsetSeconds * 1000);
 const noJitter = { random: () => 0.5 };
