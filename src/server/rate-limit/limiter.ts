@@ -97,17 +97,25 @@ export async function enforceRateLimit(
 }
 
 /**
- * Resolve the client IP for the bucket key: platform-provided address first
- * (Astro `clientAddress`), then the left-most X-Forwarded-For hop. Returns a
- * pseudonymized bucket fragment, never the raw IP.
+ * Resolve the client IP: platform-provided address first (Astro
+ * `clientAddress`), then the left-most X-Forwarded-For hop. Consumers must
+ * pseudonymize before storing (`hashIp`) — the raw value is for in-request
+ * use only.
  */
+export function resolveClientIp(
+  request: Request,
+  clientAddress?: string,
+): string | undefined {
+  const forwarded = request.headers.get('x-forwarded-for');
+  return clientAddress?.trim() || forwarded?.split(',')[0]?.trim() || undefined;
+}
+
+/** Rate-limit bucket key: scope + pseudonymized client, never the raw IP. */
 export function clientBucket(
   scope: string,
   request: Request,
   clientAddress?: string,
 ): string {
-  const forwarded = request.headers.get('x-forwarded-for');
-  const ip =
-    clientAddress?.trim() || forwarded?.split(',')[0]?.trim() || 'unknown';
+  const ip = resolveClientIp(request, clientAddress) ?? 'unknown';
   return `${scope}:${hashIp(ip)}`;
 }

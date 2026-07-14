@@ -1,4 +1,5 @@
 import { defineConfig } from 'astro/config';
+import node from '@astrojs/node';
 import react from '@astrojs/react';
 import sitemap from '@astrojs/sitemap';
 import tailwindcss from '@tailwindcss/vite';
@@ -8,10 +9,18 @@ import tailwindcss from '@tailwindcss/vite';
 // not configured here — the base is static generation.
 // Tailwind v4 (ADR-011): CSS-first via the Vite plugin; design tokens live in
 // src/styles/globals.css (`@theme`).
+//
+// BFF (Bible §13): output stays 'static' — every page is prerendered exactly
+// as before; only src/pages/api/* opts out (prerender = false) to run
+// on-demand. The Node adapter keeps the BFF host-agnostic and testable in
+// CI/e2e; on Vercel (DA-3, ratified pending client) swap it for
+// @astrojs/vercel — a one-line change, plus vercel.json's cron for the
+// outbox worker (ADR-010).
 export default defineConfig({
   // Host-agnostic base URL (hosting is DA-3, undecided). Override via SITE_URL.
   site: process.env.SITE_URL ?? 'https://example.com',
   output: 'static',
+  adapter: node({ mode: 'standalone' }),
   integrations: [
     react(),
     sitemap({
