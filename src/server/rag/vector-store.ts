@@ -37,8 +37,17 @@ export interface SearchOptions {
   indexVersion: string;
 }
 
+/** Stable per-chunk identity: `${sourceType}:${sourceSlug}:${chunkIndex}`. */
+export function chunkKey(
+  sourceType: string,
+  sourceSlug: string,
+  chunkIndex: number,
+): string {
+  return `${sourceType}:${sourceSlug}:${String(chunkIndex)}`;
+}
+
 export interface VectorStore {
-  /** Replace all rows for an index version's sources, transactionally. */
+  /** Upsert rows (idempotent on source+chunk+version), transactionally. */
   upsertBatch(records: EmbeddingRecord[]): Promise<void>;
   /** Cosine-nearest chunks to the query embedding. */
   search(
@@ -47,6 +56,10 @@ export interface VectorStore {
   ): Promise<RetrievedChunk[]>;
   /** Row count for an index version (indexing/observability). */
   count(indexVersion: string): Promise<number>;
+  /** chunkKey → contentHash for an index version (re-index skip decision). */
+  existingHashes(indexVersion: string): Promise<Map<string, string>>;
+  /** Delete rows of this version whose chunkKey is not in `validKeys`. */
+  prune(indexVersion: string, validKeys: Set<string>): Promise<number>;
 }
 
 function assertDimensions(embedding: number[]): void {
@@ -142,6 +155,50 @@ export class PgVectorStore implements VectorStore {
     );
     return Number(rows[0]?.n ?? 0);
   }
+
+  async existingHashes(indexVersion: string): Promise<Map<string, string>> {
+    const rows = await this.db.query<{
+      source_type: string;
+      source_slug: string;
+      chunk_index: number;
+      content_hash: string;
+    }>(
+      `select source_type, source_slug, chunk_index, content_hash
+       from embeddings where index_version = $1`,
+      [indexVersion],
+    );
+    return new Map(
+      rows.map((row) => [
+        chunkKey(row.source_type, row.source_slug, row.chunk_index),
+        row.content_hash,
+      ]),
+    );
+  }
+
+  async prune(indexVersion: string, validKeys: Set<string>): Promise<number> {
+    const rows = await this.db.query<{
+      id: string;
+      source_type: string;
+      source_slug: string;
+      chunk_index: number;
+    }>(
+      `select id, source_type, source_slug, chunk_index
+       from embeddings where index_version = $1`,
+      [indexVersion],
+    );
+    const staleIds = rows
+      .filter(
+        (row) =>
+          !validKeys.has(
+            chunkKey(row.source_type, row.source_slug, row.chunk_index),
+          ),
+      )
+      .map((row) => row.id);
+    for (const id of staleIds) {
+      await this.db.query('delete from embeddings where id = $1', [id]);
+    }
+    return staleIds.length;
+  }
 }
 
 /** Cosine similarity for the in-memory store + score assertions in tests. */
@@ -205,5 +262,28 @@ export class InMemoryVectorStore implements VectorStore {
     return Promise.resolve(
       this.rows.filter((row) => row.indexVersion === indexVersion).length,
     );
+  }
+
+  existingHashes(indexVersion: string): Promise<Map<string, string>> {
+    return Promise.resolve(
+      new Map(
+        this.rows
+          .filter((row) => row.indexVersion === indexVersion)
+          .map((row) => [
+            chunkKey(row.sourceType, row.sourceSlug, row.chunkIndex),
+            row.contentHash,
+          ]),
+      ),
+    );
+  }
+
+  prune(indexVersion: string, validKeys: Set<string>): Promise<number> {
+    const before = this.rows.length;
+    this.rows = this.rows.filter(
+      (row) =>
+        row.indexVersion !== indexVersion ||
+        validKeys.has(chunkKey(row.sourceType, row.sourceSlug, row.chunkIndex)),
+    );
+    return Promise.resolve(before - this.rows.length);
   }
 }

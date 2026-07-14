@@ -27,7 +27,8 @@
     "audit:a11y": "playwright test tests/e2e/a11y.spec.ts",
     "audit:lighthouse": "npx --yes @lhci/cli autorun",
     "prepare": "husky",
-    "db:migrate": "tsx scripts/migrate.ts"
+    "db:migrate": "tsx scripts/migrate.ts",
+    "rag:index": "tsx scripts/rag-index.ts"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx,astro,mjs}": [
