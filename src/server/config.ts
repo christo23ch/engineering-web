@@ -49,6 +49,8 @@ const envSchema = z.object({
   RATE_LIMIT_WINDOW: optionalPositiveInt,
   RATE_LIMIT_MAX: optionalPositiveInt,
   OUTBOX_WORKER_SECRET: optionalString,
+  CMS_WEBHOOK_SECRET: optionalString,
+  DEPLOY_HOOK_URL: optionalUrl,
 });
 
 export type Capability = 'database' | 'crm' | 'email' | 'cms';
@@ -91,6 +93,10 @@ export interface ServerConfig {
   cms?: CmsConfig;
   rateLimit: RateLimitConfig;
   outboxWorkerSecret?: string;
+  /** HMAC secret for Sanity publish webhooks (ADR-001 rebuild flow). */
+  cmsWebhookSecret?: string;
+  /** DA-3 hosting deploy hook POSTed on verified publish webhooks. */
+  deployHookUrl?: string;
 }
 
 /** Anti-abuse defaults (Bible §17): 5 submissions per client per hour. */
@@ -149,6 +155,8 @@ export function loadServerConfig(
         : RATE_LIMIT_DEFAULTS.max,
     },
     outboxWorkerSecret: raw.OUTBOX_WORKER_SECRET,
+    cmsWebhookSecret: raw.CMS_WEBHOOK_SECRET,
+    deployHookUrl: raw.DEPLOY_HOOK_URL,
   };
 }
 

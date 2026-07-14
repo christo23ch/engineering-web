@@ -18,11 +18,22 @@ export interface SanityClient {
 
 const DEFAULT_TIMEOUT_MS = 15_000;
 
+export interface SanityClientOptions {
+  timeoutMs?: number;
+  /**
+   * Content perspective: 'published' (default — only DA-4-approved,
+   * published documents) or 'drafts' (unpublished content for the protected
+   * preview deployment, F2). Requires CMS_API_TOKEN when set to 'drafts'.
+   */
+  perspective?: 'published' | 'drafts';
+}
+
 export function createSanityClient(
   config: CmsConfig,
   fetchImpl: typeof fetch = fetch,
-  timeoutMs: number = DEFAULT_TIMEOUT_MS,
+  options: SanityClientOptions = {},
 ): SanityClient {
+  const timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
   return {
     async fetch<T>(
       query: string,
@@ -30,6 +41,9 @@ export function createSanityClient(
     ): Promise<T> {
       const url = new URL(config.apiUrl);
       url.searchParams.set('query', query);
+      if (options.perspective) {
+        url.searchParams.set('perspective', options.perspective);
+      }
       for (const [key, value] of Object.entries(params)) {
         // Sanity expects GROQ params as `$name` = JSON-encoded value.
         url.searchParams.set(`$${key}`, JSON.stringify(value));

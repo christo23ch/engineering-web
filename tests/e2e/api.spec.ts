@@ -77,3 +77,16 @@ test('outbox worker endpoint is closed without its secret', async ({
   const body = (await response.json()) as { error: { code: string } };
   expect(body.error.code).toBe('not_configured');
 });
+
+test('cms publish webhook is closed without its secret (ADR-001)', async ({
+  request,
+}) => {
+  const response = await request.post('/api/internal/cms/webhook', {
+    headers: { 'content-type': 'application/json' },
+    data: { _type: 'article' },
+  });
+  // No CMS_WEBHOOK_SECRET in this environment → explicit 503, never a build.
+  expect(response.status()).toBe(503);
+  const body = (await response.json()) as { error: { code: string } };
+  expect(body.error.code).toBe('not_configured');
+});
