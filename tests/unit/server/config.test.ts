@@ -88,7 +88,62 @@ describe('server config — §38 contract', () => {
       crm: 'unconfigured',
       email: 'unconfigured',
       cms: 'unconfigured',
+      ai: 'unconfigured',
+      embeddings: 'unconfigured',
     });
     expect(JSON.stringify(states)).not.toContain('secret');
+  });
+});
+
+describe('AI + embeddings capabilities (ADR-005/DA-10) + DA-6 budget gate', () => {
+  it('parses the AI capability with model + budget defaults', () => {
+    const config = loadServerConfig({
+      AI_PROVIDER_API_KEY: 'sk-ant-xxx',
+      AI_MONTHLY_BUDGET: '50',
+    });
+    expect(config.ai?.provider).toBe('anthropic');
+    expect(config.ai?.modelDefault).toBe('claude-haiku-4.5');
+    expect(config.ai?.modelComplex).toBe('claude-opus-4-8');
+    expect(config.ai?.monthlyBudgetUsd).toBe(50);
+    expect(config.ai?.budgetHardStop).toBe(true);
+  });
+
+  it('the hard-stop is engaged by default and only an explicit "false" lifts it', () => {
+    expect(
+      loadServerConfig({ AI_PROVIDER_API_KEY: 'k' }).ai?.budgetHardStop,
+    ).toBe(true);
+    expect(
+      loadServerConfig({
+        AI_PROVIDER_API_KEY: 'k',
+        AI_BUDGET_HARD_STOP: 'false',
+      }).ai?.budgetHardStop,
+    ).toBe(false);
+  });
+
+  it('DA-6 gate fails CLOSED: configured AI + no budget + hard-stop → refuse', async () => {
+    const { aiBudgetGate } = await import('@/server/config');
+    const noBudget = loadServerConfig({ AI_PROVIDER_API_KEY: 'k' }).ai;
+    expect(noBudget).toBeDefined();
+    const gate = aiBudgetGate(noBudget!);
+    expect(gate.hardStopEngaged).toBe(true);
+    expect(gate.reason).toContain('DA-6');
+
+    const withBudget = loadServerConfig({
+      AI_PROVIDER_API_KEY: 'k',
+      AI_MONTHLY_BUDGET: '25',
+    }).ai;
+    expect(aiBudgetGate(withBudget!).hardStopEngaged).toBe(false);
+  });
+
+  it('parses the embeddings capability with the Voyage default model', () => {
+    const config = loadServerConfig({ EMBEDDINGS_API_KEY: 'voy-xxx' });
+    expect(config.embeddings?.provider).toBe('voyage');
+    expect(config.embeddings?.model).toBe('voyage-3-lite');
+  });
+
+  it('applies the IA rate-limit defaults (10/hour) distinct from forms', () => {
+    const config = loadServerConfig({});
+    expect(config.aiRateLimit).toEqual({ windowSeconds: 3600, max: 10 });
+    expect(config.rateLimit).toEqual({ windowSeconds: 3600, max: 5 });
   });
 });

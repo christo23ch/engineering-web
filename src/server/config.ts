@@ -51,9 +51,21 @@ const envSchema = z.object({
   OUTBOX_WORKER_SECRET: optionalString,
   CMS_WEBHOOK_SECRET: optionalString,
   DEPLOY_HOOK_URL: optionalUrl,
+  AI_PROVIDER: optionalString,
+  AI_PROVIDER_API_KEY: optionalString,
+  AI_MODEL_DEFAULT: optionalString,
+  AI_MODEL_COMPLEX: optionalString,
+  AI_MONTHLY_BUDGET: optionalString,
+  AI_BUDGET_HARD_STOP: optionalString,
+  AI_RATE_LIMIT_WINDOW: optionalPositiveInt,
+  AI_RATE_LIMIT_MAX: optionalPositiveInt,
+  EMBEDDINGS_PROVIDER: optionalString,
+  EMBEDDINGS_API_KEY: optionalString,
+  EMBEDDINGS_MODEL: optionalString,
 });
 
-export type Capability = 'database' | 'crm' | 'email' | 'cms';
+export type Capability =
+  'database' | 'crm' | 'email' | 'cms' | 'ai' | 'embeddings';
 
 export interface DatabaseConfig {
   url: string;
@@ -79,6 +91,32 @@ export interface CmsConfig {
   apiToken?: string;
 }
 
+export interface AiConfig {
+  /** Anthropic (ADR-005). Generation only, via the BFF proxy. */
+  apiKey: string;
+  provider: string;
+  modelDefault: string;
+  modelComplex: string;
+  /**
+   * DA-6 budget guardrail (REQUIRES CLIENT RATIFICATION). Monthly cap in USD,
+   * or undefined when the client has not set it yet.
+   */
+  monthlyBudgetUsd?: number;
+  /**
+   * Hard-stop switch (default ON). Fail-closed: with the hard-stop on and no
+   * budget set, the assistant refuses rather than spending — the client
+   * ratifies the number before any cost can occur.
+   */
+  budgetHardStop: boolean;
+}
+
+export interface EmbeddingsConfig {
+  /** Voyage AI (DA-10). Anthropic has no embeddings API. */
+  apiKey: string;
+  provider: string;
+  model: string;
+}
+
 export interface RateLimitConfig {
   windowSeconds: number;
   max: number;
@@ -91,7 +129,11 @@ export interface ServerConfig {
   crm?: CrmConfig;
   email?: EmailConfig;
   cms?: CmsConfig;
+  ai?: AiConfig;
+  embeddings?: EmbeddingsConfig;
   rateLimit: RateLimitConfig;
+  /** IA-specific anti-abuse window (Bible §16/§17). */
+  aiRateLimit: RateLimitConfig;
   outboxWorkerSecret?: string;
   /** HMAC secret for Sanity publish webhooks (ADR-001 rebuild flow). */
   cmsWebhookSecret?: string;
@@ -105,7 +147,16 @@ export const RATE_LIMIT_DEFAULTS: RateLimitConfig = {
   max: 5,
 };
 
+/** IA anti-abuse defaults (Bible §16): 10 questions per client per hour. */
+export const AI_RATE_LIMIT_DEFAULTS: RateLimitConfig = {
+  windowSeconds: 3600,
+  max: 10,
+};
+
 const DEFAULT_CRM_API_BASE = 'https://api.brevo.com/v3';
+const DEFAULT_AI_MODEL_DEFAULT = 'claude-haiku-4.5';
+const DEFAULT_AI_MODEL_COMPLEX = 'claude-opus-4-8';
+const DEFAULT_EMBEDDINGS_MODEL = 'voyage-3-lite';
 
 /**
  * Parse the §38 contract from an environment map. Pure — inject a custom map
@@ -146,6 +197,27 @@ export function loadServerConfig(
     cms: raw.CMS_API_URL
       ? { apiUrl: raw.CMS_API_URL, apiToken: raw.CMS_API_TOKEN }
       : undefined,
+    ai: raw.AI_PROVIDER_API_KEY
+      ? {
+          apiKey: raw.AI_PROVIDER_API_KEY,
+          provider: raw.AI_PROVIDER ?? 'anthropic',
+          modelDefault: raw.AI_MODEL_DEFAULT ?? DEFAULT_AI_MODEL_DEFAULT,
+          modelComplex: raw.AI_MODEL_COMPLEX ?? DEFAULT_AI_MODEL_COMPLEX,
+          monthlyBudgetUsd: raw.AI_MONTHLY_BUDGET
+            ? Number(raw.AI_MONTHLY_BUDGET)
+            : undefined,
+          // Default ON: absence of an explicit "false" means the hard-stop
+          // stays engaged (fail-closed on cost — DA-6).
+          budgetHardStop: raw.AI_BUDGET_HARD_STOP !== 'false',
+        }
+      : undefined,
+    embeddings: raw.EMBEDDINGS_API_KEY
+      ? {
+          apiKey: raw.EMBEDDINGS_API_KEY,
+          provider: raw.EMBEDDINGS_PROVIDER ?? 'voyage',
+          model: raw.EMBEDDINGS_MODEL ?? DEFAULT_EMBEDDINGS_MODEL,
+        }
+      : undefined,
     rateLimit: {
       windowSeconds: raw.RATE_LIMIT_WINDOW
         ? Number(raw.RATE_LIMIT_WINDOW)
@@ -154,10 +226,36 @@ export function loadServerConfig(
         ? Number(raw.RATE_LIMIT_MAX)
         : RATE_LIMIT_DEFAULTS.max,
     },
+    aiRateLimit: {
+      windowSeconds: raw.AI_RATE_LIMIT_WINDOW
+        ? Number(raw.AI_RATE_LIMIT_WINDOW)
+        : AI_RATE_LIMIT_DEFAULTS.windowSeconds,
+      max: raw.AI_RATE_LIMIT_MAX
+        ? Number(raw.AI_RATE_LIMIT_MAX)
+        : AI_RATE_LIMIT_DEFAULTS.max,
+    },
     outboxWorkerSecret: raw.OUTBOX_WORKER_SECRET,
     cmsWebhookSecret: raw.CMS_WEBHOOK_SECRET,
     deployHookUrl: raw.DEPLOY_HOOK_URL,
   };
+}
+
+/**
+ * The AI budget number itself is a client-ratified value (DA-6). If the
+ * assistant is configured but no budget is set, `hardStopEngaged` reports
+ * that requests must be refused (fail-closed) — spend cannot begin until the
+ * client ratifies the number.
+ */
+export function aiBudgetGate(ai: AiConfig): {
+  hardStopEngaged: boolean;
+  reason?: string;
+} {
+  if (ai.monthlyBudgetUsd === undefined) {
+    return ai.budgetHardStop
+      ? { hardStopEngaged: true, reason: 'no ratified budget (DA-6)' }
+      : { hardStopEngaged: false };
+  }
+  return { hardStopEngaged: false };
 }
 
 type CapabilityConfigMap = {
@@ -165,6 +263,8 @@ type CapabilityConfigMap = {
   crm: CrmConfig;
   email: EmailConfig;
   cms: CmsConfig;
+  ai: AiConfig;
+  embeddings: EmbeddingsConfig;
 };
 
 /**
@@ -190,5 +290,7 @@ export function capabilityStates(
     crm: config.crm ? 'configured' : 'unconfigured',
     email: config.email ? 'configured' : 'unconfigured',
     cms: config.cms ? 'configured' : 'unconfigured',
+    ai: config.ai ? 'configured' : 'unconfigured',
+    embeddings: config.embeddings ? 'configured' : 'unconfigured',
   };
 }

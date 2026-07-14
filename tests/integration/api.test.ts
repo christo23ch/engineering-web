@@ -265,6 +265,8 @@ describe('GET /api/health', () => {
       crm: 'configured',
       email: 'configured',
       cms: 'unconfigured',
+      ai: 'unconfigured',
+      embeddings: 'unconfigured',
     });
     expect(data.status).toBe('degraded');
     expect(JSON.stringify(data)).not.toContain('crm-key');

@@ -29,18 +29,23 @@ describe('migrations (real SQL on PGlite)', () => {
     expect(second.every((m) => m.status === 'skipped')).toBe(true);
   });
 
-  it('created the five F1 tables and no embeddings table (F2 scope)', async () => {
+  it('created the F1 tables plus the F2 RAG tables (embeddings + AI ledger)', async () => {
     const rows = await harness.db.query<{ table_name: string }>(
       `select table_name from information_schema.tables
        where table_schema = 'public' order by table_name`,
     );
     const names = rows.map((r) => r.table_name);
+    // F1 (0001)
     expect(names).toContain('leads');
     expect(names).toContain('candidatures');
     expect(names).toContain('consents');
     expect(names).toContain('outbox_events');
     expect(names).toContain('rate_limits');
-    expect(names).not.toContain('embeddings');
+    // F2 (0002 — RAG/pgvector, gated on DA-6 at runtime)
+    expect(names).toContain('embeddings');
+    expect(names).toContain('ai_usage');
+    expect(names).toContain('ai_answer_cache');
+    expect(names).toContain('ai_events');
   });
 });
 

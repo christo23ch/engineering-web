@@ -6,6 +6,7 @@
  * (DA-5) runs in production.
  */
 import { PGlite, type Transaction } from '@electric-sql/pglite';
+import { vector } from '@electric-sql/pglite/vector';
 import type { DbClient } from '@/server/db/client';
 import { runMigrations } from '@/server/db/migrate';
 
@@ -35,9 +36,14 @@ export interface TestDb {
   close(): Promise<void>;
 }
 
-/** Fresh in-memory database with all migrations applied. */
+/**
+ * Fresh in-memory database with all migrations applied. The pgvector
+ * extension is loaded so the embeddings migration (0002) runs its real
+ * `CREATE EXTENSION vector` + `vector(512)` DDL — the same pgvector search
+ * (ADR-004) that Supabase runs in production.
+ */
 export async function createTestDb(): Promise<TestDb> {
-  const pg = new PGlite();
+  const pg = new PGlite({ extensions: { vector } });
   const db = wrap(pg, pg);
   await runMigrations(db);
   return { db, close: () => pg.close() };
