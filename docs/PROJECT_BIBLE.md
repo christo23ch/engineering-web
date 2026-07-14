@@ -1094,7 +1094,8 @@ CI ejecuta lint + unit + integración + build + axe + Lighthouse antes de permit
 | `ANALYTICS_PROVIDER` / `ANALYTICS_ID` | Analítica: selector de proveedor e identificador (si aplica). | No |
 | `CMP_SITE_ID` | Gestor de consentimiento. | No |
 | `SITE_URL` / `NODE_ENV` / `ENVIRONMENT` | Entorno y URL base. | No |
-| `RATE_LIMIT_*` | Límites antiabuso de formularios/IA. | No |
+| `RATE_LIMIT_*` | Límites antiabuso de formularios (ventana/máximo genéricos). | No |
+| `AI_RATE_LIMIT_WINDOW` / `AI_RATE_LIMIT_MAX` | Límite antiabuso específico del asistente IA (perfil de coste distinto al de formularios; [§16](#16-política-de-ia)/[§17](#17-seguridad)). | No |
 | `OUTBOX_WORKER_SECRET` | Autenticación (Bearer) del endpoint interno que procesa el outbox de leads ([§43](#43-decisiones-de-arquitectura-adr) ADR-010). En Vercel (DA-3) se duplica el mismo valor en `CRON_SECRET` para la inyección automática del cron. | Sí |
 | `EMAIL_TO_INTERNAL` | Buzón interno que recibe las notificaciones de nuevos leads y candidaturas (ADR-008). | No |
 | `CMS_WEBHOOK_SECRET` | Verificación de firma (HMAC) de los webhooks de publicación del CMS ([§43](#43-decisiones-de-arquitectura-adr) ADR-001: *rebuild-on-webhook*; DA-7 Sanity). | Sí |
