@@ -21,6 +21,32 @@ export default defineConfig({
   site: process.env.SITE_URL ?? 'https://example.com',
   output: 'static',
   adapter: node({ mode: 'standalone' }),
+  // Content-Security-Policy (docs/PROJECT_BIBLE.md §17 security). Astro emits a
+  // <meta http-equiv="content-security-policy"> per page and auto-derives the
+  // `script-src`/`style-src` sources — hashing every bundled script/style it
+  // controls — so no inline-execution escape hatch is needed (the site is
+  // zero-JS by default;
+  // the only bundled script, the Modal controller, is pure event delegation and
+  // gets hashed). JSON-LD (<script type="application/ld+json">) is a CSP-exempt
+  // data block. `frame-ancestors` is intentionally omitted here because it is
+  // ignored in a meta CSP — clickjacking is covered by the X-Frame-Options
+  // header (see vercel.json). HTTP-only headers (HSTS, nosniff, Referrer-Policy,
+  // Permissions-Policy) also live in vercel.json since static HTML can't set
+  // response headers from Astro.
+  security: {
+    csp: {
+      directives: [
+        "default-src 'self'",
+        "base-uri 'self'",
+        "form-action 'self'",
+        "object-src 'none'",
+        "img-src 'self' data:",
+        "font-src 'self'",
+        "connect-src 'self'",
+        'upgrade-insecure-requests',
+      ],
+    },
+  },
   integrations: [
     react(),
     sitemap({
