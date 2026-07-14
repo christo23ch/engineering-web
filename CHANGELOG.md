@@ -10,6 +10,52 @@ never overrides it.
 
 ## [Unreleased]
 
+### Backend / BFF — built and tested (2026-07-14)
+
+#### Added
+- **Server kernel** (`src/server/`): §38 configuration contract (capability
+  -based, zod; missing integrations degrade to client-safe 503s), structured
+  JSON logging with recursive PII redaction and secret-key dropping, closed
+  AppError taxonomy with HTTP mapping, endpoint kernel (request-id
+  propagation, single exception→response boundary), body intake with 64 KiB
+  cap for JSON + form encodings.
+- **PostgreSQL layer** (Supabase EU, DA-5): `DbClient` seam (postgres.js with
+  `prepare:false` for the transaction pooler ⇄ PGlite in tests), forward-only
+  SQL migrations (leads, candidatures, consents with XOR constraint +
+  pseudonymized IP, outbox_events, rate_limits), repositories,
+  `npm run db:migrate` (deploy-time only).
+- **Domain validation** (Spanish, zod): approved §13 form field names
+  verbatim; GDPR consent must be actively granted; `servicio` checked against
+  the real §24 taxonomy; honeypot semantics (fake-accept, never persist).
+- **Durable rate limiting** (§17): fixed window in Postgres via one atomic
+  upsert; pseudonymized client buckets; exact Retry-After; fail-open with
+  logging.
+- **Transactional outbox + retry worker (ADR-010)**: jobs written in the same
+  transaction as the business row; FOR UPDATE SKIP LOCKED claiming with a
+  visibility timeout; exponential backoff with jitter (30 s → 1 h cap);
+  permanent-vs-transient settlement; dead-letter kept for audit/replay.
+- **Brevo integration** (DA-2 CRM + DA-8 email): fetch-based client with the
+  retry-policy error mapping; contact upsert (uppercase attributes); text-only
+  transactional email; provisional-honest Spanish templates (no invented
+  promises); topic→delivery handler registry (missing capability = transient).
+- **Sanity read layer** (DA-7): GROQ over the canonical CMS_API_URL; queries
+  matching the typed frontend interfaces field-for-field; zod-validated
+  loaders with the content-honesty fallback (local sources; empty
+  cases/articles) — the F2 wiring point for `getStaticPaths`.
+- **API endpoints**: `POST /api/leads`, `POST /api/candidatures`,
+  `GET /api/health`, `GET|POST /api/internal/outbox/process` (constant-time
+  Bearer auth; scheduled by `vercel.json` cron per DA-3). Pipeline: honeypot →
+  rate limit → validation → one transaction (subject + consent + outbox).
+  Candidatures notify internally only — never the CRM (GDPR §21).
+- **Platform**: `@astrojs/node` adapter — output stays `static`, only
+  `/api/*` runs on-demand; Astro's CSRF origin check active. Bible §38 gained
+  `OUTBOX_WORKER_SECRET` and `EMAIL_TO_INTERNAL` (SSOT-first) and
+  `.env.example` was reconciled.
+- **Testing**: real-SQL integration suites on PGlite (migrations,
+  constraints, rate limit, outbox state machine, full endpoint flows,
+  end-to-end drain through a faked Brevo) + API e2e smoke against the built
+  server. Suite: 242 unit/integration + 50 e2e, all green.
+
 ### Interface layer — FRONTEND APPROVED (2026-07-09 → 2026-07-13)
 
 #### Added

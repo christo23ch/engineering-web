@@ -6,7 +6,7 @@
 
 > **Progreso a 2026-07-13 (derivado de Bible §46, v1.1):**
 > - **F0 — Descubrimiento/Scaffolding:** ✅ **cerrada.** Scaffolding técnico completo; decisiones DA-2…DA-10 **ratificadas por el comité, pendientes de ratificación única del cliente** (§49); hipótesis H1–H11 **triadas** (ninguna validada, §44).
-> - **F1 — MVP:** 🔶 **capa de interfaz ✅ construida y auditada** (biblioteca UI *LIBRARY APPROVED* + todas las pantallas del §13 DESIGN_SYSTEM + Header/Footer + SEO → *FRONTEND APPROVED*, con contenido honesto: fuentes tipadas vacías, sin datos inventados). **Pendiente:** CMS, BFF (formularios→CRM, email, persistencia), base de datos y despliegue.
+> - **F1 — MVP:** 🔶 **capa de interfaz ✅ construida y auditada** (biblioteca UI *LIBRARY APPROVED* + todas las pantallas del §13 DESIGN_SYSTEM + Header/Footer + SEO → *FRONTEND APPROVED*, con contenido honesto: fuentes tipadas vacías, sin datos inventados). **BFF ✅ construido y probado (2026-07-14):** endpoints de captación con validación y *rate limiting* durable, persistencia PostgreSQL con outbox transaccional + worker de reintentos (ADR-010), Brevo (DA-2/DA-8) y capa de lectura Sanity (DA-7). **Pendiente:** credenciales de proveedores (§49), cableado de formularios → `/api`, analítica/CMP y despliegue.
 > - **F2 — Contenido + IA:** ⏳ interfaz del asistente IA construida (sin backend); pendiente RAG, embeddings y contenido real.
 > - **F3 / F4:** ⏳ sin iniciar.
 >

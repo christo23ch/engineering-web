@@ -29,7 +29,9 @@ A premium, performance-first website platform for a Spanish engineering firm spe
 >
 > 🔶 **Honestidad de contenido:** las plantillas son fieles pero las fuentes de contenido (`cases.ts`, `articles.ts`) están **vacías a propósito** y los textos legales son marcadores — **no se inventan** métricas, clientes, testimonios, certificaciones ni texto legal. El contenido real llega en F2.
 >
-> ⏳ **Pendiente:** backend/BFF (formularios→CRM, email, persistencia), integración de CMS, PostgreSQL + pgvector, lógica de IA/RAG, contenido real y despliegue. Todo ello gobernado por las decisiones de **Bible §49** (ratificadas por el comité, **pendientes de ratificación única del cliente**).
+> ✅ **Backend/BFF construido y probado (2026-07-14):** endpoints de captación (`/api/leads`, `/api/candidatures`, `/api/health`, drenaje interno del outbox) con validación en frontera (ES, zod), *rate limiting* durable, honeypot, consentimiento RGPD; persistencia PostgreSQL (Supabase-ready, DA-5) con **outbox transaccional + worker de reintentos (ADR-010)**; integraciones **Brevo** (CRM DA-2 + email DA-8) y capa de lectura **Sanity** (DA-7) con *fallback* honesto. Las páginas siguen 100 % estáticas (adapter Node; solo `/api/*` es *on-demand*). Batería ampliada: 242 tests unit/integración (SQL real vía PGlite) + 9 specs e2e (50 tests). Todo operativo en cuanto existan credenciales de proveedor.
+>
+> ⏳ **Pendiente:** altas/credenciales de proveedores (Bible §49, **pendientes de ratificación única del cliente**), cableado de los formularios aprobados → `/api`, analítica/CMP, lógica de IA/RAG + pgvector (F2, DA-6), contenido real y despliegue.
 
 ### Prerequisites
 - **Node.js** 22.12+ (required by Astro 7 — ADR-011)
@@ -81,12 +83,13 @@ npm run preview
 - ✅ Session context preserved (CLAUDE.md)
 - 🟡 11 hypotheses **triaged** (none validated — require client) + 9 decisions **ratified by committee** (pending single client ratification) — see Bible §44/§49
 
-**Phase 1: MVP** (interface layer ✅ done; backend ⏳ pending)
+**Phase 1: MVP** (interface ✅ + backend code ✅; credentials/wiring/deploy ⏳)
 - ✅ Component library (16 UI primitives/compositions) — **LIBRARY APPROVED**
 - ✅ All §13 screens + Header/Footer + SEO layer — **FRONTEND APPROVED**
-- ⏳ BFF serverless functions (forms, CRM webhook, email, persistence)
-- ⏳ PostgreSQL + pgvector integration
-- ⏳ Headless CMS integration (Sanity — ratified, pending client)
+- ✅ BFF (forms validation, rate limiting, persistence, outbox→CRM/email retry — ADR-008/010)
+- ✅ Brevo CRM + transactional email delivery (DA-2/DA-8)
+- 🔶 Headless CMS (Sanity, DA-7): read layer + GROQ contract built; awaits a real project + content
+- ⏳ Wire approved forms → `/api`; staging deploy (Vercel per DA-3 + `npm run db:migrate`); pgvector is F2
 
 **Phase 2: Content & IA** (2 months)
 - 🔶 IA assistant widget **UI built** — RAG backend pending
@@ -378,7 +381,24 @@ npm run audit:a11y
 
 # Performance audit (Lighthouse)
 npm run audit:lighthouse
+
+# Apply database migrations (deploy-time; needs DATABASE_URL — Bible §38)
+npm run db:migrate
 ```
+
+### BFF API (Bible §13; on-demand routes — everything else is SSG)
+
+| Route | Method | Purpose |
+|-------|--------|---------|
+| `/api/leads` | POST | Lead capture (contact form RF-06/07, lead magnet RF-13). JSON or form-encoded. |
+| `/api/candidatures` | POST | Spontaneous candidature (RF-14). Internal notification only — never CRM (GDPR). |
+| `/api/health` | GET | Liveness + §38 capability states (never values). |
+| `/api/internal/outbox/process` | GET/POST | Scheduled outbox drain (ADR-010). Bearer `OUTBOX_WORKER_SECRET`; Vercel cron in `vercel.json`. |
+
+Pipeline on capture: body caps → honeypot fake-accept → durable rate limit
+(429 + Retry-After) → Spanish per-field validation (400) → **one transaction**:
+subject + GDPR consent + outbox jobs → 201. Delivery (Brevo CRM/email) happens
+asynchronously with exponential-backoff retries and a dead-letter audit trail.
 
 ### Git Workflow
 
@@ -626,8 +646,8 @@ Proprietary. All rights reserved. Contact repo owner for licensing inquiries.
 
 ---
 
-**Last Updated:** 2026-07-13  
+**Last Updated:** 2026-07-14  
 **Phase:** 0 closed · interface layer complete (FRONTEND APPROVED)  
-**Status:** 🟢 Frontend built & audited · backend/CMS/IA pending client ratification of Bible §49  
+**Status:** 🟢 Frontend built & audited · backend/BFF built & tested · credentials/wiring/deploy + IA (F2) pending client ratification of Bible §49  
 
 For full project context, see **[CLAUDE.md](./CLAUDE.md)**, **[CHANGELOG.md](./CHANGELOG.md)** and **[docs/PROJECT_BIBLE.md](./docs/PROJECT_BIBLE.md)**.

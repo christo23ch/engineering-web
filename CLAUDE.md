@@ -20,12 +20,13 @@ This is a **professional engineering firm website** (Jamstack: Astro 7 + React i
 - ✅ **UI component library complete and audited (LIBRARY APPROVED)** — 16 UI primitives/compositions in `src/components/ui/` (Button, Input, Textarea, Select, Checkbox, Radio, Field shells/messages, Card, Badge, Alert, Modal, Skeleton, Loading, Spinner, Icon) with public API barrels. Zero-JS discipline (native `<details>`/`<dialog>`); the only client script is the Modal controller.
 - ✅ **All §13 screens + global chrome + SEO layer built (FRONTEND APPROVED)** — 14 route files (Home, service template ×6, portfolio index + case detail template, sobre-nosotros, recursos index + article detail, empleo, contacto + gracias, legal template ×3, buscar, 404, 500), Header + Footer, IA assistant widget UI, JSON-LD/OG/Twitter/canonical/robots/sitemap. Lighthouse perf/a11y/best-practices 100.
 - ✅ **Governance closed (Phase 0)** — DA-2…DA-10 ratified by committee (pending client), H1-H11 triaged.
+- ✅ **Backend/BFF built and tested (2026-07-14)** — `src/server/` kernel (§38 config contract, structured logging with PII redaction, AppError taxonomy), PostgreSQL layer (migrations + repositories, Supabase-pooler-ready, DA-5), Spanish zod validation on the approved form field names, durable Postgres rate limiting (§17), **transactional outbox + retry worker (ADR-010)**, **Brevo** CRM/email integration (DA-2/DA-8), **Sanity** read layer with honest local fallback (DA-7), endpoints `/api/leads` · `/api/candidatures` · `/api/health` · `/api/internal/outbox/process` (Bearer + Vercel cron, DA-3). Pages stay 100 % SSG (Node adapter; only `/api/*` is on-demand). Operational as soon as vendor credentials exist.
 - 🔶 **Content honesty:** templates are faithful but content sources (`cases.ts`, `articles.ts`) are intentionally EMPTY — no fabricated metrics/clients/testimonials/certifications. Real content lands in F2.
-- ⏳ **Pending:** backend/BFF (forms→CRM, email, persistence), CMS integration, PostgreSQL + pgvector, IA/RAG logic, real content, deployment.
+- ⏳ **Pending:** vendor sign-ups/credentials (client ratification of §49), wiring the approved zero-JS forms to `/api` (success-screen navigation), analytics/CMP, IA/RAG logic + pgvector (F2, gated on DA-6), real content, deployment.
 
-**Validation battery (all green):** `npm run typecheck` · `lint` · `format:check` · `test` (139 unit tests) · `build` · `npm audit --omit=dev` (0 vulns) · `test:e2e` (8 Playwright + axe specs).
+**Validation battery (all green):** `npm run typecheck` · `lint` · `format:check` · `test` (242 unit + integration tests, incl. real-SQL PGlite suites) · `build` · `npm audit --omit=dev` (0 vulns) · `test:e2e` (9 Playwright specs / 50 tests, incl. API smoke).
 
-**Immediate Next Step:** Phase 1 backend/CMS/IA (blocked on single client ratification of DA-2…DA-10, esp. DA-6 IA budget + hosting/domain).
+**Immediate Next Step:** wire the approved forms → `/api` endpoints + staging deploy, once the client ratifies §49 and vendor credentials exist (esp. DA-6 IA budget + DA-3 hosting/domain via H11). Backend code is ready and waiting on configuration only.
 
 ---
 
@@ -175,14 +176,31 @@ engineering-web/
 │   │   ├── content/              content blocks ✅
 │   │   ├── seo/                   StructuredData + SocialMeta ✅
 │   │   └── ia/                    IA assistant widget UI ✅ (no backend)
+│   ├── pages/api/                 BFF routes ✅ leads · candidatures · health
+│   │                              · internal/outbox/process (on-demand)
 │   ├── layouts/                   BaseLayout.astro ✅
 │   ├── lib/                       api/ · content/ · db/ · seo/ · ui/ · utils/
+│   ├── server/                    BFF ✅ (Bible §13) — config (§38) · logging
+│   │   ├── http/                  errors · handler · respond · body
+│   │   ├── db/                    client · migrations/ · repositories/
+│   │   ├── validation/            leads · candidatures (zod, ES)
+│   │   ├── rate-limit/            durable fixed window (§17)
+│   │   ├── outbox/                topics · backoff · repository · worker ·
+│   │   │                          handlers (ADR-010)
+│   │   ├── integrations/          brevo/ (DA-2/DA-8) · sanity/ (DA-7)
+│   │   ├── email/                 provisional-honest templates
+│   │   ├── services/              capture use-cases (ADR-008)
+│   │   └── endpoints/             route factories (testable DI)
 │   └── styles/globals.css         Tailwind v4 @theme design tokens ✅
 ├── tests/
-│   ├── unit/                      139 unit tests (Vitest + Astro Container) ✅
-│   └── e2e/                       8 specs (Playwright + @axe-core) ✅
+│   ├── unit/                      unit tests (Vitest + Astro Container) ✅
+│   ├── integration/               real-SQL suites on PGlite ✅
+│   └── e2e/                       9 specs (Playwright + @axe-core + API) ✅
+│                                  (242 unit+integration / 50 e2e in total)
+├── scripts/migrate.ts             deploy-time migrations (npm run db:migrate)
 ├── .github/workflows/            build.yml · lint.yml · lighthouse.yml ✅
-├── astro.config.ts · tsconfig.json · package.json ✅
+├── astro.config.ts · tsconfig.json · package.json ✅ (+ @astrojs/node)
+├── vercel.json                   outbox cron (DA-3) ✅
 ├── eslint.config.mjs · prettier.config.mjs · commitlint.config.mjs ✅
 ├── vitest.config.ts · playwright.config.ts · lighthouserc.json ✅
 ├── .env.example                  (all Bible §38 vars) ✅
@@ -223,12 +241,13 @@ engineering-web/
 - ✅ Component library (16 UI primitives/compositions) from DESIGN_SYSTEM.md §11 — **LIBRARY APPROVED**
 - ✅ All §13 screens (Home, 6 Service pages, Portfolio + Case detail, About, Recursos + article, Empleo, Contacto, Legal, 404/500, buscar) + Header/Footer + IA widget UI — **FRONTEND APPROVED**
 - ✅ SEO fundamentals (sitemap, robots, canonical, JSON-LD/OG/Twitter via Schema.org)
-- ⏳ BFF serverless functions (form validation, CRM webhook, email, persistence)
-- ⏳ Wire PostgreSQL with RAG index (pgvector, chunking, retrieval pipeline)
-- ⏳ Wire headless CMS (content source for Services, Projects, Articles, Team)
-- ⏳ Deploy to staging environment
+- ✅ BFF endpoints (validation, durable rate limiting, honeypot, GDPR consent) + PostgreSQL persistence + transactional outbox/retry (ADR-008/010)
+- ✅ Brevo CRM + transactional email delivery (DA-2/DA-8, via outbox)
+- 🔶 Headless CMS: Sanity read layer + GROQ contract built (DA-7) — needs a real Sanity project + content, then wiring `getStaticPaths` to the loaders
+- ⏳ Wire the approved zero-JS forms to `/api` (action + success screen)
+- ⏳ Deploy to staging environment (Vercel per DA-3: swap adapter one line; cron in vercel.json; run `npm run db:migrate`)
 
-**Deliverables:** Interface layer done + audited; backend/CMS/deploy pending client ratification of vendors.
+**Deliverables:** Interface + backend code done and tested; vendor credentials, form wiring and deploy pending client ratification (§49). RAG/pgvector is F2 (DA-6).
 
 ### **Phase 2: Content & IA** (2 months)
 - 🔶 IA assistant widget **UI built** (side panel, floating trigger, source-citation slot) — backend/RAG pending
@@ -363,14 +382,22 @@ Then:
 - Prepare Storybook or equivalent (optional for F0, required for F1)
 - Document component props + stories aligned to DESIGN_SYSTEM.md §11
 
-### Blocked Until Decisions Resolved
+### Blocked Until Decisions Resolved (updated 2026-07-14 — backend built)
 
-- **CMS integration** (DA-7) — scaffolds BFF handlers, awaits API spec
-- **PostgreSQL + pgvector schema** (DA-5) — awaits host selection + connection string
-- **CRM webhook routes** (DA-2) — awaits CRM choice + webhook docs
-- **IA assistant backend** (DA-6 + API key) — awaits budget + provider confirmation
-- **Email transactional setup** — awaits provider choice + API key
-- **Analytics instrumentation** — awaits provider choice + consent flow
+The CODE for all of these now exists (`src/server/`); what remains blocked is
+**configuration** (vendor sign-ups + §38 credentials, on client ratification
+of §49) — except the last two, which are still unbuilt:
+
+- **CMS integration** (DA-7) — ✅ read layer + GROQ contract built; awaits a
+  Sanity project + CMS_API_URL/TOKEN, then wire `getStaticPaths` to loaders
+- **PostgreSQL schema** (DA-5) — ✅ migrations + repositories built; awaits a
+  Supabase project + DATABASE_URL (`npm run db:migrate`); pgvector is F2
+- **CRM delivery** (DA-2) — ✅ Brevo upsert via outbox built; awaits CRM_API_KEY
+- **Email transactional** (DA-8) — ✅ Brevo send + templates built; awaits
+  EMAIL_API_KEY/FROM/TO_INTERNAL
+- **IA assistant backend** (DA-6 + API key) — ⏳ NOT built (F2; requires
+  client-ratified budget + hard-stop first)
+- **Analytics instrumentation** (DA-9) — ⏳ NOT built (needs consent flow/CMP)
 
 ---
 
@@ -385,11 +412,8 @@ Then:
 6. **Follow the Decisions Status table** to unblock any pending work.
 
 ### For Pushing to Remote
-Current issue: 403 Forbidden on `git push -u origin claude/repo-structure-setup-9eg3lj`. Mitigations:
-- Verify SSH key is loaded: `ssh -T git@github.com`
-- Retry push with `-u` flag (exponential backoff: 2s, 4s, 8s, 16s delays)
-- If still blocked, ask repo admin to check: GitHub App permissions, branch protection rules, user org access
-- Fallback: create PR after push succeeds (if push succeeds, PR template search in `.github/pull_request_template.md`)
+Pushes to `claude/repo-structure-setup-9eg3lj` work (`git push -u origin <branch>`).
+If a transient failure appears, retry with exponential backoff (2s, 4s, 8s, 16s).
 
 ### Code Style & Quality
 - **TypeScript:** `strict: true`, no `any`, resolve all errors before commit
@@ -432,7 +456,7 @@ Current issue: 403 Forbidden on `git push -u origin claude/repo-structure-setup-
 
 ## Notes for Next Session
 
-**TL;DR:** Interface layer is **complete and audited** (LIBRARY APPROVED + FRONTEND APPROVED) with honest, empty content sources. Governance closed Phase 0: DA-2…DA-10 ratified by committee (pending single client ratification), H1-H11 triaged (none validated). **Next: backend/BFF + CMS + IA/RAG (F1/F2)**, gated on client ratification (esp. DA-6 IA budget, DA-3 hosting/domain via H11).
+**TL;DR:** Interface layer is **complete and audited** (LIBRARY APPROVED + FRONTEND APPROVED) and the **backend/BFF is built and tested** (kernel + Postgres/outbox/retry + rate limiting + Brevo + Sanity read layer + `/api` endpoints; 242 unit/integration + 50 e2e green; pages stay 100 % SSG). Governance closed Phase 0: DA-2…DA-10 ratified by committee (pending single client ratification), H1-H11 triaged (none validated). **Next: vendor credentials + form wiring + staging deploy (F1 close), then IA/RAG (F2)** — gated on client ratification (esp. DA-6 IA budget, DA-3 hosting/domain via H11).
 
 **Content honesty (CRITICAL):** Templates are faithful but `cases.ts`/`articles.ts` are EMPTY and legal text is placeholder. Never fabricate metrics, clients, testimonials, certifications, or legal copy — real content arrives with the client in F2.
 
