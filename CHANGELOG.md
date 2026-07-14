@@ -10,6 +10,48 @@ never overrides it.
 
 ## [Unreleased]
 
+### IA — RAG assistant backend complete (2026-07-14, F2)
+
+> Gated at runtime on **DA-6** (IA budget + hard-stop — REQUIRES CLIENT
+> RATIFICATION). The assistant is FAIL-CLOSED: with no ratified budget it
+> refuses every request and spends nothing.
+
+#### Added
+- **pgvector data layer** (ADR-004, §28 Embedding): migration 0002 —
+  `vector(512)` embeddings table (voyage-3-lite, DA-10) + ivfflat cosine
+  index + provenance for citations + idempotency keys; durable AI ledger
+  (`ai_usage`), answer cache (`ai_answer_cache`) and telemetry (`ai_events`).
+  VectorStore seam (PgVectorStore real `<=>` search ⇄ InMemoryVectorStore),
+  tested on real pgvector (PGlite pinned to 0.2.17 for the extension).
+- **Deterministic chunker**: structure-aware, token-bounded chunks with
+  overlap + provenance + content hashes (idempotent re-indexing); content
+  honesty carried through (verifiable metrics, no invented testimonials).
+- **Voyage embeddings client** (DA-10): input_type query/document, 512-dim
+  guard, exact token accounting, ADR-010 error mapping.
+- **Indexing pipeline** + `npm run rag:index`: chunk → embed → upsert; only
+  changed chunks re-embedded, removed content pruned; ANALYZE.
+- **Retrieval** with a relevance floor — the no-hallucination gate: nothing
+  above the floor → EMPTY → the assistant refuses.
+- **Claude client** (ADR-005): Anthropic Messages via the BFF proxy (key
+  never in the browser), Haiku default / Opus for complex, usage + cost
+  estimation (conservative fallback) for the DA-6 ledger.
+- **Prompt builder + citation engine** (§16): RAG-anchored Spanish system
+  prompt (answer only from sources, cite every claim, fixed refusal
+  sentence, no fabrication, prompt-injection fencing of untrusted content);
+  the answer is VERIFIED — hallucinated or uncited citations are rejected to
+  the honest fallback; verified citations carry the §24 public URL.
+- **DA-6 budget hard-stop** (durable monthly ledger, fail-closed) + durable
+  answer cache (normalized-question key, index-version + TTL invalidation).
+- **Assistant orchestrator + `POST /api/ia/consulta`** (RF-15): cache →
+  budget → retrieve → prompt → Claude → citation check → spend/telemetry →
+  cache; three honest outcomes (answered / refused / fallback). Fail-SOFT on
+  capability (200 fallback keeps the widget usable); 400 validation, 429 IA
+  rate limit, 405. Observability via `ai_events` (§34).
+- Bible §38 gained `AI_RATE_LIMIT_WINDOW`/`AI_RATE_LIMIT_MAX` (SSOT-first);
+  `ai`/`embeddings` capabilities + `aiBudgetGate()` in config.
+- **docs/AI.md**: full RAG runbook — architecture, no-hallucination
+  enforcement, DA-6 gate, indexing, cache, observability, setup, testing.
+
 ### CMS — Sanity integration complete (2026-07-14)
 
 #### Added

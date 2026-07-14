@@ -22,12 +22,13 @@ This is a **professional engineering firm website** (Jamstack: Astro 7 + React i
 - ✅ **Governance closed (Phase 0)** — DA-2…DA-10 ratified by committee (pending client), H1-H11 triaged.
 - ✅ **Backend/BFF built and tested (2026-07-14)** — `src/server/` kernel (§38 config contract, structured logging with PII redaction, AppError taxonomy), PostgreSQL layer (migrations + repositories, Supabase-pooler-ready, DA-5), Spanish zod validation on the approved form field names, durable Postgres rate limiting (§17), **transactional outbox + retry worker (ADR-010)**, **Brevo** CRM/email integration (DA-2/DA-8), **Sanity** read layer with honest local fallback (DA-7), endpoints `/api/leads` · `/api/candidatures` · `/api/health` · `/api/internal/outbox/process` (Bearer + Vercel cron, DA-3). Pages stay 100 % SSG (Node adapter; only `/api/*` is on-demand). Operational as soon as vendor credentials exist.
 - ✅ **Sanity CMS integration complete (2026-07-14)** — Studio as its own workspace (`cms/`: schemas for the six §28 entities with honesty-encoding validation, DA-4 two-level workflow with publish gated on approval + review queue + badges, role model incl. custom `redactor`, "Open preview" route resolution), §13 templates wired to the CMS loaders (byte-identical build without CMS — honest fallback), signed publish webhook → deploy hook → SSG rebuild (ADR-001; ISR documented as a DA-3 optimization, not architecture), drafts perspective ready for F2 preview. Runbook: `docs/CMS.md`. Awaits only a real Sanity project (client ratification of DA-7).
+- ✅ **RAG / IA assistant backend built and tested (2026-07-14, F2)** — full pipeline on pgvector (ADR-004): deterministic chunker, **Voyage** embeddings (DA-10, 512-dim) with idempotent indexing (`npm run rag:index`) + threshold retrieval, **Claude** via BFF proxy (ADR-005), RAG-anchored prompt + citation engine enforcing the **strict no-hallucination + mandatory-citation policy** (§16, incl. prompt-injection guardrails), **DA-6 fail-closed budget** (durable ledger + hard-stop: with no ratified budget it refuses and spends nothing), durable answer cache, honest fallback, observability (`ai_events`), endpoint `/api/ia/consulta`. Runbook: `docs/AI.md`. **Inert by design until the client ratifies DA-6** (budget + hard-stop) and vendor credentials exist. `src/server/{rag,ai}/`.
 - 🔶 **Content honesty:** templates are faithful but content sources (`cases.ts`, `articles.ts`) are intentionally EMPTY — no fabricated metrics/clients/testimonials/certifications. Real content lands in F2.
-- ⏳ **Pending:** vendor sign-ups/credentials (client ratification of §49), wiring the approved zero-JS forms to `/api` (success-screen navigation), analytics/CMP, IA/RAG logic + pgvector (F2, gated on DA-6), real content, deployment.
+- ⏳ **Pending:** vendor sign-ups/credentials (client ratification of §49), wiring the approved zero-JS forms to `/api` (success-screen navigation), analytics/CMP, real content, deployment. IA is code-complete but gated on **DA-6 ratification**.
 
-**Validation battery (all green):** `npm run typecheck` · `lint` · `format:check` · `test` (264 unit + integration tests, incl. real-SQL PGlite suites + CMS contract tests) · `build` · `npm audit --omit=dev` (0 vulns) · `test:e2e` (9 Playwright specs / 51 tests, incl. API smoke). Studio workspace: `cms/` `typecheck` + `schema:check:local` green.
+**Validation battery (all green):** `npm run typecheck` · `lint` · `format:check` · `test` (335 unit + integration tests, incl. real-SQL PGlite suites on **pgvector** + CMS contract tests) · `build` · `npm audit --omit=dev` (0 vulns) · `test:e2e` (10 Playwright specs / 52 tests, incl. API + IA smoke). Studio workspace: `cms/` `typecheck` + `schema:check:local` green. Deploy scripts: `db:migrate`, `rag:index`.
 
-**Immediate Next Step:** wire the approved forms → `/api` endpoints + staging deploy, once the client ratifies §49 and vendor credentials exist (esp. DA-6 IA budget + DA-3 hosting/domain via H11). Backend code is ready and waiting on configuration only.
+**Immediate Next Step:** wire the approved forms → `/api` endpoints + staging deploy, once the client ratifies §49 and vendor credentials exist (esp. **DA-6 IA budget** + DA-3 hosting/domain via H11). Backend + CMS + RAG code is ready and waiting on configuration only. PGlite pinned to 0.2.17 (ships the pgvector extension for real-SQL vector tests).
 
 ---
 
@@ -182,8 +183,8 @@ engineering-web/
 │   │   ├── content/              content blocks ✅
 │   │   ├── seo/                   StructuredData + SocialMeta ✅
 │   │   └── ia/                    IA assistant widget UI ✅ (no backend)
-│   ├── pages/api/                 BFF routes ✅ leads · candidatures · health
-│   │                              · internal/outbox/process (on-demand)
+│   ├── pages/api/                 BFF routes ✅ leads · candidatures · health ·
+│   │                              ia/consulta · internal/{outbox,cms}/… (on-demand)
 │   ├── layouts/                   BaseLayout.astro ✅
 │   ├── lib/                       api/ · content/ · db/ · seo/ · ui/ · utils/
 │   ├── server/                    BFF ✅ (Bible §13) — config (§38) · logging
@@ -194,16 +195,20 @@ engineering-web/
 │   │   ├── outbox/                topics · backoff · repository · worker ·
 │   │   │                          handlers (ADR-010)
 │   │   ├── integrations/          brevo/ (DA-2/DA-8) · sanity/ (DA-7)
+│   │   ├── rag/                    F2 ✅ chunker · embeddings/voyage (DA-10) ·
+│   │   │                          vector-store (pgvector, ADR-004) · retrieval
+│   │   ├── ai/                     F2 ✅ claude (ADR-005) · prompt · citations ·
+│   │   │                          budget (DA-6) · cache · assistant · telemetry
 │   │   ├── email/                 provisional-honest templates
 │   │   ├── services/              capture use-cases (ADR-008)
 │   │   └── endpoints/             route factories (testable DI)
 │   └── styles/globals.css         Tailwind v4 @theme design tokens ✅
 ├── tests/
 │   ├── unit/                      unit tests (Vitest + Astro Container) ✅
-│   ├── integration/               real-SQL suites on PGlite ✅
-│   └── e2e/                       9 specs (Playwright + @axe-core + API) ✅
-│                                  (242 unit+integration / 50 e2e in total)
-├── scripts/migrate.ts             deploy-time migrations (npm run db:migrate)
+│   ├── integration/               real-SQL suites on PGlite (+ pgvector) ✅
+│   └── e2e/                       10 specs (Playwright + @axe-core + API/IA) ✅
+│                                  (335 unit+integration / 52 e2e in total)
+├── scripts/                       migrate.ts (db:migrate) · rag-index.ts (rag:index)
 ├── .github/workflows/            build.yml · lint.yml · lighthouse.yml ✅
 ├── astro.config.ts · tsconfig.json · package.json ✅ (+ @astrojs/node)
 ├── vercel.json                   outbox cron (DA-3) ✅
@@ -256,10 +261,10 @@ engineering-web/
 **Deliverables:** Interface + backend code done and tested; vendor credentials, form wiring and deploy pending client ratification (§49). RAG/pgvector is F2 (DA-6).
 
 ### **Phase 2: Content & IA** (2 months)
-- 🔶 IA assistant widget **UI built** (side panel, floating trigger, source-citation slot) — backend/RAG pending
+- ✅ IA assistant widget **UI** (side panel, floating trigger, source-citation slot) + **full RAG backend** — chunker/Voyage embeddings/pgvector retrieval, Claude via BFF proxy, no-hallucination prompt + citation engine, DA-6 fail-closed budget, cache, honest fallback, telemetry, `/api/ia/consulta` (`docs/AI.md`). **Inert until DA-6 ratified + credentials.**
 - ⏳ Load content: 6 Services, 12–20 Case studies, 20+ Articles, Team bios, 6 Certifications (sources currently EMPTY — no fabricated data)
-- ⏳ Train RAG index (chunk content, embed with pgvector, load to vector index)
-- ⏳ Setup monitoring (Core Web Vitals RUM, error tracking, logs)
+- ⏳ Build the RAG index over real content (`npm run rag:index`) — pipeline done; awaits content + Voyage key
+- ⏳ Setup monitoring (Core Web Vitals RUM, error tracking, logs; `ai_events` telemetry already emitted)
 - ⏳ Email automation (lead follow-up sequences, transactional templates)
 
 **Deliverables:** Content-rich site, IA assistant operativa, monitoring dashboards.
@@ -397,13 +402,15 @@ of §49) — except the last two, which are still unbuilt:
 - **CMS integration** (DA-7) — ✅ COMPLETE: Studio (`cms/`), DA-4 workflow,
   templates wired to loaders, publish webhook → rebuild; awaits only a real
   Sanity project + §38 credentials (runbook: `docs/CMS.md`)
-- **PostgreSQL schema** (DA-5) — ✅ migrations + repositories built; awaits a
-  Supabase project + DATABASE_URL (`npm run db:migrate`); pgvector is F2
+- **PostgreSQL schema** (DA-5) — ✅ migrations + repositories built (incl.
+  pgvector 0002); awaits a Supabase project + DATABASE_URL (`npm run db:migrate`)
 - **CRM delivery** (DA-2) — ✅ Brevo upsert via outbox built; awaits CRM_API_KEY
 - **Email transactional** (DA-8) — ✅ Brevo send + templates built; awaits
   EMAIL_API_KEY/FROM/TO_INTERNAL
-- **IA assistant backend** (DA-6 + API key) — ⏳ NOT built (F2; requires
-  client-ratified budget + hard-stop first)
+- **IA assistant backend / RAG** (DA-6 + keys) — ✅ COMPLETE: full pipeline
+  (`src/server/{rag,ai}/`), fail-closed on cost; awaits **client ratification
+  of DA-6** (budget + hard-stop) + AI_PROVIDER_API_KEY/EMBEDDINGS_API_KEY +
+  content indexing (`npm run rag:index`). Runbook: `docs/AI.md`
 - **Analytics instrumentation** (DA-9) — ⏳ NOT built (needs consent flow/CMP)
 
 ---

@@ -89,13 +89,14 @@ npm run preview
 - ✅ BFF (forms validation, rate limiting, persistence, outbox→CRM/email retry — ADR-008/010)
 - ✅ Brevo CRM + transactional email delivery (DA-2/DA-8)
 - ✅ Headless CMS (Sanity, DA-7): Studio workspace (`cms/`, DA-4 workflow + roles + preview), templates wired to loaders (honest fallback), publish webhook → rebuild (ADR-001). Awaits a real project + content — runbook in [docs/CMS.md](./docs/CMS.md)
+- ✅ **RAG / IA assistant backend (F2)**: chunker + Voyage embeddings + pgvector retrieval, Claude via BFF proxy, no-hallucination prompt + citation engine, **DA-6 fail-closed budget** + cache + honest fallback + telemetry, `/api/ia/consulta`. **Inert until the client ratifies DA-6** + credentials — runbook in [docs/AI.md](./docs/AI.md)
 - ⏳ Wire approved forms → `/api`; staging deploy (Vercel per DA-3 + `npm run db:migrate`); pgvector is F2
 
-**Phase 2: Content & IA** (2 months)
-- 🔶 IA assistant widget **UI built** — RAG backend pending
+**Phase 2: Content & IA** (widget UI ✅ + RAG backend ✅; content/credentials ⏳)
+- ✅ IA assistant: widget UI + **full RAG backend** (chunker, Voyage embeddings, pgvector retrieval, Claude via BFF proxy, no-hallucination prompt + citation engine, DA-6 fail-closed budget, cache, honest fallback, telemetry) — **inert until DA-6 ratified** ([docs/AI.md](./docs/AI.md))
 - ⏳ Content loading: Services, Case studies, Articles, Team (sources currently empty — no fabricated data)
-- ⏳ Vector index training (pgvector)
-- ⏳ Monitoring setup (Core Web Vitals, error tracking)
+- ⏳ Build the RAG index over real content (`npm run rag:index` — pipeline done)
+- ⏳ Monitoring setup (Core Web Vitals, error tracking; `ai_events` telemetry emitted)
 
 **Phase 3: Automation & i18n** (2 months)
 - i18n infrastructure (ES → EN routing)
@@ -384,6 +385,9 @@ npm run audit:lighthouse
 
 # Apply database migrations (deploy-time; needs DATABASE_URL — Bible §38)
 npm run db:migrate
+
+# Build the RAG index over the content (needs DATABASE_URL + EMBEDDINGS_API_KEY)
+npm run rag:index
 ```
 
 ### BFF API (Bible §13; on-demand routes — everything else is SSG)
@@ -393,7 +397,9 @@ npm run db:migrate
 | `/api/leads` | POST | Lead capture (contact form RF-06/07, lead magnet RF-13). JSON or form-encoded. |
 | `/api/candidatures` | POST | Spontaneous candidature (RF-14). Internal notification only — never CRM (GDPR). |
 | `/api/health` | GET | Liveness + §38 capability states (never values). |
+| `/api/ia/consulta` | POST | RAG assistant (RF-15, §16). 200 with an honest outcome — answered+citations / refused / fallback. DA-6 fail-closed. |
 | `/api/internal/outbox/process` | GET/POST | Scheduled outbox drain (ADR-010). Bearer `OUTBOX_WORKER_SECRET`; Vercel cron in `vercel.json`. |
+| `/api/internal/cms/webhook` | POST | Sanity publish → SSG rebuild (ADR-001). HMAC-verified `CMS_WEBHOOK_SECRET`. |
 
 Pipeline on capture: body caps → honeypot fake-accept → durable rate limit
 (429 + Retry-After) → Spanish per-field validation (400) → **one transaction**:
@@ -648,6 +654,6 @@ Proprietary. All rights reserved. Contact repo owner for licensing inquiries.
 
 **Last Updated:** 2026-07-14  
 **Phase:** 0 closed · interface layer complete (FRONTEND APPROVED)  
-**Status:** 🟢 Frontend built & audited · backend/BFF built & tested · Sanity CMS integration complete · credentials/form-wiring/deploy + IA (F2) pending client ratification of Bible §49  
+**Status:** 🟢 Frontend built & audited · backend/BFF built & tested · Sanity CMS + RAG/IA backend complete · credentials/form-wiring/deploy pending client ratification of Bible §49 (IA gated on DA-6)  
 
 For full project context, see **[CLAUDE.md](./CLAUDE.md)**, **[CHANGELOG.md](./CHANGELOG.md)** and **[docs/PROJECT_BIBLE.md](./docs/PROJECT_BIBLE.md)**.
