@@ -4,22 +4,39 @@
  * consent capture block, interspersed in the resources context. Composes
  * APPROVED §11.3 primitives (Input, Checkbox, Button). Zero JS.
  *
- * INTERFACE ONLY: the submit endpoint (persist + double opt-in + CRM/email) is
- * DEFERRED (BFF, blocked on DA-3; Bible §17/ADR-010) — no fake endpoint is
- * wired. Honest copy: it captures a subscription for future resources, it does
- * not promise a specific guide that does not exist yet.
+ * Posts NATIVELY to `POST /api/leads` with `tipo=lead_magnet`, which selects
+ * the magnet schema (email + recurso + consentimiento). `recurso` identifies
+ * WHICH block captured the lead — the article slug on a resource page, or the
+ * generic subscription on the index — so attribution is real, not invented.
+ * Honest copy: it captures a subscription for future resources, it does not
+ * promise a specific guide that does not exist yet.
  */
 import Input from '@/components/ui/Input.astro';
 import Checkbox from '@/components/ui/Checkbox.astro';
 import Button from '@/components/ui/Button.astro';
 import Icon from '@/components/ui/Icon.astro';
+import FormStatus from '@/components/content/FormStatus.astro';
+import HoneypotField from '@/components/content/HoneypotField.astro';
 
 interface Props {
   title?: string;
+  /**
+   * Slug attributing the capture (Bible §24 slug shape). Defaults to the
+   * generic subscription used by the resources index.
+   */
+  recurso?: string;
   class?: string;
 }
-const { title = 'Recibe nuestras guías técnicas', class: className } =
-  Astro.props;
+const {
+  title = 'Recibe nuestras guías técnicas',
+  recurso = 'suscripcion-general',
+  class: className,
+} = Astro.props;
+
+// Unique per instance: several blocks can coexist on one page and each field
+// still needs its own id/label association (§11.3 a11y).
+const emailId = `magnet-email-${recurso}`;
+const consentId = `magnet-consent-${recurso}`;
 ---
 
 <div
@@ -39,10 +56,22 @@ const { title = 'Recibe nuestras guías técnicas', class: className } =
     </div>
   </div>
 
-  <!-- Envío server-side pendiente (BFF/DA-3). -->
-  <form class="mt-6 flex flex-col gap-4" novalidate>
-    <Input label="Email" name="email" type="email" required />
-    <Checkbox name="consentimiento" required>
+  <FormStatus class="mt-6" />
+
+  <form method="post" action="/api/leads" class="mt-6 flex flex-col gap-4">
+    <input type="hidden" name="tipo" value="lead_magnet" />
+    <input type="hidden" name="recurso" value={recurso} />
+    <HoneypotField />
+    <Input
+      id={emailId}
+      label="Email"
+      name="email"
+      type="email"
+      autocomplete="email"
+      maxlength={254}
+      required
+    />
+    <Checkbox id={consentId} name="consentimiento" required>
       Acepto recibir comunicaciones y he leído la
       <a href="/legal/privacidad" class="text-action underline">
         política de privacidad

@@ -116,7 +116,10 @@ const updatedLabel = new Date(article.updated).toLocaleDateString('es-ES', {
           </div>
 
           <div class="mt-12 max-w-prose">
-            <LeadMagnet title="¿Te ha resultado útil? Recibe más guías" />
+            <LeadMagnet
+              title="¿Te ha resultado útil? Recibe más guías"
+              recurso={article.slug}
+            />
           </div>
         </div>
 

@@ -3,13 +3,14 @@
  * Contacto (`/contacto`) — DESIGN_SYSTEM §13.8, Bible RF-06/07 / CU-03.
  * The most conversion-critical screen; unblocks every CTA on the site.
  *
- * INTERFACE ONLY (per instruction): the proposal form is composed from the
- * APPROVED §11.3 form primitives (Input, Select, Textarea, Checkbox, Button).
- * The BFF submit endpoint + server-side validation + CRM/email delivery are
- * DEFERRED (blocked on DA-3/hosting, Bible §17/ADR-008/010); no fake endpoint is
- * wired and the success screen (§13.8) ships with that backend. NAP data, map,
- * phone and schedule are provisional placeholders — no fabricated contact
- * details. Zero JS.
+ * The proposal form is composed from the APPROVED §11.3 form primitives
+ * (Input, Select, Textarea, Checkbox, Button) and posts NATIVELY to the BFF
+ * (`POST /api/leads`, ADR-008/010) — no JavaScript. The browser's own
+ * constraint validation is the enhancement layer; the server is the
+ * authority. Outcomes arrive as a fragment and are rendered by FormStatus
+ * (see server/http/form-flow.ts): success redirects to §13.8
+ * `/contacto/gracias`. NAP data, map, phone and schedule are provisional
+ * placeholders — no fabricated contact details. Zero JS.
  */
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import Input from '@/components/ui/Input.astro';
@@ -18,6 +19,8 @@ import Textarea from '@/components/ui/Textarea.astro';
 import Checkbox from '@/components/ui/Checkbox.astro';
 import Button from '@/components/ui/Button.astro';
 import Icon from '@/components/ui/Icon.astro';
+import FormStatus from '@/components/content/FormStatus.astro';
+import HoneypotField from '@/components/content/HoneypotField.astro';
 import {
   cmsDepsFromEnv,
   loadServices,
@@ -63,15 +66,44 @@ const services = await loadServices(cmsDepsFromEnv());
       <div
         class="mx-auto grid w-full max-w-content gap-10 px-4 py-16 sm:px-6 lg:grid-cols-2 lg:gap-16 lg:px-8 lg:py-24"
       >
-        <!-- Formulario de propuesta. Envío server-side pendiente (BFF/DA-3). -->
+        <!-- Formulario de propuesta → POST nativo a /api/leads (ADR-008). -->
         <div>
           <h2 id="form-title" class="text-h3 font-semibold text-text-primary">
             Formulario de propuesta
           </h2>
-          <form class="mt-6 flex flex-col gap-5" novalidate>
-            <Input label="Nombre y apellidos" name="nombre" required />
-            <Input label="Email" name="email" type="email" required />
-            <Input label="Empresa" name="empresa" />
+
+          <FormStatus class="mt-6" />
+
+          <form
+            method="post"
+            action="/api/leads"
+            class="mt-6 flex flex-col gap-5"
+          >
+            <!-- Discrimina el esquema de validación (contacto vs lead magnet). -->
+            <input type="hidden" name="tipo" value="contacto" />
+            <HoneypotField />
+            <Input
+              label="Nombre y apellidos"
+              name="nombre"
+              autocomplete="name"
+              minlength={2}
+              maxlength={120}
+              required
+            />
+            <Input
+              label="Email"
+              name="email"
+              type="email"
+              autocomplete="email"
+              maxlength={254}
+              required
+            />
+            <Input
+              label="Empresa"
+              name="empresa"
+              autocomplete="organization"
+              maxlength={160}
+            />
             <Select label="Servicio de interés" name="servicio">
               <option value="">Selecciona una opción</option>
               {
@@ -84,6 +116,8 @@ const services = await loadServices(cmsDepsFromEnv());
               label="Cuéntanos tu proyecto"
               name="mensaje"
               rows={5}
+              minlength={10}
+              maxlength={5000}
               required
             />
             <Checkbox name="consentimiento" required>

@@ -1,0 +1,64 @@
+---
+/**
+ * FormStatus — outcome banners for the zero-JS form flow (Bible §13/§17,
+ * DESIGN_SYSTEM §11.6 Alert).
+ *
+ * Pages are SSG, so they cannot read a query string server-side. The BFF
+ * therefore redirects a failed submission back to the form page with an
+ * outcome FRAGMENT (see server/http/form-flow.ts), and these pre-rendered
+ * banners are revealed with CSS `:target`. No JavaScript is involved: the
+ * browser's own fragment navigation both shows the banner and moves focus to
+ * it (each region is focusable via tabindex="-1").
+ *
+ * Honest copy: it says what happened and what the user can do, and never
+ * claims the submission was stored when it was not.
+ */
+import Alert from '@/components/ui/Alert.astro';
+
+interface Props {
+  /** Extra classes for the wrapper. */
+  class?: string;
+}
+const { class: className } = Astro.props;
+---
+
+<div class:list={['flex flex-col gap-4', className]}>
+  <div id="error-validacion" class="form-status" tabindex="-1">
+    <Alert variant="error" title="Revisa los datos del formulario">
+      Algún campo no es válido o falta por completar (incluido el
+      consentimiento). Corrígelo y vuelve a enviarlo.
+    </Alert>
+  </div>
+
+  <div id="error-limite" class="form-status" tabindex="-1">
+    <Alert variant="warning" title="Demasiados envíos seguidos">
+      Hemos recibido varias solicitudes desde tu conexión. Espera unos minutos e
+      inténtalo de nuevo.
+    </Alert>
+  </div>
+
+  <div id="error-no-disponible" class="form-status" tabindex="-1">
+    <Alert variant="warning" title="El envío no está disponible ahora mismo">
+      No hemos podido registrar tu solicitud. Vuelve a intentarlo más tarde o
+      escríbenos por otra vía.
+    </Alert>
+  </div>
+
+  <div id="error-inesperado" class="form-status" tabindex="-1">
+    <Alert variant="error" title="No hemos podido enviar tu solicitud">
+      Ha ocurrido un error inesperado y tu solicitud no se ha registrado.
+      Inténtalo de nuevo en unos minutos.
+    </Alert>
+  </div>
+</div>
+
+<style>
+  /* Zero-JS reveal: only the banner named by the URL fragment is shown. */
+  .form-status {
+    display: none;
+  }
+
+  .form-status:target {
+    display: block;
+  }
+</style>

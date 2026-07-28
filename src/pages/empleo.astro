@@ -8,14 +8,22 @@
  * Faithful-to-SSOT content: culture/values are drawn from Bible §1/§3
  * (provisional). With no open positions and no ATS/CMS, the screen renders
  * §13.7's specified no-offers state (spontaneous application, "no página
- * vacía"). DEFERRED, never faked: the job-offer list (ATS/CMS data) and the
- * candidature form (§11.3 needs server-side validation + CV upload via the BFF,
- * blocked on DA-3; and a file input is not in the approved library) — a working
- * path routes to /contacto until then.
+ * vacía"), now with a working candidature form posting NATIVELY to
+ * `POST /api/candidatures` (RF-14). Recruitment is its own GDPR purpose
+ * (Bible §21) with its own consent. STILL DEFERRED, never faked: the
+ * job-offer list (ATS/CMS data) and the CV upload (storage + AV policy
+ * pending §17; a file input is not in the approved library) — the message
+ * field can carry a portfolio/profile link meanwhile, exactly as the server
+ * schema documents. Zero JS.
  */
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import Button from '@/components/ui/Button.astro';
 import Icon from '@/components/ui/Icon.astro';
+import Input from '@/components/ui/Input.astro';
+import Textarea from '@/components/ui/Textarea.astro';
+import Checkbox from '@/components/ui/Checkbox.astro';
+import FormStatus from '@/components/content/FormStatus.astro';
+import HoneypotField from '@/components/content/HoneypotField.astro';
 
 const culture = [
   'Proyectos con impacto medible en energía, industria e instalaciones.',
@@ -96,8 +104,7 @@ const culture = [
     </section>
 
     <!-- Ofertas — estado sin ofertas (§13.7): candidatura espontánea, no página
-         vacía. La lista de ofertas y el formulario de candidatura (CV + BFF)
-         llegan con el ATS/CMS y el backend. -->
+         vacía. La lista de ofertas (ATS/CMS) sigue pendiente. -->
     <section aria-labelledby="offers-title" class="bg-surface-subtle">
       <div
         class="mx-auto flex w-full max-w-prose flex-col items-center px-4 py-20 text-center sm:px-6 lg:px-8 lg:py-28"
@@ -120,24 +127,71 @@ const culture = [
       </div>
     </section>
 
-    <!-- Banda CTA final: único CTA primario de la vista (P3) -->
-    <section
-      aria-labelledby="cta-title"
-      data-surface="dark"
-      class="bg-blue-900"
-    >
+    <!-- Candidatura espontánea → POST nativo a /api/candidatures (RF-14).
+         Único CTA primario de la vista (P3). -->
+    <section aria-labelledby="candidature-title">
       <div
-        class="mx-auto flex w-full max-w-content flex-col items-start gap-6 px-4 py-16 sm:px-6 lg:px-8 lg:py-24"
+        class="mx-auto w-full max-w-prose px-4 py-16 sm:px-6 lg:px-8 lg:py-24"
       >
-        <h2 id="cta-title" class="text-h2 font-bold text-balance text-on-dark">
-          ¿Quieres formar parte del equipo?
+        <h2
+          id="candidature-title"
+          class="text-h2 font-bold text-balance text-text-primary"
+        >
+          Envía tu candidatura espontánea
         </h2>
-        <p class="max-w-prose text-body-lg text-blue-100">
-          Escríbenos y cuéntanos tu perfil; te responde una persona del equipo.
+        <p class="mt-4 text-body-lg text-text-secondary">
+          Cuéntanos tu perfil y en qué te gustaría aportar; te responde una
+          persona del equipo.
         </p>
-        <Button href="/contacto" variant="inverted">
-          Enviar candidatura espontánea
-        </Button>
+
+        <FormStatus class="mt-8" />
+
+        <form
+          method="post"
+          action="/api/candidatures"
+          class="mt-8 flex flex-col gap-5"
+        >
+          <HoneypotField />
+          <Input
+            label="Nombre y apellidos"
+            name="nombre"
+            autocomplete="name"
+            minlength={2}
+            maxlength={120}
+            required
+          />
+          <Input
+            label="Email"
+            name="email"
+            type="email"
+            autocomplete="email"
+            maxlength={254}
+            required
+          />
+          <Input
+            label="Teléfono"
+            name="telefono"
+            type="tel"
+            autocomplete="tel"
+            help="Opcional."
+          />
+          <Textarea
+            label="Cuéntanos tu perfil"
+            name="mensaje"
+            rows={5}
+            maxlength={5000}
+            help="Opcional. Puedes incluir un enlace a tu perfil profesional o portfolio: todavía no admitimos adjuntar el CV."
+          />
+          <Checkbox name="consentimiento" required>
+            He leído y acepto la
+            <a href="/legal/privacidad" class="text-action underline">
+              política de privacidad
+            </a> y el tratamiento de mis datos con fines de selección de personal.
+          </Checkbox>
+          <div>
+            <Button type="submit">Enviar candidatura</Button>
+          </div>
+        </form>
       </div>
     </section>
   </main>

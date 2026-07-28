@@ -1,0 +1,24 @@
+---
+/**
+ * HoneypotField — anti-spam decoy (Bible §17 anti-abuse). Shared by every
+ * capture form so the field name lives in one place and always matches the
+ * server check (`website`, see server/validation/common.ts isHoneypotTripped).
+ *
+ * The wrapper is `display: none`, which removes the input from the
+ * accessibility tree entirely — no screen reader reaches it, no axe rule
+ * applies, and it needs no visible label — while bots that parse the HTML
+ * still fill it. Carries no `id`, so several forms can coexist on one page
+ * without colliding. A filled value is never a validation error: the BFF
+ * fake-accepts and stores nothing, so the bot learns nothing. Zero JS.
+ */
+---
+
+<div class="honeypot" aria-hidden="true">
+  <input type="text" name="website" value="" tabindex="-1" autocomplete="off" />
+</div>
+
+<style>
+  .honeypot {
+    display: none;
+  }
+</style>

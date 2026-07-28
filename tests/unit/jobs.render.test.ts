@@ -24,11 +24,42 @@ describe('Empleo (empleo.astro)', () => {
     expect(html).toContain('candidatura espontánea');
   });
 
-  it('closes with the single primary CTA routing to contact (P3)', async () => {
+  it('closes with the candidature form as the single primary CTA (P3, RF-14)', async () => {
     const html = await render();
-    expect(html).toContain('data-surface="dark"');
-    expect(html).toContain('bg-white'); // inverted button
-    expect(html).toContain('href="/contacto"');
-    expect((html.match(/Enviar candidatura espontánea/g) ?? []).length).toBe(1);
+    // The form itself is now the primary action (it replaced the band that
+    // routed to /contacto), so there is exactly one submit control.
+    expect(html).toContain('action="/api/candidatures"');
+    expect(html).toContain('method="post"');
+    expect((html.match(/type="submit"/g) ?? []).length).toBe(1);
+  });
+
+  it('posts only the fields the server schema validates (RF-14)', async () => {
+    const html = await render();
+    for (const field of ['nombre', 'email', 'telefono', 'mensaje']) {
+      expect(html).toContain(`name="${field}"`);
+    }
+    // Recruitment consent is its own GDPR purpose (Bible §21) and the
+    // honeypot travels with every capture form (§17).
+    expect(html).toContain('name="consentimiento"');
+    expect(html).toContain('name="website"');
+    // CV upload stays deferred — no file input is fabricated.
+    expect(html).not.toContain('type="file"');
+  });
+
+  it('renders the zero-JS outcome banners without executable script', async () => {
+    const html = await render();
+    for (const id of [
+      'error-validacion',
+      'error-limite',
+      'error-no-disponible',
+      'error-inesperado',
+    ]) {
+      expect(html).toContain(`id="${id}"`);
+    }
+    // Only the JSON-LD data block (RF-11) is allowed.
+    const scripts = html.match(/<script[^>]*>/g) ?? [];
+    expect(
+      scripts.filter((tag) => !tag.includes('application/ld+json')),
+    ).toEqual([]);
   });
 });
