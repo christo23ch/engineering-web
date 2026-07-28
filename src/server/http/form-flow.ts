@@ -7,29 +7,24 @@
  * in the URL **fragment** and the pre-rendered status banner is revealed with
  * CSS `:target` (see components/content/FormStatus.astro). No JS anywhere.
  *
+ * The fragment vocabulary itself lives in `@/lib/forms/status` so the server
+ * and the rendered page cannot drift apart; this module only decides WHICH
+ * outcome an error maps to.
+ *
  * Open-redirect policy (§17): the success target is a constant we own, and the
  * "back to the form" target is derived from the Referer ONLY after checking it
  * is same-origin, keeping just its pathname. Anything else falls back to the
  * endpoint's default page. A caller-supplied absolute URL is never honoured.
  */
+import {
+  FORM_STATUS_FRAGMENTS,
+  type FormStatusFragment,
+} from '@/lib/forms/status';
 import type { ErrorCode } from '@/server/http/errors';
-
-/** Approved success screen for every capture form (DESIGN_SYSTEM §13.8). */
-export const SUCCESS_PATH = '/contacto/gracias';
-
-/**
- * Fragment ids rendered by FormStatus.astro. Spanish per ADR-009; the set is
- * closed so a new error code cannot silently produce a dead fragment.
- */
-export type FormStatusFragment =
-  | 'error-validacion'
-  | 'error-limite'
-  | 'error-no-disponible'
-  | 'error-inesperado';
 
 /**
  * Map the error taxonomy onto the four honest user-facing outcomes:
- * 400-family → "revisa los datos", 429 → "demasiados envíos",
+ * 400-family → "revisa los datos", 429 → "límite de envíos",
  * 503 → "no disponible ahora", everything else → "error inesperado".
  */
 export function fragmentForError(code: ErrorCode): FormStatusFragment {
@@ -38,13 +33,13 @@ export function fragmentForError(code: ErrorCode): FormStatusFragment {
     case 'invalid_json':
     case 'payload_too_large':
     case 'unsupported_media_type':
-      return 'error-validacion';
+      return FORM_STATUS_FRAGMENTS.validacion;
     case 'rate_limited':
-      return 'error-limite';
+      return FORM_STATUS_FRAGMENTS.limite;
     case 'not_configured':
-      return 'error-no-disponible';
+      return FORM_STATUS_FRAGMENTS.noDisponible;
     default:
-      return 'error-inesperado';
+      return FORM_STATUS_FRAGMENTS.inesperado;
   }
 }
 

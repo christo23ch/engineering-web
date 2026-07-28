@@ -4,16 +4,26 @@
  * DESIGN_SYSTEM §11.6 Alert).
  *
  * Pages are SSG, so they cannot read a query string server-side. The BFF
- * therefore redirects a failed submission back to the form page with an
- * outcome FRAGMENT (see server/http/form-flow.ts), and these pre-rendered
- * banners are revealed with CSS `:target`. No JavaScript is involved: the
- * browser's own fragment navigation both shows the banner and moves focus to
- * it (each region is focusable via tabindex="-1").
+ * redirects a failed submission back to the form page with an outcome
+ * FRAGMENT (server/http/form-flow.ts) and the matching banner is revealed
+ * with CSS `:target`. Ids and copy come from `@/lib/forms/status`, the same
+ * module the server picks the fragment from, so the two cannot drift apart.
  *
- * Honest copy: it says what happened and what the user can do, and never
- * claims the submission was stored when it was not.
+ * Safe without CSS: every banner carries the `hidden` attribute, so the user
+ * agent's own stylesheet keeps them all collapsed even if the site stylesheet
+ * never loads — the failure mode is "no banner", never four contradictory
+ * ones at once. When the stylesheet is present, the author rule
+ * `.form-status:target` (specificity 0,2,0) outranks the `[hidden]`
+ * declaration (0,1,0) and reveals exactly the addressed banner.
+ *
+ * Fragment navigation scrolls to the banner and sets it as the focus starting
+ * point; `tabindex="-1"` makes it programmatically focusable so that starting
+ * point is the banner itself. Honest copy: it says what happened, never
+ * claims the submission was stored, and never promises a wait shorter than
+ * the configured window.
  */
 import Alert from '@/components/ui/Alert.astro';
+import { FORM_STATUS_BANNERS } from '@/lib/forms/status';
 
 interface Props {
   /** Extra classes for the wrapper. */
@@ -23,41 +33,30 @@ const { class: className } = Astro.props;
 ---
 
 <div class:list={['flex flex-col gap-4', className]}>
-  <div id="error-validacion" class="form-status" tabindex="-1">
-    <Alert variant="error" title="Revisa los datos del formulario">
-      Algún campo no es válido o falta por completar (incluido el
-      consentimiento). Corrígelo y vuelve a enviarlo.
-    </Alert>
-  </div>
-
-  <div id="error-limite" class="form-status" tabindex="-1">
-    <Alert variant="warning" title="Demasiados envíos seguidos">
-      Hemos recibido varias solicitudes desde tu conexión. Espera unos minutos e
-      inténtalo de nuevo.
-    </Alert>
-  </div>
-
-  <div id="error-no-disponible" class="form-status" tabindex="-1">
-    <Alert variant="warning" title="El envío no está disponible ahora mismo">
-      No hemos podido registrar tu solicitud. Vuelve a intentarlo más tarde o
-      escríbenos por otra vía.
-    </Alert>
-  </div>
-
-  <div id="error-inesperado" class="form-status" tabindex="-1">
-    <Alert variant="error" title="No hemos podido enviar tu solicitud">
-      Ha ocurrido un error inesperado y tu solicitud no se ha registrado.
-      Inténtalo de nuevo en unos minutos.
-    </Alert>
-  </div>
+  {
+    FORM_STATUS_BANNERS.map((banner) => (
+      <div
+        id={banner.fragment}
+        class="form-status"
+        tabindex="-1"
+        hidden="until-found"
+      >
+        <Alert variant={banner.variant} title={banner.title}>
+          {banner.body}
+        </Alert>
+      </div>
+    ))
+  }
 </div>
 
 <style>
-  /* Zero-JS reveal: only the banner named by the URL fragment is shown. */
-  .form-status {
-    display: none;
-  }
-
+  /* Zero-JS reveal: only the banner named by the URL fragment is shown.
+     `hidden="until-found"` is the no-CSS floor (see the component doc). Plain
+     `hidden` would be unrevealable here: Tailwind's preflight enforces it as
+     `display: none !important` from inside a cascade layer, and for important
+     declarations layer order is inverted — a layered rule beats any unlayered
+     one whatever its specificity. The preflight rule deliberately excludes
+     `until-found`, so this ordinary declaration is free to win. */
   .form-status:target {
     display: block;
   }

@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
+import { SUCCESS_PATH } from '@/lib/forms/status';
 import {
-  SUCCESS_PATH,
   errorRedirectPath,
   fragmentForError,
   resolveReturnPath,

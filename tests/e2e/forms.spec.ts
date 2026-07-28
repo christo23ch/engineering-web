@@ -97,8 +97,12 @@ test('a throttled submission (429) shows the rate-limit banner', async ({
   await page.click('button[type="submit"], input[type="submit"]');
 
   await page.waitForURL('**/contacto#error-limite');
-  await expect(page.locator('#error-limite')).toBeVisible();
-  await expect(page.locator('#error-limite')).toContainText('Espera unos');
+  const banner = page.locator('#error-limite');
+  await expect(banner).toBeVisible();
+  await expect(banner).toContainText('límite de envíos');
+  // R1: the page is static and cannot know RATE_LIMIT_WINDOW (an hour by
+  // default), so it must not promise a shorter wait.
+  await expect(banner).not.toContainText(/minutos?|segundos?/);
 });
 
 test('an accepted submission lands on the §13.8 success screen', async ({
@@ -171,5 +175,39 @@ test('the wired forms add no JavaScript to the pages', async ({ page }) => {
     expect(
       scripts.filter((tag) => !tag.includes('application/ld+json')),
     ).toEqual([]);
+  }
+});
+
+test('degrades safely if the site stylesheet never loads', async ({ page }) => {
+  // R3: the outcome banners must not depend on our CSS to STAY hidden —
+  // otherwise a stylesheet failure would show four contradictory errors at
+  // once, and the honeypot would become a visible field whose only effect is
+  // to have a legitimate submission silently discarded.
+  await page.route('**/*.css', (route) => route.abort());
+  await page.goto('/contacto#error-validacion');
+
+  const state = await page.evaluate(() => ({
+    banners: [...document.querySelectorAll('.form-status')].map((el) => ({
+      id: el.id,
+      height: el.getBoundingClientRect().height,
+    })),
+    honeypotHeight:
+      document.querySelector('input[name="website"]')?.getBoundingClientRect()
+        .height ?? -1,
+  }));
+
+  // Exactly one banner has any box: the one the fragment addresses.
+  const shown = state.banners.filter((banner) => banner.height > 0);
+  expect(shown.map((banner) => banner.id)).toEqual(['error-validacion']);
+  // The decoy stays invisible with no CSS of ours involved.
+  expect(state.honeypotHeight).toBe(0);
+});
+
+test('the honeypot is never visible to a user', async ({ page }) => {
+  for (const path of ['/contacto', '/empleo', '/recursos']) {
+    await page.goto(path);
+    const honeypot = page.locator('input[name="website"]');
+    await expect(honeypot).toHaveCount(1);
+    await expect(honeypot).toBeHidden();
   }
 });
