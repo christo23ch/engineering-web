@@ -146,4 +146,61 @@ describe('AI + embeddings capabilities (ADR-005/DA-10) + DA-6 budget gate', () =
     expect(config.aiRateLimit).toEqual({ windowSeconds: 3600, max: 10 });
     expect(config.rateLimit).toEqual({ windowSeconds: 3600, max: 5 });
   });
+
+  it('rejects a non-numeric AI_MONTHLY_BUDGET at config load (fail-closed, never NaN)', () => {
+    expect(() =>
+      loadServerConfig({
+        AI_PROVIDER_API_KEY: 'k',
+        AI_MONTHLY_BUDGET: 'not-a-number',
+      }),
+    ).toThrowError(AppError);
+    expect(() =>
+      loadServerConfig({
+        AI_PROVIDER_API_KEY: 'k',
+        AI_MONTHLY_BUDGET: '€500',
+      }),
+    ).toThrowError(AppError);
+    expect(() =>
+      loadServerConfig({
+        AI_PROVIDER_API_KEY: 'k',
+        AI_MONTHLY_BUDGET: '1,000',
+      }),
+    ).toThrowError(AppError);
+  });
+
+  it('rejects a negative AI_MONTHLY_BUDGET at config load', () => {
+    expect(() =>
+      loadServerConfig({
+        AI_PROVIDER_API_KEY: 'k',
+        AI_MONTHLY_BUDGET: '-50',
+      }),
+    ).toThrowError(AppError);
+  });
+
+  it('accepts a valid positive AI_MONTHLY_BUDGET, including decimals', () => {
+    expect(
+      loadServerConfig({
+        AI_PROVIDER_API_KEY: 'k',
+        AI_MONTHLY_BUDGET: '250.50',
+      }).ai?.monthlyBudgetUsd,
+    ).toBe(250.5);
+  });
+
+  it('a malformed budget can never reach aiBudgetGate as NaN (config load throws first)', async () => {
+    const { aiBudgetGate } = await import('@/server/config');
+    // loadServerConfig throws before an AiConfig with a NaN budget could ever
+    // exist — this documents the guarantee the P2 hardening restores.
+    expect(() =>
+      loadServerConfig({
+        AI_PROVIDER_API_KEY: 'k',
+        AI_MONTHLY_BUDGET: 'garbage',
+      }),
+    ).toThrowError(AppError);
+    // A validly-parsed config still gates correctly (regression check).
+    const ai = loadServerConfig({
+      AI_PROVIDER_API_KEY: 'k',
+      AI_MONTHLY_BUDGET: '100',
+    }).ai;
+    expect(aiBudgetGate(ai!).hardStopEngaged).toBe(false);
+  });
 });

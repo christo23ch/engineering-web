@@ -32,6 +32,20 @@ const optionalPositiveInt = optionalString.refine(
   { message: 'must be a positive integer' },
 );
 
+/**
+ * DA-6 budget guard: the raw string must be a positive, finite number before
+ * it ever reaches `Number()`. Without this, a malformed value (currency
+ * symbols, thousands separators, non-numeric text) parses to `NaN`, and
+ * `NaN` is neither `undefined` (the "no ratified budget" fail-closed path)
+ * nor `>= NaN` true (the "budget exhausted" path) — so a typo would silently
+ * disable the DA-6 hard-stop and let the assistant spend without limit.
+ * Rejecting at config load keeps the guarantee fail-closed by construction.
+ */
+const optionalPositiveNumber = optionalString.refine(
+  (value) => value === undefined || /^\d+(\.\d+)?$/.test(value),
+  { message: 'must be a positive number' },
+);
+
 /** Raw environment schema — names must match Bible §38 verbatim. */
 const envSchema = z.object({
   SITE_URL: optionalUrl,
@@ -55,7 +69,7 @@ const envSchema = z.object({
   AI_PROVIDER_API_KEY: optionalString,
   AI_MODEL_DEFAULT: optionalString,
   AI_MODEL_COMPLEX: optionalString,
-  AI_MONTHLY_BUDGET: optionalString,
+  AI_MONTHLY_BUDGET: optionalPositiveNumber,
   AI_BUDGET_HARD_STOP: optionalString,
   AI_RATE_LIMIT_WINDOW: optionalPositiveInt,
   AI_RATE_LIMIT_MAX: optionalPositiveInt,
