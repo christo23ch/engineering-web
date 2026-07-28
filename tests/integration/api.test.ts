@@ -10,6 +10,7 @@ import {
   leadsPost,
 } from '@/server/endpoints/capture';
 import { healthGet } from '@/server/endpoints/health';
+import { AppError } from '@/server/http/errors';
 import { outboxProcess } from '@/server/endpoints/outbox';
 import { createLogger } from '@/server/logging/logger';
 
@@ -322,5 +323,156 @@ describe('outbox drain endpoint (ADR-010, Bearer auth)', () => {
     expect((await invoke(route, drainRequest('Bearer anything'))).status).toBe(
       503,
     );
+  });
+});
+
+describe('zero-JS form flow — native <form> POST (progressive enhancement)', () => {
+  const formRequest = (
+    path: string,
+    fields: Record<string, string>,
+    headers: Record<string, string> = {},
+  ) =>
+    new Request(`https://bff.test${path}`, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/x-www-form-urlencoded',
+        accept: 'text/html,application/xhtml+xml,*/*;q=0.8',
+        referer: 'https://bff.test/contacto',
+        ...headers,
+      },
+      body: new URLSearchParams(fields).toString(),
+    });
+
+  const validLeadForm = {
+    tipo: 'contacto',
+    nombre: 'Nombre Apellido',
+    email: 'form@example.com',
+    empresa: 'ACME',
+    servicio: 'eficiencia-energetica',
+    mensaje: 'Necesitamos una auditoría energética completa.',
+    consentimiento: 'on',
+    website: '',
+  };
+
+  it('redirects a valid submission to the success screen (303, no JSON shown)', async () => {
+    const response = await invoke(
+      leadsPost(testDeps()),
+      formRequest('/api/leads', validLeadForm),
+    );
+    expect(response.status).toBe(303);
+    expect(response.headers.get('location')).toBe('/contacto/gracias');
+    expect(await response.text()).toBe('');
+    // The lead is really persisted — the redirect is not a facade.
+    const rows = await harness.db.query<{ email: string }>(
+      'select email from leads',
+    );
+    expect(rows.map((row) => row.email)).toEqual(['form@example.com']);
+  });
+
+  it('returns to the form with the validation banner on a 400', async () => {
+    const response = await invoke(
+      leadsPost(testDeps()),
+      formRequest('/api/leads', { ...validLeadForm, email: 'not-an-email' }),
+    );
+    expect(response.status).toBe(303);
+    expect(response.headers.get('location')).toBe('/contacto#error-validacion');
+    expect(await harness.db.query('select id from leads')).toHaveLength(0);
+  });
+
+  it('returns the rate-limit banner once the window is exhausted (429)', async () => {
+    const deps = testDeps(); // RATE_LIMIT_MAX = 2
+    for (let i = 0; i < 2; i += 1) {
+      await invoke(leadsPost(deps), formRequest('/api/leads', validLeadForm));
+    }
+    const response = await invoke(
+      leadsPost(deps),
+      formRequest('/api/leads', validLeadForm),
+    );
+    expect(response.status).toBe(303);
+    expect(response.headers.get('location')).toBe('/contacto#error-limite');
+  });
+
+  it('returns the unavailable banner when the database is not configured (503)', async () => {
+    const config = loadServerConfig({ ENVIRONMENT: 'test' });
+    const route = leadsPost(() => ({
+      config,
+      db: () => {
+        throw AppError.notConfigured('database');
+      },
+      log: silentLog,
+    }));
+    const response = await invoke(
+      route,
+      formRequest('/api/leads', validLeadForm),
+    );
+    expect(response.status).toBe(303);
+    expect(response.headers.get('location')).toBe(
+      '/contacto#error-no-disponible',
+    );
+  });
+
+  it('honeypot submissions are fake-accepted to the success screen', async () => {
+    const response = await invoke(
+      leadsPost(testDeps()),
+      formRequest('/api/leads', { ...validLeadForm, website: 'bot' }),
+    );
+    expect(response.status).toBe(303);
+    expect(response.headers.get('location')).toBe('/contacto/gracias');
+    expect(await harness.db.query('select id from leads')).toHaveLength(0);
+  });
+
+  it('candidatures redirect back to /empleo on failure and persist on success', async () => {
+    const candidature = {
+      nombre: 'Nombre Apellido',
+      email: 'candidato@example.com',
+      telefono: '+34 600 000 000',
+      mensaje: 'Perfil de ingeniería energética.',
+      consentimiento: 'on',
+    };
+    const ok = await invoke(
+      candidaturesPost(testDeps()),
+      formRequest('/api/candidatures', candidature, {
+        referer: 'https://bff.test/empleo',
+      }),
+    );
+    expect(ok.status).toBe(303);
+    expect(ok.headers.get('location')).toBe('/contacto/gracias');
+    expect(await harness.db.query('select id from candidatures')).toHaveLength(
+      1,
+    );
+
+    const bad = await invoke(
+      candidaturesPost(testDeps()),
+      formRequest(
+        '/api/candidatures',
+        { ...candidature, consentimiento: '' },
+        { referer: 'https://bff.test/empleo' },
+      ),
+    );
+    expect(bad.headers.get('location')).toBe('/empleo#error-validacion');
+  });
+
+  it('a cross-origin referer can never become the redirect target', async () => {
+    const response = await invoke(
+      leadsPost(testDeps()),
+      formRequest(
+        '/api/leads',
+        { ...validLeadForm, email: 'bad' },
+        { referer: 'https://evil.example/phish' },
+      ),
+    );
+    expect(response.headers.get('location')).toBe('/contacto#error-validacion');
+  });
+
+  it('fetch/JSON clients keep the exact JSON contract (201, no redirect)', async () => {
+    const response = await invoke(
+      leadsPost(testDeps()),
+      jsonRequest('/api/leads', validLead),
+    );
+    expect(response.status).toBe(201);
+    expect(response.headers.get('location')).toBeNull();
+    expect((await bodyOf(response)).data).toMatchObject({
+      estado: 'recibido',
+    });
   });
 });
