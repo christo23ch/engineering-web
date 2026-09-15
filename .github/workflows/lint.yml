@@ -1,9 +1,10 @@
 name: Lint
 
 # Blocking quality gate: ESLint + Prettier + TypeScript (docs/PROJECT_BIBLE.md §30).
+# See build.yml: the trunk is `claude/repo-structure-setup-9eg3lj`, not `main`.
 on:
   push:
-    branches: [main]
+    branches: [main, claude/repo-structure-setup-9eg3lj]
   pull_request:
 
 permissions:

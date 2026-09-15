@@ -1,8 +1,16 @@
 {
   "ci": {
     "collect": {
-      "staticDistDir": "./dist",
-      "numberOfRuns": 3
+      "staticDistDir": "./dist/client",
+      "numberOfRuns": 3,
+      "url": [
+        "http://localhost/index.html",
+        "http://localhost/servicios/ingenieria-industrial/index.html",
+        "http://localhost/proyectos/index.html",
+        "http://localhost/recursos/index.html",
+        "http://localhost/sobre-nosotros/index.html",
+        "http://localhost/contacto/index.html"
+      ]
     },
     "assert": {
       "assertions": {

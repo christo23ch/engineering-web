@@ -2,9 +2,12 @@ name: Build & Test
 
 # Blocking gates: build + unit/integration tests + accessibility (axe) + SCA.
 # docs/PROJECT_BIBLE.md §32 (testing), §33 (deploy), §17/§30 (SCA).
+# The repository's default branch is `claude/repo-structure-setup-9eg3lj`; there
+# is no `main`. Listing only `main` meant pushes to the trunk ran NO checks at
+# all — `main` is kept for the day the trunk is renamed.
 on:
   push:
-    branches: [main]
+    branches: [main, claude/repo-structure-setup-9eg3lj]
   pull_request:
 
 permissions:
@@ -35,7 +38,10 @@ jobs:
           path: dist/
           retention-days: 7
 
-  a11y:
+  # Full Playwright suite, not just the axe spec: the form round-trip, the
+  # security headers/CSP, the API smoke and the SEO specs are blocking gates
+  # too, and running only tests/e2e/a11y.spec.ts left 10 of 11 specs unchecked.
+  e2e:
     needs: build-and-test
     runs-on: ubuntu-latest
     steps:
@@ -59,8 +65,8 @@ jobs:
           key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
       - name: Install Playwright Chromium
         run: npx playwright install --with-deps chromium
-      - name: Accessibility scan (axe, WCAG 2.2 AA)
-        run: npm run audit:a11y
+      - name: E2E + accessibility (Playwright + axe, WCAG 2.2 AA)
+        run: npm run test:e2e
 
   audit:
     runs-on: ubuntu-latest

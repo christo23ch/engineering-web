@@ -2,7 +2,11 @@ name: Lighthouse
 
 # Performance/SEO/a11y/best-practices budget (docs/PROJECT_BIBLE.md §18/§20).
 # Non-blocking for now (warn) — becomes a blocker once real pages exist.
+# Runs on the trunk too (see build.yml), so the budget is measured on what is
+# actually shipped and not only on pull requests.
 on:
+  push:
+    branches: [main, claude/repo-structure-setup-9eg3lj]
   pull_request:
 
 permissions:
