@@ -28,7 +28,8 @@
     "audit:lighthouse": "npx --yes @lhci/cli autorun",
     "prepare": "husky",
     "db:migrate": "tsx scripts/migrate.ts",
-    "rag:index": "tsx scripts/rag-index.ts"
+    "rag:index": "tsx scripts/rag-index.ts",
+    "serve": "node dist/server/entry.mjs"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx,astro,mjs}": [

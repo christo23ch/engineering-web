@@ -26,9 +26,14 @@ export default defineConfig({
   webServer: {
     // In CI the build artifact is downloaded from the build job, so just serve
     // it. Locally, build first so `npm run test:e2e` works from a clean tree.
+    // `astro preview` daemonizes itself when there is no TTY (Astro 7.3+:
+    // `--background`, `preview stop/status/logs`), so the foreground process
+    // exits immediately and Playwright reports "webServer exited early".
+    // `npm run serve` boots the Node adapter's standalone entry instead — a
+    // real foreground process that serves both the static pages and /api/*.
     command: process.env.CI
-      ? 'npm run preview'
-      : 'npm run build && npm run preview',
+      ? 'npm run serve'
+      : 'npm run build && npm run serve',
     url: 'http://localhost:4321',
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
